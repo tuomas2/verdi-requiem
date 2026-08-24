@@ -8,15 +8,37 @@
 | `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, 13-14 sivua kukin |
 | `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa |
 | `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys |
+| `harjoitus-*.mscz` | Harjoittelutiedosto: oma ääni trumpettina, muut piilossa |
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
+| `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
 | `korjaa_sanat.py` | Korjaa osien 01 ja 14 kuorosanat lähde-PDF:ää vasten |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
 
 ## Työnkulku
 
-Harjoitteluun avaa **`Verdi-Requiem-koko.mxl`** MuseScoressa ja piilota muut
-viivastot kuin oma äänesi. Piilotetut viivastot soivat edelleen, joten kuulet
-koko kuoron ja pianon vaikka luet vain omaa riviäsi.
+Harjoitteluun avaa **`harjoitus-basso-1.mscz`** MuseScoressa. Siinä on kaikki
+valmiina: oma rivi on ainoa näkyvä ja soi **trumpettina**, muut kuoroäänet
+soivat vaimeana kuorona, solistit oboena ja piano pianona. Piilotetut
+viivastot soivat edelleen, joten kuulet koko teoksen vaikka luet vain omaa
+riviäsi. Taukotahdit ovat tiivistetyt, joten omat pitkät tauot eivät vie
+sivuja.
+
+Toiselle äänelle:
+
+    python3 harjoitus.py --stemma "Altto II"    # -> harjoitus-altto-2.mscz
+
+Vaihtoehdot ovat samat kahdeksan kuin stemmoissa. Kuoro II:n laulajalla
+näkyviä viivastoja on kaksi, koska kaksoiskuoro esiintyy vain Sanctuksessa.
+
+Soittimet ovat `harjoitus.py`:n alussa `SOUND`-taulukossa, jos haluat vaihtaa
+ne. Tunnisteet ovat MuseScoren omia, esimerkiksi `brass.trumpet.c`,
+`voice.vocals`, `wind.reed.oboe`, `keyboard.piano`.
+
+> **Viivaston nimi ja soitin ovat eri asia.** Viivastolla lukee edelleen
+> "Kuoro B" vaikka se soi trumpettina.
+
+Jos haluat mieluummin rakentaa asettelun itse, avaa
+**`Verdi-Requiem-koko.mxl`** ja piilota viivastot käsin.
 
 Lukulaitteelle mene oma **`stemma-*.pdf`**. Kahdeksan stemmaa kattavat koko
 kuoron: `sopraano-1`, `sopraano-2`, `altto-1`, `altto-2`, `tenori-1`,
@@ -314,3 +336,38 @@ Kolme muuta yritystä hylättiin mittausten perusteella:
 | Mittakaava sovitettuna systeemin omista ankkureista | Kolmesta lähekkäisestä pisteestä ekstrapolointi systeemin toiseen päähän heittää tavun verran; `ad` jäi pois |
 | Tavun siirto viereiselle vapaalle nuotille kun oma on varattu | Tuotti kaksoiskappaleita: `ti-bi bi red-de-tur`, `o-ra-ra{1-o-nem` |
 | Täyttö ilman järjestystarkistusta | Kyriestä tuli `e-le-le-son` ja `Chri-i-e-i-ste` |
+
+## Harjoittelutiedoston rakentaminen
+
+    python3 harjoitus.py --stemma "Basso I"
+
+Skripti tekee kolme asiaa:
+
+1. Muuntaa `Verdi-Requiem-koko.mxl`:n MuseScoren muotoon tyylillä
+   `tiivistys.mss`, jolloin **taukotahtien tiivistys** on päällä.
+2. Asettaa jokaiselle viivastolle soittimen: oma ääni trumpetti, muut
+   kuoroäänet choir aahs, solistit oboe, piano ja vasket piano.
+3. Piilottaa kaikki viivastot paitsi oman.
+
+Ajossa menee noin 15 sekuntia, josta lähes kaikki on MuseScoren muunnos.
+
+### Miksi vasket soivat pianona
+
+Tuba mirumissa on oikea D-trumpettistemma. Jos se soisi trumpettina, se
+sekoittuisi luettavaan riviin juuri siinä osassa jossa kuoro laulaa sen
+kanssa, joten vasket saavat pianon.
+
+### Tarkistus
+
+Tulos tarkistettiin kolmella mittauksella:
+
+| Mitä | Tulos |
+|---|---|
+| Näkyvyys | 15 viivastosta 14 piilotettu, Kuoro B näkyvissä |
+| Soivuus | MIDI patchatusta ja patchaamattomasta tiedostosta **nuotilleen identtinen** |
+| Soittimet | Kuoro B `brass.trumpet.c`, kuoro `voice.vocals`, solistit `wind.reed.oboe`, muut `keyboard.piano` |
+
+Pianoraidoissa on noin 1,8 % vähemmän nuotteja kuin suoraan `.mxl`:stä
+viedyssä MIDIssä. Ero syntyy MuseScoren omassa `.mxl` → `.mscz`
+-muunnoksessa eikä tässä skriptissä — patchattu ja patchaamaton `.mscz`
+antavat identtisen MIDIn.

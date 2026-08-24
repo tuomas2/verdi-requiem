@@ -27,6 +27,8 @@ the reading part must be dense.
 | `stemmat-sisallys.txt` | Where each movement starts in all eight |
 | `yhdista.py` | The merge tool; mapping table at the top |
 | `korjaa_sanat.py` | Fixes OMR lyric errors against the source PDFs |
+| `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |
+| `harjoitus-*.mscz` | The result, one per singer |
 | `test_korjaa_sanat.py` | Its tests: `python3 -m unittest test_korjaa_sanat` |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
 | `tiivistys.mss` | MuseScore style: multimeasure rests |
@@ -330,3 +332,40 @@ remains is the systems where the assignment was ambiguous — the row has more
 syllables than the system has notes, meaning the OMR dropped notes as well as
 lyrics. Those need a person in MuseScore, and they also need the *notes*
 checked, so they are proofreading work either way.
+
+
+## The practice file: one visible staff, everything still sounding
+
+`harjoitus.py --stemma "Basso I"` converts the merged score to `.mscz`,
+gives every staff an instrument, and hides all staves but the singer's.
+The point is that hidden staves still play, so the singer hears the whole
+work while reading one line.
+
+Everything here was established by experiment, because MuseScore's file
+format is not documented in the app and guessing is expensive:
+
+- **A staff is hidden with `<show>0</show>` inside its `<Part>`** in the
+  `.mscx`. Verified by counting glyphs in the exported PDF: the part's
+  noteheads and lyrics disappear (Leland 500 → 395, lyric font 140 → 30).
+- **Hidden staves still sound.** The MIDI exported from the patched and
+  unpatched `.mscz` is note-for-note identical, all 16 tracks.
+- **The instrument must be set in the `.mscx`, not in the MusicXML.**
+  Writing `<score-instrument><instrument-name>` plus `<midi-program>` into
+  every `<score-part>` got through for only two parts of fifteen — the rest
+  imported as `keyboard.piano.grand`. Adding `<midi-channel>` changed
+  nothing. Patching `<instrumentId>` and `<program value>` in the `.mscx`
+  works for all fifteen.
+- **Instrument ids come from MuseScore's own templates** under
+  `Contents/Resources/templates/`, which are unpacked `.mscx` directories:
+  `voice.vocals` (program 52, choir aahs), `wind.reed.oboe` (68),
+  `keyboard.piano` (0). The trumpet id `brass.trumpet.c` came from letting
+  MuseScore import `<instrument-name>Trumpet</instrument-name>` once — note
+  it is the **C** trumpet, which does not transpose.
+- **Staff name and instrument are independent.** The staff still reads
+  "Kuoro B" while sounding as a trumpet, so no renaming is needed.
+- **The brass staves sound as piano, deliberately.** Tuba mirum has a real
+  D trumpet part; leaving it as a trumpet would blur it against the read
+  line in the one movement where both play.
+- MuseScore's `.mxl` → `.mscz` conversion loses about 1.8 % of the piano's
+  MIDI notes (ties), independently of this script. Compare patched against
+  unpatched `.mscz`, not against the `.mxl`, when checking for losses.
