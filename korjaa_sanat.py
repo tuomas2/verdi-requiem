@@ -5,6 +5,7 @@ Osat 01 ja 14 on luettu Audiveriksella PDF:stä, ja niiden sanoissa on
 OCR-virheitä. Molempien PDF:ien sanat ovat kuitenkin oikeaa tekstiä eivät
 kuvaa, joten oikea sanoitus saadaan poimittua suoraan lähteestä.
 """
+import difflib
 import re
 import subprocess
 import xml.etree.ElementTree as ET
@@ -126,3 +127,95 @@ def extract_rows(pdf_path, font, pages=None):
             if text:
                 rows.append(Row(number, y, text))
     return rows
+
+
+def _norm(text):
+    """Vertailumuoto: pieniksi kirjaimiksi ja välimerkit pois."""
+    return text.lower().strip(VALIMERKIT + " ")
+
+
+def align(syls, slots):
+    """Kohdistaa PDF:n tavut olemassa oleviin tavupaikkoihin.
+
+    Palauttaa slots-listan mittaisen listan tavoitetiloja: Syllable jos
+    paikalle tulee sana, None jos paikalta poistetaan sana. Vertailu on
+    tavutasoinen, joten konelukemisen kirjainvirhe näkyy korvauksena ja
+    korvaus kirjoitetaan PDF:n mukaan.
+
+    Kun paikkoja on tavuja enemmän, ylimääräiset jäävät Noneksi — se on
+    tapaus jossa yksi tavu on pilkkoutunut kahdelle säkeistölle, tai jossa
+    esitysmerkintä on luettu sanaksi. Kun tavuja on paikkoja enemmän,
+    ylimääräiset jäävät sijoittamatta; niitä ei lisätä arvaamalla.
+
+    Palauttaa myös montako paikkaa tuli käsitellyksi, jotta kursori osaa
+    siirtyä myös poistettujen paikkojen yli. Ikkunan lopussa olevat
+    paikat, joihin rivi ei ulotu, jäävät koskematta.
+    """
+    a = [_norm(s.text) for s in slots]
+    b = [_norm(s.text) for s in syls]
+    target = [None] * len(slots)
+
+    consumed = 0
+    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(
+            a=a, b=b, autojunk=False).get_opcodes():
+        if tag in ("equal", "replace"):
+            for k in range(min(i2 - i1, j2 - j1)):
+                target[i1 + k] = syls[j1 + k]
+        if j2 > j1:
+            consumed = max(consumed, i2)
+    return target, consumed
+
+
+# Ikkuna otetaan tavumäärää pidempänä, jotta rivin loppuun osuva
+# ylimääräinen paikka mahtuu mukaan poistettavaksi.
+SLACK = 4
+
+
+def _ratio(syls, slots):
+    a = [_norm(s.text) for s in slots]
+    b = [_norm(s.text) for s in syls]
+    return difflib.SequenceMatcher(a=a, b=b, autojunk=False).ratio()
+
+
+def match_part(rows, slots, threshold=0.55, lookahead=8):
+    """Kohdistaa yhden äänen tavupaikat PDF:n riveihin.
+
+    PDF:n rivit ovat kaikkien äänten rivejä sekaisin, järjestyksessä ylhäältä
+    alas. Rivi hyväksytään kun se vastaa riittävän hyvin kursorin kohdalla
+    olevia paikkoja, muuten se ohitetaan toisen äänen rivinä.
+
+    Samassa systeemissä äänet laulavat usein samaa tekstiä, jolloin valinta
+    niiden välillä on yhdentekevä. Siksi ehdokkaista otetaan paras eikä
+    ensimmäinen: siellä missä tekstit eroavat, ero itse ratkaisee valinnan.
+
+    Palauttaa (tavoitetilat, käytetyt rivit, ohitetut rivit).
+    """
+    target = [None] * len(slots)
+    used, skipped = [], []
+    cursor, i = 0, 0
+
+    while i < len(rows) and cursor < len(slots):
+        best = None
+        for j in range(i, min(i + lookahead, len(rows))):
+            syls = tokenise(rows[j].text)
+            if not syls:
+                continue
+            score = _ratio(syls, slots[cursor:cursor + len(syls) + SLACK])
+            if score >= threshold and (best is None or score > best[0]):
+                best = (score, j, syls)
+
+        if best is None:
+            skipped.append(rows[i])
+            i += 1
+            continue
+
+        _, j, syls = best
+        skipped.extend(rows[i:j])
+        window = slots[cursor:cursor + len(syls) + SLACK]
+        part, consumed = align(syls, window)
+        target[cursor:cursor + consumed] = part[:consumed]
+        cursor += consumed
+        used.append(rows[j])
+        i = j + 1
+
+    return target, used, skipped
