@@ -434,9 +434,14 @@ all members and rewriting only the `.mscx` is the safe way; a plain
 **MIDI export is not a check of the sound.** It reads `<program value>`
 from the `.mscx`, so it reported the right instruments while the GUI still
 played every staff as a piano. That mistake shipped once. The sound the
-user hears comes from `audiosettings.json`; to check it, render audio and
-compare against the same score rendered without the patch, or read the
-`audiosettings.json` back out of the file.
+user hears comes from `audiosettings.json`.
+
+Rendering audio is the check that works. Do it on a short movement, not on
+the merged score — the full 1756 bars take well over ten minutes. Patching
+one part of `04-Verdi-Mors_stupebit.mxl` to trumpet and rendering both
+versions gave two MP3s of identical length differing in 79 % of their
+bytes, with the first difference at the point where the music starts.
+Identical hashes would have meant the patch did nothing.
 
 Counting Note On events by scanning bytes for `0x90..0x9F` **gives wrong
 answers** — velocity and program bytes collide with the status range, and
