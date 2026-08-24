@@ -349,12 +349,25 @@ format is not documented in the app and guessing is expensive:
   noteheads and lyrics disappear (Leland 500 → 395, lyric font 140 → 30).
 - **Hidden staves still sound.** The MIDI exported from the patched and
   unpatched `.mscz` is note-for-note identical, all 16 tracks.
-- **The instrument must be set in the `.mscx`, not in the MusicXML.**
-  Writing `<score-instrument><instrument-name>` plus `<midi-program>` into
-  every `<score-part>` got through for only two parts of fifteen — the rest
+- **Setting the instrument takes three edits, and missing any one leaves
+  the part sounding like a grand piano.** In the `.mscx`, both the
+  `<instrumentId>` *element* and the `<Instrument id="...">` *attribute*,
+  and in `audiosettings.json`, a track entry pinning the sound. The
+  attribute is what `audiosettings.json` refers to; leaving it at
+  `grand-piano` while changing only the element silently does nothing.
+- **`audiosettings.json` is what the GUI actually plays.** A file coming
+  out of MusicXML import has `"tracks": []`, and with that MuseScore plays
+  everything as a grand piano no matter what the instruments say. Each
+  track needs `partId` (the `<Part id>`), `instrumentId` (the
+  `<Instrument id>` attribute) and an `in.resourceMeta` naming the sound:
+  `presetProgram`, `presetName`, and `id` of the form `MS Basic\0\<program>`.
+  Keep the `partId: "999"` metronome track. The shape was copied from a
+  file MuseScore had written itself.
+- **The instrument must not be set through MusicXML at all.** Writing
+  `<score-instrument><instrument-name>` plus `<midi-program>` into every
+  `<score-part>` got through for only two parts of fifteen — the rest
   imported as `keyboard.piano.grand`. Adding `<midi-channel>` changed
-  nothing. Patching `<instrumentId>` and `<program value>` in the `.mscx`
-  works for all fifteen.
+  nothing.
 - **Instrument ids come from MuseScore's own templates** under
   `Contents/Resources/templates/`, which are unpacked `.mscx` directories:
   `voice.vocals` (program 52, choir aahs), `wind.reed.oboe` (68),
@@ -410,10 +423,20 @@ all members and rewriting only the `.mscx` is the safe way; a plain
     mscore -o x.pdf harjoitus.mscz
     mutool draw -F stext -o - x.pdf 1 | grep -c '<char'
 
-    # playback — compare the patched .mscz against the UNPATCHED .mscz,
-    # never against MIDI exported from the .mxl
+    # notes still sounding — compare the patched .mscz against the
+    # UNPATCHED .mscz, never against MIDI exported from the .mxl
     mscore -o patched.mid harjoitus.mscz
     mscore -o plain.mid   unpatched.mscz
+
+    # which sound each staff plays — MIDI export will NOT tell you, see below
+    mscore -o rendered.mp3 harjoitus.mscz
+
+**MIDI export is not a check of the sound.** It reads `<program value>`
+from the `.mscx`, so it reported the right instruments while the GUI still
+played every staff as a piano. That mistake shipped once. The sound the
+user hears comes from `audiosettings.json`; to check it, render audio and
+compare against the same score rendered without the patch, or read the
+`audiosettings.json` back out of the file.
 
 Counting Note On events by scanning bytes for `0x90..0x9F` **gives wrong
 answers** — velocity and program bytes collide with the status range, and

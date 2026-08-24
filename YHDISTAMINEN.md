@@ -393,7 +393,13 @@ Tulos tarkistettiin kolmella mittauksella:
 |---|---|
 | Näkyvyys | 15 viivastosta 14 piilotettu, Kuoro B näkyvissä |
 | Soivuus | MIDI patchatusta ja patchaamattomasta tiedostosta **nuotilleen identtinen** |
-| Soittimet | Kuoro B `brass.trumpet.c`, kuoro `voice.vocals`, solistit `wind.reed.oboe`, muut `keyboard.piano` |
+| Soittimet | Kuoro B `c-trumpet` / Trumpet 56, kuoro `voice` / Choir Aahs 52, solistit `oboe` / Oboe 68, muut `piano` |
+
+> Soitin vaatii kolme merkintää: `<instrumentId>`-elementin,
+> `<Instrument id>`-attribuutin ja `audiosettings.json`:n raidan. Jos yksi
+> puuttuu, viivasto soi flyygelinä. Ensimmäisessä versiossa niin kävikin,
+> koska MIDI-vienti näytti soittimet oikein mutta käyttöliittymän soitto
+> tulee eri polkua.
 
 Pianoraidoissa on noin 1,8 % vähemmän nuotteja kuin suoraan `.mxl`:stä
 viedyssä MIDIssä. Ero syntyy MuseScoren omassa `.mxl` → `.mscz`
