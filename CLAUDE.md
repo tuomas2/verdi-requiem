@@ -21,10 +21,13 @@ the reading part must be dense.
 | `01…16-*.mxl` | Source movements, numbered by position in the whole work |
 | `01-*.pdf`, `14-*.pdf` | Source PDFs for the two movements that had no MusicXML |
 | `*.omr` | Audiveris projects for those two, for manual correction |
+| `*-OMR-korjattu.mxl` | Those two with their chorus lyrics fixed from the PDFs |
 | `Verdi-Requiem-koko.mxl` | Merged score, 15 staves, 1756 measures |
 | `stemma-*.mxl` / `.pdf` | Eight choir reading parts |
 | `stemmat-sisallys.txt` | Where each movement starts in all eight |
 | `yhdista.py` | The merge tool; mapping table at the top |
+| `korjaa_sanat.py` | Fixes OMR lyric errors against the source PDFs |
+| `test_korjaa_sanat.py` | Its tests: `python3 -m unittest test_korjaa_sanat` |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
 | `tiivistys.mss` | MuseScore style: multimeasure rests |
 
@@ -35,8 +38,12 @@ export dated 2017-10-10 (movements 02–07, 13) and `Verdi_*` from a CPDL Finale
 neither convention but belongs to the Sibelius batch. All are CPDL editions.
 
 Movements 01 (Requiem & Kyrie) and 14 (Agnus Dei) existed only as PDFs and were
-produced by OMR — their notes and lyrics are **less reliable than the other 14**
-and still need proofreading against the PDFs.
+produced by OMR — they are **less reliable than the other 14**. Their chorus
+**lyrics are now corrected** from the PDFs by `korjaa_sanat.py`; see below for
+what that does and does not fix. The **notes still need proofreading**.
+
+`yhdista.py` reads the corrected files. Changing those filenames means editing
+three places: `MOVEMENTS`, the `MAPPING` keys, and `OMR_SOURCES`.
 
 ## Environment
 
@@ -47,6 +54,11 @@ and still need proofreading against the PDFs.
   MuseScore has no built-in OMR — "Import PDF" opens musescore.com in a browser.
 - `mutool` (mupdf-tools) installed via Homebrew. Used for rasterising and for
   reading text out of PDFs. `poppler` is *not* installed.
+- **The MuseScore CLI aborts at teardown, nondeterministically.** Roughly two
+  runs in three exit 134 (SIGABRT) with `mutex lock failed` *after* writing a
+  complete PDF. It predates this work — the same file converts with exit 0 on
+  a retry, and files from earlier commits abort identically. Verify output by
+  page count, not by exit status, and do not put `mscore` under `set -e`.
 - Tesseract language data for Audiveris lives in
   `~/Library/Application Support/AudiverisLtd/audiveris/tessdata` (eng, ita, lat).
 - **Audiveris itself is not installed** — it ran from a temporary directory that
@@ -199,3 +211,79 @@ Compute expected note counts per target staff directly from `MAPPING` and the
 source files, then compare against the merged output. Every row must match
 exactly. This found two silent data-loss bugs that looked fine on the page.
 Do not hand-add the numbers — an early hand sum was wrong.
+
+## Fixing OMR lyrics from the source PDFs
+
+`korjaa_sanat.py` rewrites the chorus lyrics of movements 01 and 14 to match
+their source PDFs. `--kuiva` reports without writing. Output goes to
+`*-OMR-korjattu.mxl`; the OMR originals are never touched, so the pass is
+repeatable if the OMR is ever redone for the piano.
+
+**Both source PDFs carry their lyrics as real text**, not as glyph images —
+`mutool draw -F stext` extracts them. This is the fact the whole approach
+rests on, and it holds for movement 14 too: Audiveris could not read its
+Type1 fonts but `mutool` can.
+
+Results: coverage 83–91 % per voice in movement 01, 25–81 % in movement 14.
+86 changes written in 01 and 28 in 14. **The chorus bass of movement 01 — the
+line the user reads — is 91 % with zero uncertain changes**, and its
+`Is-ru-sa-lem` and `Te dc-cet` are fixed.
+
+### Details that took measurement to get right
+
+- **Lyrics are separated from staff labels by font size**, not by content.
+  `4 Soli` and `Tutti` are the same Times-Roman as the lyrics, two points
+  larger. The size is derived from the data — the most common size for that
+  font — rather than hardcoded.
+- **Word spacing must be measured from the previous glyph's right edge**, not
+  from its origin. Movement 14's MusiXTeX positions every letter separately,
+  and an origin-to-origin threshold turns a wide letter into a space
+  (`d o - n a` instead of `do-na`).
+- **A lyric line is read verse-major, not note-major.** Audiveris put the
+  `sotto voce` marking on verse 2 *under* the real syllables, so note-major
+  reading interleaved `SOITO` and `VOCE` into `Re-qui-em` and broke the
+  sequence at the third syllable. Extra verses are a separate pass.
+- **Row selection is a global optimum, not a greedy scan.** For each PDF row
+  the plausible positions are enumerated, then dynamic programming picks the
+  largest compatible set — rows in order, positions non-overlapping. Candidate
+  positions come from a syllable index, so the whole search is ~3 s.
+- **Deletions only between matches, and only for a syllable the PDF does not
+  know.** At a window edge the evidence is missing: the slot may be the next
+  row's first syllable. And a syllable that occurs in the PDF is a real
+  syllable, so deleting it would mean the alignment had drifted.
+- **Flagging is case-sensitive, matching is not.** `Is` -> `Je` looks
+  uncertain only because lowercase `is` occurs in every other bar inside
+  `e-is`; capitalised `Is` occurs nowhere, so it is a clear fix.
+- **Uncertain changes are reported, not applied.** Where the old text is also
+  a word the PDF knows, the change may be drift. Checked by hand, three of
+  five were wrong — e.g. `Chri` -> `e` would have made `Chri-ste` into
+  `e-ste`. So they are listed and left alone.
+
+### Approaches tried and rejected, with the measurement
+
+| Attempt | Result |
+|---|---|
+| Greedy cursor over rows | Drifted in repetitive text: deleted the real `Ky`, `ri`, `e` from the Kyrie. Also stalled — one garbled syllable at the cursor stopped the rest, tenor matched 8 slots of 128 |
+| Fixed 85 % match threshold | Rejects short rows: one letter error in a five-syllable row is already 80 % |
+| Window 4 slots longer than the row | A replace at the row's end swallowed the next row's slots; deleted the correct `pe` in bar 20 |
+| Filling short gaps from the bracketing row | Never fires. Gaps always fall *between* two rows, never inside one |
+| Larger window (6, 10 instead of 3) | Coverage fell, 400 -> 388 -> 387 matched slots |
+
+### What is left, and why it needs a person
+
+Two things, neither fixable by changing text.
+
+**Dropped syllables.** The OMR read five syllables where there are six —
+`ra-ti-nem` for `o-ra-ti-o-nem`. Slots are then fewer than syllables and no
+one-to-one alignment exists. The report lists these as
+`kohdistamatta tahdit N-M:`.
+
+**Notes carrying no lyric at all.** 44 notes in the chorus bass of movement
+01, the longest run bars 49–55 (15 notes, `ad te om-nis ca-ro ve-ni-et` in
+the PDF). The text is readable and even the right row is identifiable — row
+27 of the extraction ends with `Re-qui-em,`, the anchor that did match at bar
+57. What is *not* determinable by counting is **which note each syllable goes
+on**: a melisma stretches one syllable over several notes, and that run has 9
+syllables for 15 notes. Reliable placement would need the PDF's notehead
+x-positions matched against the lyric x-positions — doable, but font-specific
+work for both Mozart9 and MusiXTeX.

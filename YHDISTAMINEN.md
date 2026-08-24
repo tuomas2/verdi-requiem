@@ -9,6 +9,7 @@
 | `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa |
 | `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys |
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
+| `korjaa_sanat.py` | Korjaa osien 01 ja 14 kuorosanat lähde-PDF:ää vasten |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
 
 ## Työnkulku
@@ -121,9 +122,11 @@ aeterna — ne ovat soolonumeroita. Se ei ole virhe.
 ## Tunnetut rajoitukset
 
 **Osat I ja V ovat konelukemisen tulosta** (Audiveris PDF:stä), joten niiden
-nuotit ja sanat eivät ole yhtä luotettavia kuin muiden. Sanoissa on OCR-virheitä
-kuten "V0-tum in Is-ru-sa-lem" ja "ra-t1-nem me-am". Nämä kaksi osaa pitää
-oikaisulukea nuottia vasten. Muut 14 osaa tulevat julkaisukuntoisista lähteistä.
+nuotit ja sanat eivät ole yhtä luotettavia kuin muiden. Muut 14 osaa tulevat
+julkaisukuntoisista lähteistä.
+
+Sanat on nyt korjattu koneellisesti lähde-PDF:ää vasten, ks. **Sanojen
+korjaus** alla. Nuotteja se ei koske: ne pitää edelleen oikaisulukea.
 
 **MuseScore ilmoitti aiemmin tiedoston korruptoituneeksi.** Se on korjattu.
 Syy oli lähteissä 05 ja 16: niiden pianostemmassa on nuotteja, joissa on
@@ -179,3 +182,105 @@ mukaan.
 
 **Osa II·10 Lacrymosa**: P9 on kuorobasson divisi tahdeissa 54–56, ja se
 yhdistetään kuorobassoriville omaksi äänekseen.
+
+## Sanojen korjaus
+
+Osien 01 ja 14 sanoissa oli konelukemisen virheitä kuten `Is-ru-sa-lem`,
+`Te dc-cet` ja `V0-tum`, ja paikoin esitysmerkintä oli luettu sanaksi
+(`sotto voce` → `SOITO` / `VOCE`, `PPP`, `morendo`). Molempien lähde-PDF:ien
+sanat ovat kuitenkin **oikeaa tekstiä eivät kuvaa**, joten oikea sanoitus
+saadaan luettua suoraan lähteestä.
+
+    python3 korjaa_sanat.py            # korjaa ja kirjoita
+    python3 korjaa_sanat.py --kuiva    # näytä raportti, älä kirjoita mitään
+
+Tulos menee tiedostoihin `01-Verdi_Requiem-OMR-korjattu.mxl` ja
+`14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl`, ja `yhdista.py` käyttää niitä.
+Konelukemisen alkuperäisiin tiedostoihin ei kosketa, joten korjaus on
+ajettavissa uudelleen jos konelukeminen joskus tehdään uusiksi.
+
+### Mitä se korjasi
+
+| Osasto | Tavuja | Kohdistettu | Muutoksia | Ehdotuksia |
+|---|---:|---:|---:|---:|
+| I Kuoro S | 141 | 84 % | 25 | 1 |
+| I Kuoro A | 115 | 83 % | 23 | 3 |
+| I Kuoro T | 128 | 83 % | 24 | 1 |
+| **I Kuoro B** | **131** | **91 %** | **14** | **0** |
+| V Kuoro S | 37 | 81 % | 11 | 2 |
+| V Kuoro A | 28 | 25 % | 3 | 1 |
+| V Kuoro T | 79 | 65 % | 10 | 5 |
+| V Kuoro B | 68 | 37 % | 4 | 0 |
+
+Kuorobasson rivi osasta I luki korjauksen jälkeen näin — vertaa PDF:ään:
+
+    Re-qui-em, re-qui-em ae-ter-nam, et lux per-pe-tu-a et lux
+    per-pe-tu-a lu-ce-at e-is. Te de-cet hym-nus, De-us in Si-on et
+    ti-bi red-de-tur V0-tum in Je-ru-sa-lem; ex-au-di ra-ti-nem me-am,
+    ra{1-nem me-am ...
+
+`Is-ru-sa-lem` → `Je-ru-sa-lem` ja `Te dc-cet` → `Te de-cet` korjautuivat.
+`V0-tum` ja `ra-ti-nem` eivät, ja syy on alla.
+
+### Ehdotukset: 13 kohtaa joita ei sovellettu
+
+Raportti erottaa muutokset ehdotuksista. **Ehdotuksia ei kirjoiteta
+tiedostoon.** Ne ovat kohtia joissa myös vanha teksti oli PDF:n tuntema sana,
+eli sanan vaihtuminen toiseksi sanaksi — se voi olla aito korjaus tai
+kohdistuksen liukumista. Käsin tarkistettuna kolme viidestä oli väärin,
+esimerkiksi sopraanon tahti 134, jossa `Chri` → `e` olisi tehnyt sanasta
+`Chri-ste` muodon `e-ste`. Siksi ne vain raportoidaan.
+
+Kuorobassossa ei ole yhtään ehdotusta, eli sen 14 muutosta ovat kaikki
+sellaisia joissa vanha teksti oli roskaa.
+
+### Mitä jäi korjaamatta
+
+Kaksi asiaa, ja kumpaakaan ei voi korjata tekstiä muuttamalla.
+
+**Pudonneet tavut.** Konelukeminen on paikoin lukenut viisi tavua kuuden
+sijaan, esimerkiksi `ra-ti-nem` kun oikein on `o-ra-ti-o-nem`. Silloin
+paikkoja on tavuja vähemmän eikä kohdistus voi olla yksi yhteen. Raportti
+listaa nämä kohdat rivillä `kohdistamatta tahdit N-M:`.
+
+**Nuotit joilla ei ole sanaa lainkaan.** Näitä on kuorobassossa 44 nuottia,
+pisin jakso tahdit 49–55 (15 nuottia, PDF:n mukaan `ad te om-nis ca-ro
+ve-ni-et`). Työkalu ei lisää sanaa nuotille jolla sanaa ei ole. Teksti on
+PDF:stä luettavissa, mutta se **mille nuotille kukin tavu kuuluu** ei ratkea
+laskemalla: melismassa yksi tavu venyy usealle nuotille, ja tuossa jaksossa
+on 9 tavua 15 nuotille. Nämä on lisättävä käsin MuseScoressa.
+
+### Miten se toimii
+
+1. `mutool draw -F stext` poimii PDF:n tekstin sijainteineen. Sanat
+   erottuvat viivastomerkinnöistä (`4 Soli`, `Tutti`) fonttikoolla, joka
+   päätellään aineistosta: se on tekstifontin yleisin koko.
+2. Merkit ryhmitellään peruslinjan y-koordinaatilla, jolloin yksi rivi on
+   yhden äänen sanat yhdessä systeemissä. Väli päätellään edellisen merkin
+   **oikeasta reunasta**, koska osan 14 MusiXTeX asemoi joka kirjaimen
+   erikseen ja leveä kirjain näyttäisi muuten väliltä.
+3. Rivi pilkotaan tavuiksi: sanaraja on välilyönti ja tavuraja viiva, ja
+   viivan asema kertoo `syllabic`-arvon (single/begin/middle/end).
+4. Sanarivi luetaan MusicXML:stä **säkeistö kerrallaan** eikä nuotti
+   kerrallaan. Konelukeminen pani `sotto voce` -merkinnän säkeistölle 2
+   oikeiden tavujen alle, ja nuotti kerrallaan luettuna se katkaisi jonon.
+5. Jokaiselle riville etsitään mahdolliset kohdat ja niistä valitaan
+   dynaamisella ohjelmoinnilla suurin yhteensopiva joukko: rivit
+   järjestyksessä, kohdat päällekkäin menemättä. Väärä kohta häviää
+   oikealle, koska oikeat kohdat tukevat toisiaan.
+6. Poisto tehdään vain osumien välissä ja vain tavulle jota PDF ei tunne.
+
+### Miksi ratkaisu on tällainen
+
+Ahne kohdistus kokeiltiin ensin ja se hylättiin: se liukui toistuvassa
+tekstissä väärään kohtaan ja poisti Kyriestä oikeat tavut `Ky`, `ri`, `e`,
+ja se juuttui — yksi roskatavu kursorin kohdalla pysäytti loppuosan, ja
+tenorista kohdistui 8 paikkaa 128:sta.
+
+Kolme muuta yritystä hylättiin mittausten perusteella:
+
+| Yritys | Tulos |
+|---|---|
+| Kiinteä osuusraja 85 % | Hylkäsi lyhyet rivit: viiden tavun rivissä yksikin kirjainvirhe pudottaa osuuden 80 prosenttiin |
+| Ikkuna 4 paikkaa tavumäärää pidempi | Rivin loppuun osuva korvaus nieli seuraavan rivin paikat; tahdin 20 oikea `pe` poistui |
+| Lyhyiden aukkojen täyttö osumien välistä | Ei laukea kertaakaan: aukot ovat aina eri rivien välissä, eivät saman rivin sisällä |
