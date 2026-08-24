@@ -282,6 +282,11 @@ syllable above it simply gets none.
 - **If the nearest note already carries a word the PDF knows, leave it**; if
   it carries something the PDF does not know, that is OMR junk and gets
   replaced.
+- **A syllable already sitting on a neighbouring note is not added again.**
+  The predicted note can be empty while the syllable is in place one note
+  over; that produced `qui tol-tol-lis`. The neighbour is checked across
+  system boundaries, since a row can begin with the previous system's last
+  syllable.
 - **The whole system is skipped unless the assignment is monotone and
   injective.** When a row has more syllables than the system has notes — the
   OMR dropped notes, not just lyrics — filling produced `e-le-le-son` and
