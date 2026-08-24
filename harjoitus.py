@@ -7,6 +7,8 @@ ovat piilossa. Taukotahdit tiivistyvät, joten omat tauot eivät vie sivuja.
 MuseScore erottaa viivaston *nimen* ja *soittimen*: viivastolla lukee
 edelleen "Kuoro B" vaikka se soi trumpettina.
 """
+import collections
+import json
 import re
 import subprocess
 import sys
@@ -14,14 +16,22 @@ import zipfile
 
 from yhdista import SINGER_PARTS
 
-# (MuseScoren soitintunniste, ohjelmanumero) — tunnisteet on poimittu
-# MuseScoren omista pohjatiedostoista, ohjelmanumero on nollapohjainen
-# kuten MuseScoren <program value>, ei MusicXML:n yksipohjainen.
+# MuseScore tarvitsee soittimesta kolme asiaa, ja kaikki kolme on
+# asetettava tai sointi jää flyygeliksi:
+#   long    <instrumentId>-elementti, soittimen pitkä tunniste
+#   short   <Instrument id>-attribuutti, jolla audiosettings viittaa siihen
+#   preset  General MIDI -nimi, jolla ääni kiinnitetään audiosettingsissä
+#   program ohjelmanumero, nollapohjainen kuten MuseScoressa (ei MusicXML:n
+#           yksipohjainen: trumpetti on 56 eikä 57)
+# Tunnisteet on poimittu MuseScoren omista pohjatiedostoista.
+Sound = collections.namedtuple("Sound", "long short preset program")
+
 SOUND = {
-    "oma":     ("brass.trumpet.c", 56),   # se rivi jota luetaan
-    "kuoro":   ("voice.vocals", 52),      # choir aahs
-    "solisti": ("wind.reed.oboe", 68),
-    "piano":   ("keyboard.piano", 0),
+    # C-trumpetti, ei transponoiva; pohjien brass.trumpet.bflat olisi.
+    "oma":     Sound("brass.trumpet.c", "c-trumpet", "Trumpet", 56),
+    "kuoro":   Sound("voice.vocals", "voice", "Choir Aahs", 52),
+    "solisti": Sound("wind.reed.oboe", "oboe", "Oboe", 68),
+    "piano":   Sound("keyboard.piano", "piano", "Acoustic Grand Piano", 0),
 }
 
 
@@ -63,16 +73,70 @@ def set_sounds(mscx, own):
         name = re.search(r"<trackName>([^<]*)</trackName>", block)
         if name is None:
             continue
-        sound, program = instrument_for(name.group(1), own)
+        sound = instrument_for(name.group(1), own)
+        block = re.sub(r'<Instrument id="[^"]*">',
+                       '<Instrument id="%s">' % sound.short, block)
         block = re.sub(r"<instrumentId>[^<]*</instrumentId>",
-                       "<instrumentId>%s</instrumentId>" % sound, block)
+                       "<instrumentId>%s</instrumentId>" % sound.long, block)
         block = re.sub(r'<program value="\d+"\s*/>',
-                       '<program value="%d"/>' % program, block)
+                       '<program value="%d"/>' % sound.program, block)
         out.append(mscx[at:match.end()])
         out.append(block)
         at = end
     out.append(mscx[at:])
     return "".join(out)
+
+
+def _track(part_id, instrument_id, preset=None, program=None):
+    """Yksi raita audiosettings.json:iin.
+
+    Muoto on kopioitu MuseScoren itsensä kirjoittamasta tiedostosta.
+    Ilman presetProgramia raita soi soittimen oletusäänellä.
+    """
+    attributes = {"playbackSetupData": "last.last.last",
+                  "soundFontName": "MS Basic"}
+    resource = "MS Basic"
+    if program is not None:
+        attributes.update({"presetBank": "0", "presetName": preset,
+                           "presetProgram": str(program)})
+        resource = "MS Basic\\0\\%d" % program
+    return {
+        "in": {"resourceMeta": {"attributes": attributes,
+                                "hasNativeEditorSupport": False,
+                                "id": resource,
+                                "type": "fluid_soundfont",
+                                "vendor": "Fluid"},
+               "unitConfiguration": {}},
+        "instrumentId": instrument_id,
+        "out": {"balance": 0, "fxChain": {}, "volumeDb": 0},
+        "partId": part_id,
+        "soloMuteState": {"mute": False, "solo": False},
+    }
+
+
+def audio_settings(mscx, own):
+    """Kiinnittää jokaisen raidan äänen.
+
+    Pelkkä soitin .mscx:ssä ei riitä. Tuonnista tuleva audiosettings.json
+    on tyhjä, ja tyhjällä MuseScore soittaa kaiken flyygelinä riippumatta
+    siitä mitä soittimeksi on merkitty. Ääni on siis sanottava täälläkin.
+    """
+    tracks = []
+    for match in re.finditer(r'<Part\b[^>]*>', mscx):
+        end = mscx.index("</Part>", match.end())
+        part_id = re.search(r'id="([^"]*)"', match.group(0))
+        name = re.search(r"<trackName>([^<]*)</trackName>",
+                         mscx[match.end():end])
+        if part_id is None or name is None:
+            continue
+        sound = instrument_for(name.group(1), own)
+        tracks.append(_track(part_id.group(1), sound.short,
+                             sound.preset, sound.program))
+    tracks.append(_track("999", "metronome"))
+    return {"activeSoundProfile": "MuseScore Basic",
+            "aux": [],
+            "master": {"balance": 0, "fxChain": {}, "volumeDb": 0},
+            "tracks": tracks}
 
 
 def hide_others(mscx, visible):
@@ -129,12 +193,17 @@ def build(voice, source=LAHDE, style=TYYLI):
         score = next(n for n in z.namelist() if n.endswith(".mscx"))
         members = [(n, z.read(n)) for n in z.namelist()]
 
-    mscx = dict(members)[score].decode("utf-8")
-    mscx = hide_others(set_sounds(mscx, own), set(own))
+    mscx = hide_others(set_sounds(dict(members)[score].decode("utf-8"), own),
+                       set(own))
+    audio = json.dumps(audio_settings(mscx, own)).encode("utf-8")
 
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
         for name, data in members:
-            z.writestr(name, mscx.encode("utf-8") if name == score else data)
+            if name == score:
+                data = mscx.encode("utf-8")
+            elif name == "audiosettings.json":
+                data = audio
+            z.writestr(name, data)
     return out
 
 
