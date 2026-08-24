@@ -225,8 +225,9 @@ rests on, and it holds for movement 14 too: Audiveris could not read its
 Type1 fonts but `mutool` can.
 
 Results: coverage 83–91 % per voice in movement 01, 25–81 % in movement 14.
-156 changes written in total, of which 183 are corrections to existing
-lyrics and the rest are syllables added to notes that carried none.
+325 changes written: 142 corrections to existing lyrics and 183 syllables
+added to notes that carried none. 13 further changes were reported as
+uncertain and deliberately not applied.
 **The chorus bass of movement 01 — the line the user reads — is 91 % with
 zero uncertain changes**, and reads correct Latin through bar 90.
 

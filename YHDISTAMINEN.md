@@ -234,6 +234,9 @@ sanassa `e-le-i-son`.
 
 ### Ehdotukset: 13 kohtaa joita ei sovellettu
 
+Yhteensä kirjoitettiin 325 muutosta: 142 olemassa olevan sanan korjausta ja
+183 tavua nuoteille joilla ei ollut sanaa.
+
 Raportti erottaa muutokset ehdotuksista. **Ehdotuksia ei kirjoiteta
 tiedostoon.** Ne ovat kohtia joissa myös vanha teksti oli PDF:n tuntema sana,
 eli sanan vaihtuminen toiseksi sanaksi — se voi olla aito korjaus tai
