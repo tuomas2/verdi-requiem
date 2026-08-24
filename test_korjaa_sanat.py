@@ -1,11 +1,14 @@
 """korjaa-sanat.py:n testit. Aja: python3 -m unittest -v"""
+import os
+import tempfile
 import unittest
+import zipfile
 
 from korjaa_sanat import (Change, Row, Syllable, align, apply_targets,
                           extract_rows, find_part, load, match_part,
                           read_extras, read_slots, remove_extras,
                           tokenise)
-from korjaa_sanat import SOURCES, correct, vocabulary
+from korjaa_sanat import SOURCES, correct, save, vocabulary
 
 
 def longest_gap(part_report):
@@ -189,6 +192,31 @@ class TestCorrect(unittest.TestCase):
         for part in report:
             self.assertLess(longest_gap(part), 30, part.name)
 
+    def test_capitalised_syllable_is_judged_case_sensitively(self):
+        # Basson tahti 35: konelukeminen luki "Je-ru-sa-lem" muodossa
+        # "Is-ru-sa-lem". Pienaakkosin "is" esiintyy PDF:ssä joka toisessa
+        # tahdissa sanassa "e-is", mutta isolla alkukirjaimella sanan alussa
+        # ei kertaakaan. Tämä ei siis ole epävarma vaan selvä korjaus.
+        source = next(s for s in SOURCES if s.mxl.startswith("01"))
+        _, report = correct(source)
+        bass = next(pr for pr in report if pr.part == "P16")
+        fix = next(c for c in bass.changes
+                   if c.measure == 35 and c.before == "Is")
+        self.assertEqual(fix.after, "Je")
+        self.assertNotIn(fix, bass.flagged)
+
+    def test_punctuation_only_change_is_not_flagged(self):
+        # Tarkistettavaksi merkitään ne joissa sana vaihtuu toiseksi sanaksi.
+        # Konelukemisen "nam ," -> "nam," on pelkkä välimerkkisiivous, ja
+        # sellaiset hukuttaisivat listaan ne muutokset jotka on syytä katsoa.
+        source = next(s for s in SOURCES if s.mxl.startswith("01"))
+        _, report = correct(source)
+        soprano = next(pr for pr in report if pr.part == "P13")
+        siivous = next(c for c in soprano.changes
+                       if c.measure == 61 and c.before == "nam ,")
+        self.assertEqual(siivous.after, "nam,")
+        self.assertNotIn(siivous, soprano.flagged)
+
     def test_a_syllable_the_pdf_knows_is_never_deleted(self):
         # Poisto on oikea vain roskalle: esitysmerkinnälle, dynamiikalle,
         # kirjainsotkulle. Jos tavu esiintyy PDF:ssä, se on oikea tavu, ja
@@ -215,6 +243,24 @@ class TestCorrect(unittest.TestCase):
         m28 = next(m for m in bass.iter("measure") if m.get("number") == "28")
         self.assertEqual([ly.findtext("text") for ly in m28.iter("lyric")],
                          ["Te", "de", "cet"])
+
+
+class TestSave(unittest.TestCase):
+    def test_saved_file_keeps_corrections_and_stays_a_valid_mxl(self):
+        source = next(s for s in SOURCES if s.mxl.startswith("01"))
+        root, _ = correct(source)
+        with tempfile.TemporaryDirectory() as tmp:
+            out = os.path.join(tmp, "korjattu.mxl")
+            save(root, source.mxl, out)
+
+            bass = find_part(load(out), "P16")
+            m28 = next(m for m in bass.iter("measure")
+                       if m.get("number") == "28")
+            self.assertEqual([ly.findtext("text") for ly in m28.iter("lyric")],
+                             ["Te", "de", "cet"])
+            with zipfile.ZipFile(out) as z:
+                # Ilman containeria MuseScore ei tunnista tiedostoa.
+                self.assertIn("META-INF/container.xml", z.namelist())
 
 
 if __name__ == "__main__":

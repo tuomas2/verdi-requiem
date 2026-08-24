@@ -381,6 +381,24 @@ def load(path):
         return ET.fromstring(z.read(name))
 
 
+def save(root, template, path):
+    """Kirjoittaa puun .mxl-tiedostoksi templaten muita jäseniä myöten.
+
+    .mxl on zip, jossa META-INF/container.xml osoittaa varsinaiseen
+    XML-tiedostoon. Ilman containeria MuseScore ei tunnista tiedostoa,
+    joten muut jäsenet kopioidaan sellaisenaan.
+    """
+    with zipfile.ZipFile(template) as z:
+        score = next(n for n in z.namelist()
+                     if not n.startswith("META-INF") and n.lower().endswith(".xml"))
+        members = [(n, z.read(n)) for n in z.namelist()]
+
+    body = ET.tostring(root, encoding="UTF-8", xml_declaration=True)
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
+        for name, data in members:
+            z.writestr(name, body if name == score else data)
+
+
 def find_part(root, part_id):
     return next(p for p in root.iter("part") if p.get("id") == part_id)
 
@@ -428,11 +446,17 @@ def read_extras(part):
 
 @dataclass(frozen=True)
 class Change:
-    """Yksi muutos raporttiin. after on None kun sana poistettiin."""
+    """Yksi muutos raporttiin. after on None kun sana poistettiin.
+
+    hyphen on (ennen, jälkeen) niissä muutoksissa joissa tavutus muuttui.
+    Ilman sitä raportti näyttäisi rivejä muotoa 'ae' -> 'ae', joissa mikään
+    ei silminnähden muutu.
+    """
 
     measure: int
     before: str
     after: str
+    hyphen: tuple = ()
 
 
 def apply_targets(slots, target, handled):
@@ -453,7 +477,9 @@ def apply_targets(slots, target, handled):
             changes.append(Change(slot.measure, have.text, None))
         elif want != have:
             _set_lyric(slot.element, want)
-            changes.append(Change(slot.measure, have.text, want.text))
+            hyphen = ((have.syllabic, want.syllabic)
+                      if have.syllabic != want.syllabic else ())
+            changes.append(Change(slot.measure, have.text, want.text, hyphen))
     for note in touched:
         _renumber_verses(note)
     return changes
@@ -464,8 +490,22 @@ def vocabulary(rows):
 
     Poisto on oikea vain roskalle. Jos tavu esiintyy PDF:ssä jossain, se on
     oikea tavu, ja sen poistaminen tarkoittaisi että kohdistus on liukunut.
+    Tämä on kirjainkoosta riippumaton, koska poistossa kannattaa olla
+    varovainen.
     """
     return {_norm(s.text) for row in rows for s in tokenise(row.text)}
+
+
+def spellings(rows):
+    """Kaikki tavut PDF:ssä sellaisina kuin ne on kirjoitettu.
+
+    Tarkistettavaksi merkitseminen katsoo kirjainkokoa, koska iso
+    alkukirjain kertoo sanan alusta. "is" esiintyy joka toisessa tahdissa
+    sanassa "e-is", mutta "Is" ei kertaakaan — joten "Is" -> "Je" on selvä
+    korjaus eikä epävarma.
+    """
+    return {s.text.strip(VALIMERKIT) for row in rows
+            for s in tokenise(row.text)}
 
 
 def remove_extras(extras, handled_notes):
@@ -551,9 +591,26 @@ class PartReport:
     slots: int
     handled: int
     changes: list
+    flagged: list  # muutokset joissa vanha teksti oli PDF:n tuntema sana
     runs: list     # kohdistamattomat jaksot, kukin lista paikkoja
     used: list     # rivit jotka tunnistettiin tämän äänen riveiksi
     skipped: list  # rivit joille ei löytynyt paikkaa tästä äänestä
+
+
+def _uncertain(change, spelled):
+    """Onko muutos sellainen joka kannattaa tarkistaa käsin.
+
+    Aito korjaus vaihtaa roskan sanaksi. Jos vanhakin teksti on sana jonka
+    PDF tuntee, muutos voi olla kohdistuksen liukumista — tai aito korjaus
+    kuten "at" -> "et", koska "at" esiintyy sanassa "lu-ce-at". Kumpi,
+    sitä ei ratkaista koneella; se merkitään katsottavaksi.
+
+    Pelkkä välimerkkiero ei ole tällainen: "nam ," -> "nam," on siivousta,
+    ja sellaiset hukuttaisivat listaan ne muutokset jotka on syytä katsoa.
+    """
+    return (change.after is not None
+            and _norm(change.before) != _norm(change.after)
+            and change.before.strip(VALIMERKIT) in spelled)
 
 
 def _runs(slots, handled):
@@ -580,6 +637,7 @@ def correct(source, pages=None):
     """Korjaa yhden osan kuorosanat ja palauttaa (puu, raportti)."""
     root = load(source.mxl)
     rows = extract_rows(source.pdf, source.font, pages)
+    spelled = spellings(rows)
 
     report = []
     for part_id, name in source.parts:
@@ -589,8 +647,63 @@ def correct(source, pages=None):
         changes = apply_targets(slots, got.target, got.handled)
         done = {id(s.note) for s, ok in zip(slots, got.handled) if ok}
         changes += remove_extras(extras, done)
+        changes.sort(key=lambda c: c.measure)
         report.append(PartReport(part_id, name, len(slots),
                                  sum(got.handled), changes,
+                                 [c for c in changes if _uncertain(c, spelled)],
                                  _runs(slots, got.handled),
                                  got.used, got.skipped))
     return root, report
+
+
+def format_report(source, report):
+    """Raportti riveinä. Jokainen muutos näkyy, mikään ei muutu hiljaa."""
+    out = ["%s  <-  %s" % (source.mxl, source.pdf)]
+    changes = flagged = 0
+
+    for part in report:
+        out.append("")
+        out.append("  %-9s %-6s %3d tavua, kohdistettu %d (%.0f %%)"
+                   % (part.name, part.part, part.slots, part.handled,
+                      100.0 * part.handled / max(part.slots, 1)))
+        for change in part.changes:
+            mark = "  !" if change in part.flagged else "   "
+            if change.after is None:
+                what = "-> poistettu"
+            elif change.before == change.after:
+                what = "   tavutus %s -> %s" % change.hyphen
+            else:
+                what = "-> %r" % change.after
+            note = ("   (PDF tuntee sanan %r)" % change.before
+                    if change in part.flagged else "")
+            out.append("%s tahti %3d  %-14r %s%s"
+                       % (mark, change.measure, change.before, what, note))
+        changes += len(part.changes)
+        flagged += len(part.flagged)
+
+        for run in part.runs:
+            out.append("     kohdistamatta tahdit %d-%d: %s"
+                       % (run[0].measure, run[-1].measure,
+                          " ".join(s.syllable.text for s in run)))
+
+    out.append("")
+    out.append("  %d muutosta, joista %d tarkistettavaa" % (changes, flagged))
+    return out
+
+
+def main(argv):
+    dry = "--kuiva" in argv
+    for source in SOURCES:
+        root, report = correct(source)
+        print("\n".join(format_report(source, report)))
+        if dry:
+            print("  (kuiva ajo, mitään ei kirjoitettu)")
+        else:
+            save(root, source.mxl, source.out)
+            print("  kirjoitettu %s" % source.out)
+        print()
+
+
+if __name__ == "__main__":
+    import sys
+    main(sys.argv[1:])
