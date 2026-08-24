@@ -244,6 +244,19 @@ TOP = 4
 # raja päästää läpi väärään toistoon liukuneen rivin.
 TOLERANCE = 0.35
 
+# Puuttuvien sanojen lisäys. Mittakaava PDF:n ja MusicXML:n välillä on
+# ~0,3; näiden ulkopuolinen sovitus tarkoittaa että parit ovat vääriä.
+MIN_SCALE = 0.2
+MAX_SCALE = 0.5
+
+# Kuinka suuren osan rivin tavuista on osuttava systeemin nuoteille, jotta
+# rivi kelpaa sen systeemin riviksi.
+MIN_HITS = 0.85
+
+# Montako jo osuvaa sanaa systeemissä tarvitaan, jotta sen kulmakerroin
+# otetaan mukaan mittakaavan mediaaniin.
+MIN_ANCHORS = 6
+
 # Osuman on alettava ikkunan alusta. Pari paikkaa liukumaa sallitaan, koska
 # konelukeminen on voinut rikkoa juuri rivin ensimmäisen tavun.
 HEAD = 2
@@ -451,6 +464,51 @@ def find_part(root, part_id):
     return next(p for p in root.iter("part") if p.get("id") == part_id)
 
 
+@dataclass
+class NoteAt:
+    """Yksi soiva nuotti sijainteineen."""
+
+    measure: int
+    system: int
+    x: float
+    note: ET.Element
+
+    @property
+    def lyrics(self):
+        return list(self.note.iter("lyric"))
+
+
+def read_notes(part):
+    """Osaston soivat nuotit systeemeittäin ja x-sijainteineen.
+
+    Audiveris säilytti nuottien default-x:n, tahtien leveydet ja
+    <print>-elementeissä systeemien vasemmat marginaalit, joten nuotin
+    paikka rivillä on laskettavissa. Laskenta alkaa alusta joka
+    systeemissä, joten x on vertailukelpoinen vain systeemin sisällä.
+
+    Soinnun lisäsävelet jätetään pois: ne ovat samalla x:llä kuin
+    soinnun ensimmäinen nuotti eivätkä kanna omaa tavua.
+    """
+    notes = []
+    system, left = -1, 0.0
+    for measure in part.iter("measure"):
+        number = int(measure.get("number"))
+        printing = measure.find("print")
+        if printing is not None and (printing.get("new-page") == "yes"
+                                     or printing.find("system-layout") is not None):
+            system += 1
+            margin = printing.find("system-layout/system-margins/left-margin")
+            left = float(margin.text) if margin is not None else 0.0
+        for note in measure.iter("note"):
+            if note.find("rest") is not None or note.find("chord") is not None:
+                continue
+            x = note.get("default-x")
+            if x is not None:
+                notes.append(NoteAt(number, max(system, 0), left + float(x), note))
+        left += float(measure.get("width") or 0)
+    return notes
+
+
 def _verse(lyric):
     try:
         return int(lyric.get("number") or 1)
@@ -654,6 +712,168 @@ class PartReport:
     skipped: list  # rivit joille ei löytynyt paikkaa tästä äänestä
 
 
+def _slope(pairs):
+    """Pienimmän neliösumman kulmakerroin nuotin x:stä tavun x:ään."""
+    n = len(pairs)
+    if n < 2:
+        return None
+    sx = sum(a for a, _ in pairs)
+    sy = sum(b for _, b in pairs)
+    sxx = sum(a * a for a, _ in pairs)
+    sxy = sum(a * b for a, b in pairs)
+    div = n * sxx - sx * sx
+    if abs(div) < 1e-6:
+        return None
+    return (n * sxy - sx * sy) / div
+
+
+def _median(values):
+    values = sorted(values)
+    return values[len(values) // 2] if values else None
+
+
+def _anchors(notes, syls):
+    """Parit (nuotin x, tavun x) niistä sanoista jotka jo osuvat."""
+    have = [(n, (n.lyrics[0].findtext("text") or "")) for n in notes
+            if n.lyrics]
+    if not have:
+        return []
+    matcher = difflib.SequenceMatcher(a=[_norm(t) for _, t in have],
+                                      b=[_norm(s.text) for s, _ in syls],
+                                      autojunk=False)
+    return [(have[block.a + k][0].x, syls[block.b + k][1])
+            for block in matcher.get_matching_blocks()
+            for k in range(block.size)]
+
+
+def scale_of(rows, systems):
+    """Mittakaava PDF:n ja MusicXML:n koordinaatistojen välillä.
+
+    Yhden systeemin muutamasta ankkurista sovitettu kulmakerroin heittää
+    sen verran, että ekstrapolointi systeemin toiseen päähän menee tavun
+    verran ohi. Mittakaava on kuitenkin sivuasettelun ominaisuus eikä
+    systeemikohtainen, joten se otetaan mediaanina kaikista systeemeistä
+    joissa on tarpeeksi ankkureita.
+    """
+    slopes = []
+    for notes in systems:
+        best = None
+        for row in rows:
+            syls = syllables_with_x(row)
+            pairs = _anchors(notes, syls)
+            if len(pairs) < MIN_ANCHORS:
+                continue
+            slope = _slope(pairs)
+            if slope and MIN_SCALE <= slope <= MAX_SCALE:
+                if best is None or len(pairs) > best[0]:
+                    best = (len(pairs), slope)
+        if best:
+            slopes.append(best[1])
+    return _median(slopes)
+
+
+def _spacing(notes):
+    """Nuottien tyypillinen väli systeemissä."""
+    gaps = sorted(b.x - a.x for a, b in zip(notes, notes[1:]) if b.x > a.x)
+    return gaps[len(gaps) // 2] if gaps else 0.0
+
+
+def _row_for_system(rows, notes, spacing, scale):
+    """Etsii sen PDF-rivin joka selittää systeemin nuotit parhaiten.
+
+    Mittakaava on tiedossa, joten systeemissä jo olevat sanat riittävät
+    ratkaisemaan siirtymän. Oikea rivi tunnistuu siitä, että sen
+    *kaikki* tavut osuvat systeemin nuoteille: väärän systeemin rivi
+    sovittuu samoihin ankkureihin mutta sen loput tavut osuvat tyhjään.
+    """
+    best = None
+    for row in rows:
+        syls = syllables_with_x(row)
+        if not syls:
+            continue
+        pairs = _anchors(notes, syls)
+        if not pairs:
+            continue
+        offset = _median([x - scale * nx for nx, x in pairs])
+        hits = sum(1 for _, x in syls
+                   if min(abs(scale * n.x + offset - x) for n in notes)
+                   <= spacing * scale / 2)
+        if hits < len(syls) * MIN_HITS:
+            continue
+        if best is None or (hits, len(pairs)) > (best[0], best[1]):
+            best = (hits, len(pairs), row, syls, offset)
+    return best[2:] if best else None
+
+
+def fill_missing(part, rows, known=frozenset()):
+    """Lisää PDF:n tavut nuoteille joilla ei ole sanaa lainkaan.
+
+    Konelukeminen jätti paikoin kokonaisia jaksoja lukematta. Teksti on
+    PDF:ssä, ja x-sijainti kertoo kummankin puolen: tavu menee sille
+    nuotille jonka yllä se on. Melisma ei häiritse, koska nuotti jonka
+    yllä ei ole tavua jää ilman.
+
+    Tavua ei siirretä: se menee sille nuotille joka on sitä lähinnä, tai
+    ei mihinkään. Jos se nuotti kantaa jo sanaa jonka PDF tuntee, sana on
+    oikea ja tavu jätetään. Jos se kantaa roskaa, roska korvataan.
+    Siirtäminen viereiselle vapaalle nuotille tuottaisi kaksoiskappaleita
+    kuten "ti-bi bi red-de-tur".
+    """
+    grouped = {}
+    for note in read_notes(part):
+        grouped.setdefault(note.system, []).append(note)
+    systems = [notes for _, notes in sorted(grouped.items())]
+
+    scale = scale_of(rows, systems)
+    if scale is None:
+        return [], []
+
+    added, skipped = [], []
+    for notes in systems:
+        if not any(not n.lyrics for n in notes):
+            continue
+        spacing = _spacing(notes)
+        if spacing <= 0:
+            continue
+        found = _row_for_system(rows, notes, spacing, scale)
+        if found is None:
+            continue
+        _, syls, offset = found
+
+        plan = []
+        for syllable, x in syls:
+            want = (x - offset) / scale
+            near = min(notes, key=lambda n: abs(n.x - want))
+            plan.append((syllable, near if abs(near.x - want) <= spacing / 2
+                         else None))
+
+        # Sijoitusten on oltava järjestyksessä eikä sama nuotti saa saada
+        # kahta tavua. Muuten sovitus ei ole yksikäsitteinen — niin käy
+        # kun rivillä on enemmän tavuja kuin systeemissä nuotteja — ja
+        # täyttäminen tuottaisi kaksoiskappaleita kuten "e-le-le-son".
+        landed = [n for _, n in plan if n is not None]
+        if (len(landed) != len({id(n.note) for n in landed})
+                or any(a.x >= b.x for a, b in zip(landed, landed[1:]))):
+            skipped.append(notes)
+            continue
+
+        for syllable, near in plan:
+            if near is None:
+                continue
+            if near.lyrics:
+                have = near.lyrics[0].findtext("text") or ""
+                if _norm(have) in known or _norm(have) == _norm(syllable.text):
+                    continue
+                _set_lyric(near.lyrics[0], syllable)
+                added.append(Change(near.measure, have, syllable.text))
+            else:
+                lyric = ET.SubElement(near.note, "lyric")
+                lyric.set("number", "1")
+                _set_lyric(lyric, syllable)
+                added.append(Change(near.measure, "", syllable.text))
+    return added, skipped
+
+
 def _uncertain(change, spelled):
     """Onko muutos sellainen joka kannattaa tarkistaa käsin.
 
@@ -694,7 +914,7 @@ def correct(source, pages=None):
     """Korjaa yhden osan kuorosanat ja palauttaa (puu, raportti)."""
     root = load(source.mxl)
     rows = extract_rows(source.pdf, source.font, pages)
-    spelled = spellings(rows)
+    known, spelled = vocabulary(rows), spellings(rows)
 
     report = []
     for part_id, name in source.parts:
@@ -705,6 +925,8 @@ def correct(source, pages=None):
                                            spelled)
         done = {id(s.note) for s, ok in zip(slots, got.handled) if ok}
         changes += remove_extras(extras, done)
+        filled, ambiguous = fill_missing(part, rows, known)
+        changes += filled
         changes.sort(key=lambda c: c.measure)
         proposals.sort(key=lambda c: c.measure)
         report.append(PartReport(part_id, name, len(slots),

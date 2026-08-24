@@ -7,7 +7,7 @@ import zipfile
 from korjaa_sanat import (Change, Row, Syllable, align, apply_targets,
                           extract_rows, find_part, load, match_part,
                           read_extras, read_slots, remove_extras,
-                          syllables_with_x, tokenise)
+                          read_notes, syllables_with_x, tokenise)
 from korjaa_sanat import SOURCES, correct, save, vocabulary
 
 
@@ -147,6 +147,23 @@ class TestReadSlots(unittest.TestCase):
                          ["SOITO", "VOCE"])
 
 
+class TestLayout(unittest.TestCase):
+    def test_notes_carry_their_system_and_x_position(self):
+        # Audiveris säilytti nuottien default-x:n, tahtien leveydet ja
+        # systeemien marginaalit, joten nuotin paikka sivulla on
+        # laskettavissa. Laskenta alkaa alusta joka systeemissä.
+        part = find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16")
+        notes = read_notes(part)
+
+        self.assertEqual([round(n.x) for n in notes if n.measure == 7],
+                         [887, 939, 991])
+        # Sivun 3 systeemi 1 on tahdit 50-58, ja 59 aloittaa uuden.
+        yksi = {n.system for n in notes if 50 <= n.measure <= 58}
+        self.assertEqual(len(yksi), 1)
+        self.assertNotIn(next(iter(yksi)),
+                         {n.system for n in notes if n.measure == 59})
+
+
 class TestApplyTargets(unittest.TestCase):
     def test_rewritten_slot_gets_both_text_and_syllabic(self):
         part = find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16")
@@ -204,6 +221,22 @@ class TestCorrect(unittest.TestCase):
         _, report = correct(source)
         for part in report:
             self.assertLess(longest_gap(part), 30, part.name)
+
+    def test_missing_lyrics_are_inserted_from_the_pdf(self):
+        # Basson tahdit 50-56: konelukeminen ei lukenut sanoja lainkaan,
+        # 15 nuottia ilman sanaa. PDF:ssä ne ovat "ad te om-nis ca-ro
+        # ve-ni-et." Tavun paikka ratkeaa x-sijainnista: se menee sille
+        # nuotille jonka yllä se on, joten melisma ei ole ongelma.
+        source = next(s for s in SOURCES if s.mxl.startswith("01"))
+        root, _ = correct(source)
+        bass = find_part(root, "P16")
+
+        words = []
+        for measure in bass.iter("measure"):
+            if 50 <= int(measure.get("number")) <= 56:
+                words += [ly.findtext("text") for ly in measure.iter("lyric")]
+        self.assertEqual(words, ["ad", "te", "om", "nis", "ca", "ro",
+                                 "ve", "ni", "et."])
 
     def test_capitalised_syllable_is_judged_case_sensitively(self):
         # Basson tahti 35: konelukeminen luki "Je-ru-sa-lem" muodossa
