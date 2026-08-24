@@ -225,9 +225,10 @@ rests on, and it holds for movement 14 too: Audiveris could not read its
 Type1 fonts but `mutool` can.
 
 Results: coverage 83–91 % per voice in movement 01, 25–81 % in movement 14.
-86 changes written in 01 and 28 in 14. **The chorus bass of movement 01 — the
-line the user reads — is 91 % with zero uncertain changes**, and its
-`Is-ru-sa-lem` and `Te dc-cet` are fixed.
+156 changes written in total, of which 183 are corrections to existing
+lyrics and the rest are syllables added to notes that carried none.
+**The chorus bass of movement 01 — the line the user reads — is 91 % with
+zero uncertain changes**, and reads correct Latin through bar 90.
 
 ### Details that took measurement to get right
 
@@ -259,6 +260,37 @@ line the user reads — is 91 % with zero uncertain changes**, and its
   five were wrong — e.g. `Chri` -> `e` would have made `Chri-ste` into
   `e-ste`. So they are listed and left alone.
 
+### Adding lyrics the OMR never read, by x position
+
+Audiveris kept `default-x` on every note, `width` on every measure, and the
+system margins in `<print>`, so a note's position along its system is
+computable. The PDF gives each syllable's position. The two coordinate
+systems are linearly related, so a syllable can be attached to the note it
+sits above — and **melismas need no special handling**: a note with no
+syllable above it simply gets none.
+
+- **The scale is global, the offset is per system.** Fitting both from one
+  system's few anchors gives a slope off by ~0.008, which over a system's
+  width is a whole note's spacing — that is exactly how the first syllable
+  `ad` of bars 50–56 got dropped. The scale (0.306 for movement 01) is a
+  property of the page setup, so it is taken as the median across systems
+  with at least six anchors; then one anchor fixes the offset.
+- **A syllable is never displaced.** It goes to the note nearest its
+  predicted position or nowhere. Letting it fall to a neighbouring free note
+  produced duplicates: `ti-bi bi red-de-tur`, `o-ra-ra{1-o-nem`.
+- **If the nearest note already carries a word the PDF knows, leave it**; if
+  it carries something the PDF does not know, that is OMR junk and gets
+  replaced.
+- **The whole system is skipped unless the assignment is monotone and
+  injective.** When a row has more syllables than the system has notes — the
+  OMR dropped notes, not just lyrics — filling produced `e-le-le-son` and
+  `Chri-i-e-i-ste`. Ambiguity is a reason to do nothing.
+- **The right row for a system is found by projection, not by index.** Every
+  candidate row is fitted against the system's existing lyrics; the correct
+  one is the one whose *remaining* syllables also land on notes. A row from
+  the next system fits the same anchors but its other syllables land in
+  empty space.
+
 ### Approaches tried and rejected, with the measurement
 
 | Attempt | Result |
@@ -278,12 +310,9 @@ Two things, neither fixable by changing text.
 one-to-one alignment exists. The report lists these as
 `kohdistamatta tahdit N-M:`.
 
-**Notes carrying no lyric at all.** 44 notes in the chorus bass of movement
-01, the longest run bars 49–55 (15 notes, `ad te om-nis ca-ro ve-ni-et` in
-the PDF). The text is readable and even the right row is identifiable — row
-27 of the extraction ends with `Re-qui-em,`, the anchor that did match at bar
-57. What is *not* determinable by counting is **which note each syllable goes
-on**: a melisma stretches one syllable over several notes, and that run has 9
-syllables for 15 notes. Reliable placement would need the PDF's notehead
-x-positions matched against the lyric x-positions — doable, but font-specific
-work for both Mozart9 and MusiXTeX.
+**Notes carrying no lyric at all.** Down from 44 to 24 in the chorus bass of
+movement 01; some of those 24 are melismas that correctly have none. What
+remains is the systems where the assignment was ambiguous — the row has more
+syllables than the system has notes, meaning the OMR dropped notes as well as
+lyrics. Those need a person in MuseScore, and they also need the *notes*
+checked, so they are proofreading work either way.

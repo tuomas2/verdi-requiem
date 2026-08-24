@@ -201,26 +201,36 @@ ajettavissa uudelleen jos konelukeminen joskus tehdään uusiksi.
 
 ### Mitä se korjasi
 
-| Osasto | Tavuja | Kohdistettu | Muutoksia | Ehdotuksia |
-|---|---:|---:|---:|---:|
-| I Kuoro S | 141 | 84 % | 25 | 1 |
-| I Kuoro A | 115 | 83 % | 23 | 3 |
-| I Kuoro T | 128 | 83 % | 24 | 1 |
-| **I Kuoro B** | **131** | **91 %** | **14** | **0** |
-| V Kuoro S | 37 | 81 % | 11 | 2 |
-| V Kuoro A | 28 | 25 % | 3 | 1 |
-| V Kuoro T | 79 | 65 % | 10 | 5 |
-| V Kuoro B | 68 | 37 % | 4 | 0 |
+| Osasto | Tavuja | Kohdistettu | Korjattu | Lisätty | Ehdotuksia | Yhä ilman sanaa |
+|---|---:|---:|---:|---:|---:|---:|
+| I Kuoro S | 141 | 84 % | 26 | 16 | 1 | 56 |
+| I Kuoro A | 115 | 83 % | 23 | 24 | 3 | 47 |
+| I Kuoro T | 128 | 83 % | 26 | 16 | 1 | 46 |
+| **I Kuoro B** | **131** | **91 %** | **17** | **21** | **0** | **24** |
+| V Kuoro S | 37 | 81 % | 11 | 14 | 2 | 52 |
+| V Kuoro A | 28 | 25 % | 9 | 25 | 1 | 48 |
+| V Kuoro T | 79 | 65 % | 15 | 33 | 5 | 70 |
+| V Kuoro B | 68 | 37 % | 15 | 34 | 0 | 69 |
 
-Kuorobasson rivi osasta I luki korjauksen jälkeen näin — vertaa PDF:ään:
+"Korjattu" on olemassa olevan sanan muuttaminen, "lisätty" sanan
+antaminen nuotille jolla ei ollut sanaa lainkaan. Viimeinen sarake on
+nuottien määrä joilla ei vieläkään ole sanaa — osa niistä on melismoja
+joilla ei kuulukaan olla.
+
+Kuorobasson rivi osasta I lukee korjauksen jälkeen tahtiin 90 asti
+virheetöntä latinaa:
 
     Re-qui-em, re-qui-em ae-ter-nam, et lux per-pe-tu-a et lux
     per-pe-tu-a lu-ce-at e-is. Te de-cet hym-nus, De-us in Si-on et
-    ti-bi red-de-tur V0-tum in Je-ru-sa-lem; ex-au-di ra-ti-nem me-am,
-    ra{1-nem me-am ...
+    ti-bi red-de-tur vo-tum in Je-ru-sa-lem; ex-au-di o-ra-ti-o-nem
+    me-am, o-ra-ti-o-nem me-am, ad te om-nis ca-ro ve-ni-et.
+    Re-qui-em, re-qui-em ae-ter-nam, et lux per-pe-tu-a et lux
+    per-pe-tu-a lu-ce-at e-is.
 
-`Is-ru-sa-lem` → `Je-ru-sa-lem` ja `Te dc-cet` → `Te de-cet` korjautuivat.
-`V0-tum` ja `ra-ti-nem` eivät, ja syy on alla.
+Konelukemisen jäljiltä siinä luki `Is-ru-sa-lem`, `Te dc-cet`,
+`V0-tum`, `ra-ti-nem` — ja tahdit 50–56 olivat kokonaan ilman sanoja.
+Kyriessä (tahdista 91) on vielä puutteita, useimmiten puuttuva `i`
+sanassa `e-le-i-son`.
 
 ### Ehdotukset: 13 kohtaa joita ei sovellettu
 
@@ -243,12 +253,13 @@ sijaan, esimerkiksi `ra-ti-nem` kun oikein on `o-ra-ti-o-nem`. Silloin
 paikkoja on tavuja vähemmän eikä kohdistus voi olla yksi yhteen. Raportti
 listaa nämä kohdat rivillä `kohdistamatta tahdit N-M:`.
 
-**Nuotit joilla ei ole sanaa lainkaan.** Näitä on kuorobassossa 44 nuottia,
-pisin jakso tahdit 49–55 (15 nuottia, PDF:n mukaan `ad te om-nis ca-ro
-ve-ni-et`). Työkalu ei lisää sanaa nuotille jolla sanaa ei ole. Teksti on
-PDF:stä luettavissa, mutta se **mille nuotille kukin tavu kuuluu** ei ratkea
-laskemalla: melismassa yksi tavu venyy usealle nuotille, ja tuossa jaksossa
-on 9 tavua 15 nuotille. Nämä on lisättävä käsin MuseScoressa.
+**Nuotit joilla ei ole sanaa lainkaan.** Nämä lisätään nyt PDF:n
+x-sijainnin perusteella, ks. alla. Kuorobassossa niitä oli 44 ja on enää
+24, joista osa on melismoja joilla ei kuulukaan olla sanaa.
+
+Loput jäävät niihin systeemeihin joissa sovitus ei ole yksikäsitteinen —
+rivillä on enemmän tavuja kuin systeemissä nuotteja, mikä tarkoittaa että
+konelukeminen on pudottanut myös nuotteja. Ne on lisättävä käsin.
 
 ### Miten se toimii
 
@@ -269,6 +280,15 @@ on 9 tavua 15 nuotille. Nämä on lisättävä käsin MuseScoressa.
    järjestyksessä, kohdat päällekkäin menemättä. Väärä kohta häviää
    oikealle, koska oikeat kohdat tukevat toisiaan.
 6. Poisto tehdään vain osumien välissä ja vain tavulle jota PDF ei tunne.
+7. Nuoteille joilla ei ole sanaa lainkaan sana haetaan **x-sijainnin**
+   perusteella. Audiveris säilytti nuottien `default-x`:n, tahtien
+   leveydet ja systeemien marginaalit, joten nuotin paikka rivillä on
+   laskettavissa, ja PDF:stä saadaan tavun paikka. Koordinaatistot ovat
+   lineaarisessa suhteessa; mittakaava (0,306) otetaan mediaanina
+   kaikista systeemeistä ja siirtymä systeemikohtaisesti niistä
+   tavuista jotka jo osuivat. Sitten tavu menee sille nuotille jonka
+   yllä se on. **Melisma ratkeaa itsestään**: nuotti jonka yllä ei ole
+   tavua jää ilman sanaa.
 
 ### Miksi ratkaisu on tällainen
 
@@ -284,3 +304,6 @@ Kolme muuta yritystä hylättiin mittausten perusteella:
 | Kiinteä osuusraja 85 % | Hylkäsi lyhyet rivit: viiden tavun rivissä yksikin kirjainvirhe pudottaa osuuden 80 prosenttiin |
 | Ikkuna 4 paikkaa tavumäärää pidempi | Rivin loppuun osuva korvaus nieli seuraavan rivin paikat; tahdin 20 oikea `pe` poistui |
 | Lyhyiden aukkojen täyttö osumien välistä | Ei laukea kertaakaan: aukot ovat aina eri rivien välissä, eivät saman rivin sisällä |
+| Mittakaava sovitettuna systeemin omista ankkureista | Kolmesta lähekkäisestä pisteestä ekstrapolointi systeemin toiseen päähän heittää tavun verran; `ad` jäi pois |
+| Tavun siirto viereiselle vapaalle nuotille kun oma on varattu | Tuotti kaksoiskappaleita: `ti-bi bi red-de-tur`, `o-ra-ra{1-o-nem` |
+| Täyttö ilman järjestystarkistusta | Kyriestä tuli `e-le-le-son` ja `Chri-i-e-i-ste` |
