@@ -14,6 +14,22 @@ still play, and carry a PDF of their line on a Boox e-reader. That drives every
 design decision: measure numbers must match the printed rehearsal score, and
 the reading part must be dense.
 
+## Where things stand
+
+Done and verified: the merge, the eight reading parts, the chorus **lyrics**
+of the two OMR movements, and a practice `.mscz` per singer.
+
+Open, roughly in the order a singer would feel them:
+
+| Open | Where to read up |
+|---|---|
+| **Notes** of movements 01 and 14 are still unproofread | *OMR recipe*; the lyrics pass did not touch notes |
+| Movement 01's Kyrie (from bar 91) still drops syllables | *What is left* — the OMR lost notes there, so it is note work, not text work |
+| Movement 14 is weak throughout — 25–81 % matched, 69 bass notes still wordless | same |
+| 13 lyric changes reported but deliberately not applied | `python3 korjaa_sanat.py --kuiva` lists them |
+| Movement I has no piano | *Movement I has no piano* |
+| Four assumptions made without the rehearsal score | *Open assumptions* |
+
 ## Layout of the directory
 
 | Pattern | What it is |

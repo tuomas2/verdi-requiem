@@ -56,6 +56,20 @@ siitä. MusicXML ei säilytä noita asetuksia.
 
 ## Uudelleenluonti
 
+Jos lähdeaineisto muuttuu, aja koko ketju **tässä järjestyksessä** —
+`yhdista.py` lukee `korjaa_sanat.py`:n tuottamia tiedostoja, ja
+`harjoitus.py` lukee yhdistettyä partituuria:
+
+    python3 korjaa_sanat.py                       # 1. sanat PDF:stä
+    python3 yhdista.py Verdi-Requiem-koko.mxl     # 2. partituuri
+    python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"   # 3. stemmat
+    "/Applications/MuseScore 4.app/Contents/MacOS/mscore" \
+        -S tiivistys.mss -o stemma-basso-1.pdf stemma-basso-1.mxl
+    python3 harjoitus.py --stemma "Basso I"       # 4. harjoittelutiedosto
+
+Vaiheet 3 ja 4 toistetaan kullekin tarvittavalle äänelle. Yksittäiset
+komennot ovat alla.
+
     # koko partituuri, 15 viivastoa
     python3 yhdista.py Verdi-Requiem-koko.mxl
 
