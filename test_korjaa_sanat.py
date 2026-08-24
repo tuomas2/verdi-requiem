@@ -238,6 +238,20 @@ class TestCorrect(unittest.TestCase):
         self.assertEqual(words, ["ad", "te", "om", "nis", "ca", "ro",
                                  "ve", "ni", "et."])
 
+    def test_a_syllable_already_on_a_neighbour_is_not_added_again(self):
+        # Osan V bassoon tuli "qui tol-tol-lis": lisättävän tavun ennustettu
+        # nuotti oli tyhjä, mutta viereisellä nuotilla oli jo sama tavu.
+        # Tavu on siis jo paikallaan eikä sitä lisätä toista kertaa.
+        source = next(s for s in SOURCES if s.mxl.startswith("14"))
+        root, _ = correct(source)
+        part = find_part(root, "P4")
+
+        texts = [ly.findtext("text")
+                 for m in part.iter("measure")
+                 if 30 <= int(m.get("number")) <= 32
+                 for ly in m.iter("lyric")]
+        self.assertEqual(texts.count("tol"), 1, texts)
+
     def test_capitalised_syllable_is_judged_case_sensitively(self):
         # Basson tahti 35: konelukeminen luki "Je-ru-sa-lem" muodossa
         # "Is-ru-sa-lem". Pienaakkosin "is" esiintyy PDF:ssä joka toisessa

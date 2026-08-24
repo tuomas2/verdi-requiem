@@ -772,6 +772,24 @@ def scale_of(rows, systems):
     return _median(slopes)
 
 
+def _beside(notes, index, syllable):
+    """Onko sama tavu jo naapurinuotilla.
+
+    Ennustettu nuotti voi olla tyhjä vaikka tavu on jo paikallaan yhtä
+    nuottia sivussa. Ilman tätä syntyi "qui tol-tol-lis": tavu lisättiin
+    tyhjälle nuotille jo olevan viereen.
+
+    Naapuria katsotaan yli systeemirajan, koska rivi voi alkaa edellisen
+    systeemin viimeisellä tavulla.
+    """
+    for k in (index - 1, index + 1):
+        if 0 <= k < len(notes) and notes[k].lyrics:
+            text = notes[k].lyrics[0].findtext("text") or ""
+            if _norm(text) == _norm(syllable.text):
+                return True
+    return False
+
+
 def _spacing(notes):
     """Nuottien tyypillinen väli systeemissä."""
     gaps = sorted(b.x - a.x for a, b in zip(notes, notes[1:]) if b.x > a.x)
@@ -819,8 +837,10 @@ def fill_missing(part, rows, known=frozenset()):
     Siirtäminen viereiselle vapaalle nuotille tuottaisi kaksoiskappaleita
     kuten "ti-bi bi red-de-tur".
     """
+    every = read_notes(part)
+    place = {id(n.note): i for i, n in enumerate(every)}
     grouped = {}
-    for note in read_notes(part):
+    for note in every:
         grouped.setdefault(note.system, []).append(note)
     systems = [notes for _, notes in sorted(grouped.items())]
 
@@ -844,8 +864,11 @@ def fill_missing(part, rows, known=frozenset()):
         for syllable, x in syls:
             want = (x - offset) / scale
             near = min(notes, key=lambda n: abs(n.x - want))
-            plan.append((syllable, near if abs(near.x - want) <= spacing / 2
-                         else None))
+            if abs(near.x - want) > spacing / 2 or _beside(every, place[id(near.note)],
+                                                           syllable):
+                plan.append((syllable, None))
+            else:
+                plan.append((syllable, near))
 
         # Sijoitusten on oltava järjestyksessä eikä sama nuotti saa saada
         # kahta tavua. Muuten sovitus ei ole yksikäsitteinen — niin käy
