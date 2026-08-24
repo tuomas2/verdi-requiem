@@ -459,13 +459,18 @@ class Change:
     hyphen: tuple = ()
 
 
-def apply_targets(slots, target, handled):
-    """Kirjoittaa tavoitetilat XML:ään ja palauttaa tehdyt muutokset.
+def apply_targets(slots, target, handled, spelled=frozenset()):
+    """Kirjoittaa tavoitetilat XML:ään.
+
+    Palauttaa (muutokset, ehdotukset). Ehdotuksia ei kirjoiteta: ne ovat
+    muutoksia joissa vanhakin teksti on PDF:n tuntema sana, ja sellainen
+    voi olla kohdistuksen liukumista. Käsin tarkistettuna kolme viidestä
+    oli väärin, joten niitä ei sovelleta.
 
     Vain kohdistetut paikat käsitellään. Muualla tyhjä tavoitetila ei ole
     poisto vaan kohdistamaton paikka, ja se jätetään koskematta.
     """
-    changes, touched = [], []
+    changes, proposals, touched = [], [], []
     for i, ok in enumerate(handled):
         if not ok:
             continue
@@ -476,13 +481,17 @@ def apply_targets(slots, target, handled):
             touched.append(slot.note)
             changes.append(Change(slot.measure, have.text, None))
         elif want != have:
-            _set_lyric(slot.element, want)
             hyphen = ((have.syllabic, want.syllabic)
                       if have.syllabic != want.syllabic else ())
-            changes.append(Change(slot.measure, have.text, want.text, hyphen))
+            change = Change(slot.measure, have.text, want.text, hyphen)
+            if _uncertain(change, spelled):
+                proposals.append(change)
+                continue
+            _set_lyric(slot.element, want)
+            changes.append(change)
     for note in touched:
         _renumber_verses(note)
-    return changes
+    return changes, proposals
 
 
 def vocabulary(rows):
@@ -590,8 +599,8 @@ class PartReport:
     name: str
     slots: int
     handled: int
-    changes: list
-    flagged: list  # muutokset joissa vanha teksti oli PDF:n tuntema sana
+    changes: list    # sovelletut muutokset
+    proposals: list  # muutokset joita ei sovellettu, tarkistettavaksi
     runs: list     # kohdistamattomat jaksot, kukin lista paikkoja
     used: list     # rivit jotka tunnistettiin tämän äänen riveiksi
     skipped: list  # rivit joille ei löytynyt paikkaa tästä äänestä
@@ -644,13 +653,14 @@ def correct(source, pages=None):
         part = find_part(root, part_id)
         slots, extras = read_slots(part), read_extras(part)
         got = match_part(rows, [s.syllable for s in slots])
-        changes = apply_targets(slots, got.target, got.handled)
+        changes, proposals = apply_targets(slots, got.target, got.handled,
+                                           spelled)
         done = {id(s.note) for s, ok in zip(slots, got.handled) if ok}
         changes += remove_extras(extras, done)
         changes.sort(key=lambda c: c.measure)
+        proposals.sort(key=lambda c: c.measure)
         report.append(PartReport(part_id, name, len(slots),
-                                 sum(got.handled), changes,
-                                 [c for c in changes if _uncertain(c, spelled)],
+                                 sum(got.handled), changes, proposals,
                                  _runs(slots, got.handled),
                                  got.used, got.skipped))
     return root, report
@@ -659,7 +669,7 @@ def correct(source, pages=None):
 def format_report(source, report):
     """Raportti riveinä. Jokainen muutos näkyy, mikään ei muutu hiljaa."""
     out = ["%s  <-  %s" % (source.mxl, source.pdf)]
-    changes = flagged = 0
+    changes = proposals = 0
 
     for part in report:
         out.append("")
@@ -667,27 +677,30 @@ def format_report(source, report):
                    % (part.name, part.part, part.slots, part.handled,
                       100.0 * part.handled / max(part.slots, 1)))
         for change in part.changes:
-            mark = "  !" if change in part.flagged else "   "
             if change.after is None:
                 what = "-> poistettu"
             elif change.before == change.after:
                 what = "   tavutus %s -> %s" % change.hyphen
             else:
                 what = "-> %r" % change.after
-            note = ("   (PDF tuntee sanan %r)" % change.before
-                    if change in part.flagged else "")
-            out.append("%s tahti %3d  %-14r %s%s"
-                       % (mark, change.measure, change.before, what, note))
-        changes += len(part.changes)
-        flagged += len(part.flagged)
+            out.append("    tahti %3d  %-14r %s"
+                       % (change.measure, change.before, what))
 
+        if part.proposals:
+            out.append("    ei sovellettu, tarkista käsin:")
+            for change in part.proposals:
+                out.append("      tahti %3d  %-14r -> %r"
+                           % (change.measure, change.before, change.after))
         for run in part.runs:
-            out.append("     kohdistamatta tahdit %d-%d: %s"
+            out.append("    kohdistamatta tahdit %d-%d: %s"
                        % (run[0].measure, run[-1].measure,
                           " ".join(s.syllable.text for s in run)))
+        changes += len(part.changes)
+        proposals += len(part.proposals)
 
     out.append("")
-    out.append("  %d muutosta, joista %d tarkistettavaa" % (changes, flagged))
+    out.append("  %d muutosta kirjoitettu, %d ehdotusta tarkistettavaksi"
+               % (changes, proposals))
     return out
 
 

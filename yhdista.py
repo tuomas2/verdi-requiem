@@ -37,22 +37,22 @@ TARGETS = [
 # ---------------------------------------------------------------- osat
 # (tiedosto, numero partituurissa, nimi)
 MOVEMENTS = [
-    ("01-Verdi_Requiem-OMR.mxl",          "I",     "Requiem & Kyrie"),
-    ("02-Verdi-Dies_irae.mxl",            "II·1",  "Dies irae"),
-    ("03-Verdi-Tuba_mirum.mxl",           "II·2",  "Tuba mirum"),
-    ("04-Verdi-Mors_stupebit.mxl",        "II·3",  "Mors stupebit"),
-    ("05-Verdi-Liber_scriptus.mxl",       "II·4",  "Liber scriptus"),
-    ("06-Verdi-Quid_sum_miser.mxl",       "II·5",  "Quid sum miser"),
-    ("07-Verdi-Rex.mxl",                  "II·6",  "Rex tremendae"),
-    ("08-Verdi_Recordare.mxl",            "II·7",  "Recordare"),
-    ("09-Verdi_Ingemisco.mxl",            "II·8",  "Ingemisco"),
-    ("10-Verdi_Confutatis.mxl",           "II·9",  "Confutatis"),
-    ("11-Verdi_Lacrymosa.mxl",            "II·10", "Lacrymosa"),
-    ("12-Verdi_Offertorio.mxl",           "III",   "Offertorio"),
-    ("13-Verdi-Sanctus.mxl",              "IV",    "Sanctus"),
-    ("14-Verdi_requiem_agnus-dei-OMR.mxl", "V",    "Agnus Dei"),
-    ("15-Verdi_Lux_aeterna.mxl",          "VI",    "Lux aeterna"),
-    ("16-Libera_Me.mxl",                  "VII",   "Libera me"),
+    ("01-Verdi_Requiem-OMR-korjattu.mxl",           "I",     "Requiem & Kyrie"),
+    ("02-Verdi-Dies_irae.mxl",                      "II·1",  "Dies irae"),
+    ("03-Verdi-Tuba_mirum.mxl",                     "II·2",  "Tuba mirum"),
+    ("04-Verdi-Mors_stupebit.mxl",                  "II·3",  "Mors stupebit"),
+    ("05-Verdi-Liber_scriptus.mxl",                 "II·4",  "Liber scriptus"),
+    ("06-Verdi-Quid_sum_miser.mxl",                 "II·5",  "Quid sum miser"),
+    ("07-Verdi-Rex.mxl",                            "II·6",  "Rex tremendae"),
+    ("08-Verdi_Recordare.mxl",                      "II·7",  "Recordare"),
+    ("09-Verdi_Ingemisco.mxl",                      "II·8",  "Ingemisco"),
+    ("10-Verdi_Confutatis.mxl",                     "II·9",  "Confutatis"),
+    ("11-Verdi_Lacrymosa.mxl",                      "II·10", "Lacrymosa"),
+    ("12-Verdi_Offertorio.mxl",                     "III",   "Offertorio"),
+    ("13-Verdi-Sanctus.mxl",                        "IV",    "Sanctus"),
+    ("14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl", "V",     "Agnus Dei"),
+    ("15-Verdi_Lux_aeterna.mxl",                    "VI",    "Lux aeterna"),
+    ("16-Libera_Me.mxl",                            "VII",   "Libera me"),
 ]
 
 # ---------------------------------------------------------------- kartoitus
@@ -62,7 +62,7 @@ MOVEMENTS = [
 #   ("P5", 14, None, 1)               kuten yllä, mutta kohdeviivastolle 1
 # Useampi viipale samassa listassa yhdistyy samalle riville.
 MAPPING = {
-    "01-Verdi_Requiem-OMR.mxl": {
+    "01-Verdi_Requiem-OMR-korjattu.mxl": {
         # Audiveris pilkkoi solistiviivastot useaan osastoon; ne yhdistetään.
         "Solisti S": ["P7", "P3", "P1"],
         "Solisti M-S": ["P8", "P4", "P2"],
@@ -126,7 +126,7 @@ MAPPING = {
         "Kuoro S II": ["P5"], "Kuoro A II": ["P6"], "Kuoro T II": ["P7"], "Kuoro B II": ["P8"],
         "Piano": ["P9"],
     },
-    "14-Verdi_requiem_agnus-dei-OMR.mxl": {
+    "14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl": {
         # P5 ja P6 ovat tahdeissa 1-13 sooloäänet (a cappella -alku) ja
         # tahdista 14 alkaen pianon kaksi viivastoa.
         "Solisti S": [("P5", 1, 13)],
@@ -153,7 +153,9 @@ TITLE_PARTS = ["Solisti S", "Kuoro B"]
 # Laulajan stemmat. Kaksoiskuoro esiintyy vain Sanctuksessa, joten kuoro II:n
 # laulaja lukee tavallista riviä kaikissa muissa osissa.
 # Konelukemisella tuotetut osat: niiden tahtien pituudet normalisoidaan.
-OMR_SOURCES = {"01-Verdi_Requiem-OMR.mxl", "14-Verdi_requiem_agnus-dei-OMR.mxl"}
+# Sanat on korjattu lähde-PDF:ää vasten, ks. korjaa_sanat.py.
+OMR_SOURCES = {"01-Verdi_Requiem-OMR-korjattu.mxl",
+               "14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl"}
 
 SANCTUS = "13-Verdi-Sanctus.mxl"
 SINGER_PARTS = {

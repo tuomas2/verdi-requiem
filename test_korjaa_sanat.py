@@ -143,7 +143,7 @@ class TestApplyTargets(unittest.TestCase):
                  if s.measure == 19 and s.syllable.text == "er")
         target[i] = Syllable("per", "begin")
 
-        changes = apply_targets(slots, target, [True] * len(slots))
+        changes, _ = apply_targets(slots, target, [True] * len(slots))
 
         self.assertEqual(changes, [Change(19, "er", "per")])
         self.assertEqual(slots[i].element.findtext("text"), "per")
@@ -154,8 +154,8 @@ class TestApplyTargets(unittest.TestCase):
         slots = read_slots(part)
         total = len(list(part.iter("lyric")))
 
-        changes = apply_targets(slots, [None] * len(slots),
-                                [False] * len(slots))
+        changes, _ = apply_targets(slots, [None] * len(slots),
+                                   [False] * len(slots))
 
         self.assertEqual(changes, [])
         self.assertEqual(len(list(part.iter("lyric"))), total)
@@ -203,7 +203,24 @@ class TestCorrect(unittest.TestCase):
         fix = next(c for c in bass.changes
                    if c.measure == 35 and c.before == "Is")
         self.assertEqual(fix.after, "Je")
-        self.assertNotIn(fix, bass.flagged)
+        self.assertNotIn(fix, bass.proposals)
+
+    def test_uncertain_change_is_proposed_but_not_applied(self):
+        # Sopraanon tahti 134: 'Chri' -> 'e' tekisi sanasta "Chri-ste"
+        # muodon "e-ste". Kun sekä vanha että uusi ovat PDF:n tuntemia
+        # sanoja, kohdistus voi olla liukunut — käsin tarkistettuna kolme
+        # viidestä tällaisesta oli väärin. Niitä ei sovelleta vaan
+        # ehdotetaan.
+        source = next(s for s in SOURCES if s.mxl.startswith("01"))
+        root, report = correct(source)
+        soprano = next(pr for pr in report if pr.part == "P13")
+
+        self.assertIn(134, [c.measure for c in soprano.proposals])
+        self.assertNotIn(134, [c.measure for c in soprano.changes])
+        m134 = next(m for m in find_part(root, "P13").iter("measure")
+                    if m.get("number") == "134")
+        self.assertEqual([ly.findtext("text") for ly in m134.iter("lyric")],
+                         ["Chri"])
 
     def test_punctuation_only_change_is_not_flagged(self):
         # Tarkistettavaksi merkitään ne joissa sana vaihtuu toiseksi sanaksi.
@@ -215,7 +232,7 @@ class TestCorrect(unittest.TestCase):
         siivous = next(c for c in soprano.changes
                        if c.measure == 61 and c.before == "nam ,")
         self.assertEqual(siivous.after, "nam,")
-        self.assertNotIn(siivous, soprano.flagged)
+        self.assertNotIn(siivous, soprano.proposals)
 
     def test_a_syllable_the_pdf_knows_is_never_deleted(self):
         # Poisto on oikea vain roskalle: esitysmerkinnälle, dynamiikalle,
