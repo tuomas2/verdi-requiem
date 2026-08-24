@@ -1,0 +1,5 @@
+# Pakatut MusicXML- ja MuseScore-tiedostot ovat binäärejä
+*.mxl   binary
+*.mscz  binary
+*.omr   binary
+*.pdf   binary
