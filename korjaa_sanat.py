@@ -8,6 +8,7 @@ kuvaa, joten oikea sanoitus saadaan poimittua suoraan lähteestä.
 import difflib
 import re
 import subprocess
+import zipfile
 import xml.etree.ElementTree as ET
 from collections import Counter
 from dataclasses import dataclass
@@ -166,15 +167,50 @@ def align(syls, slots):
     return target, consumed
 
 
-# Ikkuna otetaan tavumäärää pidempänä, jotta rivin loppuun osuva
-# ylimääräinen paikka mahtuu mukaan poistettavaksi.
-SLACK = 4
+@dataclass
+class Match:
+    """Yhden äänen kohdistuksen tulos."""
+
+    target: list   # tavoitetila per paikka, pituus = paikkojen määrä
+    reached: int   # montako paikkaa alusta tuli kohdistetuksi
+    used: list     # rivit jotka tunnistettiin tämän äänen riveiksi
+    skipped: list  # rivit jotka ohitettiin toisen äänen riveinä
 
 
-def _ratio(syls, slots):
+# Ikkuna otetaan yhtä paikkaa tavumäärää pidempänä. Silloin rivin loppuun
+# osuva ylimääräinen paikka mahtuu mukaan poistettavaksi, mutta ikkuna ei
+# ulotu seuraavan rivin paikkoihin niin että ne katoaisivat.
+SLACK = 1
+
+# Osuman on alettava kursorin kohdalta. Pari paikkaa liukumaa sallitaan,
+# koska konelukeminen on voinut rikkoa juuri rivin ensimmäisen tavun.
+HEAD = 2
+
+
+def _score(syls, slots):
+    """Rivin osuvuus paikkoihin kursorista alkaen, parina.
+
+    Ensimmäinen luku on se joka ratkaisee: kuinka suuri osa rivin tavuista
+    osuu. Ankkurointi on olennainen — ilman sitä pitkä rivi voi saada
+    korkean arvon osumalla ikkunan loppupäähän, ja tulla valituksi sitä
+    riviä ennen jonka paikoille se ei kuulu.
+
+    Toinen luku ratkaisee tasapelin. Samassa systeemissä äänet laulavat
+    usein samat sanat mutta eri välimerkeillä, ja välimerkeistä PDF:n rivit
+    eivät kerro kummalle ne kuuluvat. Silloin lähimmäksi konelukemisen omaa
+    tekstiä osuva rivi on oikea: se on tämän äänen rivi.
+    """
     a = [_norm(s.text) for s in slots]
     b = [_norm(s.text) for s in syls]
-    return difflib.SequenceMatcher(a=a, b=b, autojunk=False).ratio()
+    blocks = [bl for bl in difflib.SequenceMatcher(
+        a=a, b=b, autojunk=False).get_matching_blocks() if bl.size]
+    if not blocks or blocks[0].a > HEAD or blocks[0].b > HEAD:
+        return (0.0, 0.0)
+    share = sum(bl.size for bl in blocks) / len(syls)
+    exact = difflib.SequenceMatcher(
+        a=[s.text for s in slots], b=[s.text for s in syls],
+        autojunk=False).ratio()
+    return (share, exact)
 
 
 def match_part(rows, slots, threshold=0.55, lookahead=8):
@@ -188,7 +224,9 @@ def match_part(rows, slots, threshold=0.55, lookahead=8):
     niiden välillä on yhdentekevä. Siksi ehdokkaista otetaan paras eikä
     ensimmäinen: siellä missä tekstit eroavat, ero itse ratkaisee valinnan.
 
-    Palauttaa (tavoitetilat, käytetyt rivit, ohitetut rivit).
+    Palauttaa Matchin. Sen reached kertoo mihin asti paikat tulivat
+    kohdistetuiksi: sen jälkeen tuleva tyhjä tavoitetila ei tarkoita
+    poistoa vaan sitä, ettei yksikään rivi ulottunut niin pitkälle.
     """
     target = [None] * len(slots)
     used, skipped = [], []
@@ -200,8 +238,8 @@ def match_part(rows, slots, threshold=0.55, lookahead=8):
             syls = tokenise(rows[j].text)
             if not syls:
                 continue
-            score = _ratio(syls, slots[cursor:cursor + len(syls) + SLACK])
-            if score >= threshold and (best is None or score > best[0]):
+            score = _score(syls, slots[cursor:cursor + len(syls) + SLACK])
+            if score[0] >= threshold and (best is None or score > best[0]):
                 best = (score, j, syls)
 
         if best is None:
@@ -218,4 +256,45 @@ def match_part(rows, slots, threshold=0.55, lookahead=8):
         used.append(rows[j])
         i = j + 1
 
-    return target, used, skipped
+    return Match(target, cursor, used, skipped)
+
+
+@dataclass
+class Slot:
+    """Yksi olemassa oleva tavupaikka: <lyric> jonkin nuotin alla."""
+
+    measure: int
+    note: ET.Element
+    element: ET.Element
+
+    @property
+    def syllable(self):
+        return Syllable(self.element.findtext("text") or "",
+                        self.element.findtext("syllabic") or "single")
+
+
+def load(path):
+    with zipfile.ZipFile(path) as z:
+        name = next(n for n in z.namelist()
+                    if not n.startswith("META-INF") and n.lower().endswith(".xml"))
+        return ET.fromstring(z.read(name))
+
+
+def find_part(root, part_id):
+    return next(p for p in root.iter("part") if p.get("id") == part_id)
+
+
+def read_slots(part):
+    """Osaston tavupaikat järjestyksessä.
+
+    Yksikkö on <lyric> eikä nuotti, koska konelukeminen on paikoin pannut
+    yhden tavun puolikkaat samalle nuotille eri säkeistöiksi. Kohdistus
+    tarvitsee ne erikseen.
+    """
+    slots = []
+    for measure in part.iter("measure"):
+        number = int(measure.get("number"))
+        for note in measure.iter("note"):
+            for lyric in note.iter("lyric"):
+                slots.append(Slot(number, note, lyric))
+    return slots

@@ -1,8 +1,8 @@
 """korjaa-sanat.py:n testit. Aja: python3 -m unittest -v"""
 import unittest
 
-from korjaa_sanat import (Row, Syllable, align, extract_rows, match_part,
-                          tokenise)
+from korjaa_sanat import (Row, Syllable, align, extract_rows, find_part,
+                          load, match_part, read_slots, tokenise)
 
 
 class TestTokenise(unittest.TestCase):
@@ -75,13 +75,58 @@ class TestMatchPart(unittest.TestCase):
             Syllable("et", "single"), Syllable("lux", "single"),
             Syllable("er", "begin"), Syllable("p", "single"),
         ]
-        target, _, _ = match_part(rows, slots)
+        got = match_part(rows, slots)
 
-        self.assertEqual([s.text if s else None for s in target], [
+        self.assertEqual([s.text if s else None for s in got.target], [
             "Re", "qui", "em,", "re", "qui", "em", "ae",
             "ter", "nam,", "et", "lux", "per", None,
         ])
-        self.assertEqual(target[11], Syllable("per", "begin"))
+        self.assertEqual(got.target[11], Syllable("per", "begin"))
+
+
+class TestMatchTail(unittest.TestCase):
+    def test_slots_beyond_the_given_pages_are_left_untouched(self):
+        # Tyhjä tavoitetila tarkoittaa poistoa, joten sitä ei saa sekoittaa
+        # paikkaan johon yksikään rivi ei ulottunut. Sivulta 1 saa bassolle
+        # sanat tahtiin 26; tahdin 28 "dc- cet" on vasta sivulla 2.
+        rows = extract_rows("01-Verdi_Requiem.pdf", "Times-Roman", pages=[1])
+        slots = read_slots(find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16"))
+        got = match_part(rows, [s.syllable for s in slots])
+
+        self.assertLess(got.reached, len(slots))
+        self.assertEqual(slots[got.reached - 1].measure, 26)
+        self.assertTrue(all(s.measure <= 26 for s in slots[:got.reached]))
+
+
+class TestTieBreak(unittest.TestCase):
+    def test_punctuation_is_not_taken_from_a_tied_voice(self):
+        # Systeemissä 3 sopraano, altto ja basso laulavat samat sanat mutta
+        # eri välimerkeillä: sopraanolla "e-is," ja bassolla "e-is.". Sanojen
+        # perusteella rivit ovat tasapelissä, joten tasapeli on ratkaistava
+        # niin ettei basso saa sopraanon pilkkua.
+        rows = extract_rows("01-Verdi_Requiem.pdf", "Times-Roman", pages=[1])
+        slots = read_slots(find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16"))
+        got = match_part(rows, [s.syllable for s in slots])
+
+        changed = [(slots[i].measure, slots[i].syllable.text,
+                    got.target[i].text if got.target[i] else None)
+                   for i in range(got.reached)
+                   if got.target[i] != slots[i].syllable]
+        # Sivun 1 ainoa oikea virhe on tahdin 19 kahtia mennyt "per".
+        self.assertEqual(changed, [(19, "er", "per"), (19, "p", None)])
+
+
+class TestReadSlots(unittest.TestCase):
+    def test_both_verses_of_a_split_syllable_are_separate_slots(self):
+        # Tahdissa 19 yksi nuotti kantaa kahta sanaa eri säkeistöillä.
+        # Kohdistus tarvitsee ne kahtena paikkana, ei yhtenä.
+        part = find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16")
+        slots = read_slots(part)
+        self.assertEqual(
+            [(s.measure, s.syllable.text) for s in slots
+             if 17 <= s.measure <= 19],
+            [(17, "et"), (18, "lux"), (19, "er"), (19, "p")],
+        )
 
 
 if __name__ == "__main__":
