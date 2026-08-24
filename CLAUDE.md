@@ -241,6 +241,14 @@ zero uncertain changes**, and reads correct Latin through bar 90.
   from its origin. Movement 14's MusiXTeX positions every letter separately,
   and an origin-to-origin threshold turns a wide letter into a space
   (`d o - n a` instead of `do-na`).
+- **Hyphenation is decided by majority across rows.** The same per-glyph
+  positioning puts a hyphen's x after the wrong letter in some rows:
+  `peccata` comes out `pecc-a-ta` in four rows of ten and `pec-ca-ta` in the
+  other six, so the majority settles it. Only whole words vote — a fragment
+  at a system edge is part of a word and says nothing about the whole. A
+  repeated hyphen (`Chri--ste`) is the engraver's extension line, not a
+  second break, so repeats are ignored; counting them as a distinct
+  hyphenation let the extension line win the vote by one.
 - **A lyric line is read verse-major, not note-major.** Audiveris put the
   `sotto voce` marking on verse 2 *under* the real syllables, so note-major
   reading interleaved `SOITO` and `VOCE` into `Re-qui-em` and broke the

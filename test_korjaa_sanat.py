@@ -54,6 +54,17 @@ class TestExtractRows(unittest.TestCase):
         self.assertEqual(round(xs[0]), 266)
         self.assertEqual(xs, sorted(xs))
 
+    def test_hyphenation_is_made_consistent_across_rows(self):
+        # Osan V MusiXTeX asemoi joka kirjaimen erikseen, ja tavuviivan x
+        # osuu neljällä rivillä kymmenestä väärän kirjaimen jälkeen:
+        # "pecc-a-ta". Sama sana on oikein kuudella rivillä, joten
+        # enemmistö kertoo oikean tavutuksen.
+        rows = extract_rows("14-Verdi_requiem_agnus-dei.pdf", "Garamond")
+        forms = {word.strip(",.;:!?") for row in rows
+                 for word in row.text.split()
+                 if word.replace("-", "").strip(",.;:!?").lower() == "peccata"}
+        self.assertEqual(forms, {"pec-ca-ta"})
+
     def test_glyph_spacing_survives_cramped_engraving(self):
         # Osan 14 MusiXTeX asemoi joka kirjaimen erikseen, joten naiivi
         # kirjainvälin kynnys tuottaa väliä sanojen sisälle.

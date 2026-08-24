@@ -275,6 +275,10 @@ konelukeminen on pudottanut myös nuotteja. Ne on lisättävä käsin.
    erikseen ja leveä kirjain näyttäisi muuten väliltä.
 3. Rivi pilkotaan tavuiksi: sanaraja on välilyönti ja tavuraja viiva, ja
    viivan asema kertoo `syllabic`-arvon (single/begin/middle/end).
+   Tavutus päätetään enemmistöllä: osan V ladonta asemoi viivan paikoin
+   väärän kirjaimen jälkeen, jolloin `peccata` poimitaan neljällä
+   rivillä kymmenestä muodossa `pecc-a-ta` ja kuudella oikein
+   `pec-ca-ta`. Vain kokonaiset sanat äänestävät.
 4. Sanarivi luetaan MusicXML:stä **säkeistö kerrallaan** eikä nuotti
    kerrallaan. Konelukeminen pani `sotto voce` -merkinnän säkeistölle 2
    oikeiden tavujen alle, ja nuotti kerrallaan luettuna se katkaisi jonon.

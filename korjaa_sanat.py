@@ -122,6 +122,90 @@ def _clean(s):
     return _clean_chars([(c, 0.0) for c in s])[0]
 
 
+def _pattern(word):
+    """Sanan tavutus: ne kirjainindeksit joiden jälkeen on viiva.
+
+    Toistuva viiva samassa kohdassa on kaivertajan jatkoviiva eikä toinen
+    tavuraja — "Chri--ste" tavuttuu kuten "Chri-ste" — joten toistot
+    jätetään huomiotta. Muuten jatkoviiva näyttäisi eri tavutukselta ja
+    voisi voittaa äänestyksen.
+    """
+    cuts, letters = set(), 0
+    for c in word:
+        if c == "-":
+            cuts.add(letters)
+        else:
+            letters += 1
+    return tuple(sorted(cuts))
+
+
+def _key(word):
+    """Sanan kirjaimet ilman viivoja ja välimerkkejä, pienellä."""
+    return word.replace("-", "").strip(VALIMERKIT).lower()
+
+
+def hyphenations(rows):
+    """Yleisin tavutus kullekin kokonaiselle sanalle.
+
+    Osan 14 MusiXTeX asemoi joka kirjaimen erikseen, ja tavuviivan x osuu
+    paikoin väärän kirjaimen jälkeen: sana "peccata" poimitaan neljällä
+    rivillä kymmenestä muodossa "pecc-a-ta". Sama sana on kuitenkin
+    oikein kuudella rivillä, joten enemmistö kertoo oikean tavutuksen.
+
+    Vain kokonaiset sanat äänestävät. Systeemin alussa tai lopussa oleva
+    katkelma on osa sanaa eikä kerro koko sanan tavutusta.
+    """
+    seen = {}
+    for row in rows:
+        for word in row.text.split():
+            if word.startswith("-") or word.endswith("-"):
+                continue
+            key = _key(word)
+            if len(key) > 1:
+                seen.setdefault(key, Counter())[_pattern(word)] += 1
+    return {key: counts.most_common(1)[0][0] for key, counts in seen.items()}
+
+
+def _rehyphenate(chars, pattern):
+    """Kirjoittaa sanan uudelleen annetulla tavutuksella.
+
+    Kirjaimet pitävät oman x-sijaintinsa; vain viivat siirtyvät, eikä
+    niiden sijainnilla ole merkitystä — tavun x tulee sen ensimmäisestä
+    kirjaimesta.
+    """
+    letters = [(c, x) for c, x in chars if c != "-"]
+    out, cuts = [], set(pattern)
+    for k, (c, x) in enumerate(letters):
+        out.append((c, x))
+        if k + 1 in cuts and c not in VALIMERKIT:
+            out.append(("-", x))
+    return out
+
+
+def _consistent(rows):
+    """Yhtenäistää tavutuksen: sama sana tavutetaan kaikkialla samoin."""
+    patterns = hyphenations(rows)
+    fixed = []
+    for row in rows:
+        chars, word, out = list(zip(row.text, row.xs)), [], []
+        for pair in chars + [(" ", 0.0)]:
+            if pair[0] != " ":
+                word.append(pair)
+                continue
+            text = "".join(c for c, _ in word)
+            want = patterns.get(_key(text))
+            if (word and not text.startswith("-") and not text.endswith("-")
+                    and want is not None and want != _pattern(text)):
+                word = _rehyphenate(word, want)
+            out.extend(word)
+            out.append(pair)
+            word = []
+        out.pop()
+        fixed.append(Row(row.page, row.y, "".join(c for c, _ in out),
+                         tuple(x for _, x in out)))
+    return fixed
+
+
 def _stext(pdf_path, pages):
     cmd = ["mutool", "draw", "-F", "stext", "-o", "-", pdf_path]
     if pages:
@@ -175,7 +259,7 @@ def extract_rows(pdf_path, font, pages=None):
             text, xs = _clean_chars(out)
             if text:
                 rows.append(Row(number, y, text, tuple(xs)))
-    return rows
+    return _consistent(rows)
 
 
 def _norm(text):
