@@ -239,14 +239,14 @@ ajettavissa uudelleen jos konelukeminen joskus tehdään uusiksi.
 
 | Osasto | Tavuja | Kohdistettu | Korjattu | Lisätty | Ehdotuksia | Yhä ilman sanaa |
 |---|---:|---:|---:|---:|---:|---:|
-| I Kuoro S | 141 | 84 % | 26 | 16 | 1 | 56 |
-| I Kuoro A | 115 | 83 % | 23 | 24 | 3 | 47 |
-| I Kuoro T | 128 | 83 % | 26 | 16 | 1 | 46 |
-| **I Kuoro B** | **131** | **91 %** | **17** | **21** | **0** | **24** |
-| V Kuoro S | 37 | 81 % | 11 | 14 | 2 | 52 |
-| V Kuoro A | 28 | 25 % | 9 | 25 | 1 | 48 |
-| V Kuoro T | 79 | 65 % | 15 | 33 | 5 | 70 |
-| V Kuoro B | 68 | 37 % | 15 | 34 | 0 | 69 |
+| I Kuoro S | 141 | 84 % | 26 | 15 | 1 | 57 |
+| I Kuoro A | 115 | 83 % | 23 | 22 | 3 | 49 |
+| I Kuoro T | 128 | 83 % | 26 | 14 | 1 | 48 |
+| **I Kuoro B** | **131** | **91 %** | **17** | **22** | **0** | **23** |
+| V Kuoro S | 37 | 81 % | 11 | 13 | 2 | 53 |
+| V Kuoro A | 28 | 25 % | 9 | 23 | 1 | 50 |
+| V Kuoro T | 79 | 65 % | 15 | 31 | 5 | 72 |
+| V Kuoro B | 68 | 37 % | 15 | 32 | 0 | 71 |
 
 "Korjattu" on olemassa olevan sanan muuttaminen, "lisätty" sanan
 antaminen nuotille jolla ei ollut sanaa lainkaan. Viimeinen sarake on
@@ -270,8 +270,8 @@ sanassa `e-le-i-son`.
 
 ### Ehdotukset: 13 kohtaa joita ei sovellettu
 
-Yhteensä kirjoitettiin 325 muutosta: 142 olemassa olevan sanan korjausta ja
-183 tavua nuoteille joilla ei ollut sanaa.
+Yhteensä kirjoitettiin 314 muutosta: 142 olemassa olevan sanan korjausta ja
+172 tavua nuoteille joilla ei ollut sanaa.
 
 Raportti erottaa muutokset ehdotuksista. **Ehdotuksia ei kirjoiteta
 tiedostoon.** Ne ovat kohtia joissa myös vanha teksti oli PDF:n tuntema sana,
@@ -294,7 +294,7 @@ listaa nämä kohdat rivillä `kohdistamatta tahdit N-M:`.
 
 **Nuotit joilla ei ole sanaa lainkaan.** Nämä lisätään nyt PDF:n
 x-sijainnin perusteella, ks. alla. Kuorobassossa niitä oli 44 ja on enää
-24, joista osa on melismoja joilla ei kuulukaan olla sanaa.
+23, joista osa on melismoja joilla ei kuulukaan olla sanaa.
 
 Loput jäävät niihin systeemeihin joissa sovitus ei ole yksikäsitteinen —
 rivillä on enemmän tavuja kuin systeemissä nuotteja, mikä tarkoittaa että

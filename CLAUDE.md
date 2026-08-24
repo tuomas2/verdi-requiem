@@ -25,7 +25,7 @@ Open, roughly in the order a singer would feel them:
 |---|---|
 | **Notes** of movements 01 and 14 are still unproofread | *OMR recipe*; the lyrics pass did not touch notes |
 | Movement 01's Kyrie (from bar 91) still drops syllables | *What is left* — the OMR lost notes there, so it is note work, not text work |
-| Movement 14 is weak throughout — 25–81 % matched, 69 bass notes still wordless | same |
+| Movement 14 is weak throughout — 25–81 % matched, 71 bass notes still wordless | same |
 | 13 lyric changes reported but deliberately not applied | `python3 korjaa_sanat.py --kuiva` lists them |
 | Movement I has no piano | *Movement I has no piano* |
 | Four assumptions made without the rehearsal score | *Open assumptions* |
@@ -243,7 +243,7 @@ rests on, and it holds for movement 14 too: Audiveris could not read its
 Type1 fonts but `mutool` can.
 
 Results: coverage 83–91 % per voice in movement 01, 25–81 % in movement 14.
-325 changes written: 142 corrections to existing lyrics and 183 syllables
+314 changes written: 142 corrections to existing lyrics and 172 syllables
 added to notes that carried none. 13 further changes were reported as
 uncertain and deliberately not applied.
 **The chorus bass of movement 01 — the line the user reads — is 91 % with
@@ -342,7 +342,7 @@ Two things, neither fixable by changing text.
 one-to-one alignment exists. The report lists these as
 `kohdistamatta tahdit N-M:`.
 
-**Notes carrying no lyric at all.** Down from 44 to 24 in the chorus bass of
+**Notes carrying no lyric at all.** Down from 44 to 23 in the chorus bass of
 movement 01; some of those 24 are melismas that correctly have none. What
 remains is the systems where the assignment was ambiguous — the row has more
 syllables than the system has notes, meaning the OMR dropped notes as well as
