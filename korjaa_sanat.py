@@ -143,120 +143,221 @@ def align(syls, slots):
     tavutasoinen, joten konelukemisen kirjainvirhe näkyy korvauksena ja
     korvaus kirjoitetaan PDF:n mukaan.
 
-    Kun paikkoja on tavuja enemmän, ylimääräiset jäävät Noneksi — se on
-    tapaus jossa yksi tavu on pilkkoutunut kahdelle säkeistölle, tai jossa
-    esitysmerkintä on luettu sanaksi. Kun tavuja on paikkoja enemmän,
-    ylimääräiset jäävät sijoittamatta; niitä ei lisätä arvaamalla.
+    Palauttaa (tavoitetilat, lo, hi). Väli lo:hi on se osa ikkunasta johon
+    rivi ulottui; sen sisällä tyhjä tavoitetila tarkoittaa poistoa. Välin
+    ulkopuolelle jäävät paikat eivät ole poistettavia vaan kohdistamattomia.
 
-    Palauttaa myös montako paikkaa tuli käsitellyksi, jotta kursori osaa
-    siirtyä myös poistettujen paikkojen yli. Ikkunan lopussa olevat
-    paikat, joihin rivi ei ulotu, jäävät koskematta.
+    Poisto tehdään vain osumien välissä. Ikkunan reunalla evidenssi
+    puuttuu: sellainen paikka voi yhtä hyvin olla seuraavan rivin
+    ensimmäinen tavu kuin roskaa, joten se jätetään koskematta. Osumien
+    välissä oleva paikka sen sijaan on luettu sanaksi jotain joka ei ole
+    sana — esitysmerkintä tai dynamiikkamerkki.
+
+    Kun tavuja on paikkoja enemmän, ylimääräiset jäävät sijoittamatta;
+    niitä ei lisätä arvaamalla.
     """
     a = [_norm(s.text) for s in slots]
     b = [_norm(s.text) for s in syls]
     target = [None] * len(slots)
 
-    consumed = 0
+    placed = []
     for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(
             a=a, b=b, autojunk=False).get_opcodes():
         if tag in ("equal", "replace"):
             for k in range(min(i2 - i1, j2 - j1)):
                 target[i1 + k] = syls[j1 + k]
-        if j2 > j1:
-            consumed = max(consumed, i2)
-    return target, consumed
+                placed.append(i1 + k)
+    if not placed:
+        return target, 0, 0
+    return target, placed[0], placed[-1] + 1
 
 
 @dataclass
 class Match:
     """Yhden äänen kohdistuksen tulos."""
 
-    target: list   # tavoitetila per paikka, pituus = paikkojen määrä
-    reached: int   # montako paikkaa alusta tuli kohdistetuksi
-    used: list     # rivit jotka tunnistettiin tämän äänen riveiksi
-    skipped: list  # rivit jotka ohitettiin toisen äänen riveinä
+    target: list    # tavoitetila per paikka, pituus = paikkojen määrä
+    handled: list   # tuliko paikka kohdistetuksi; vain näihin kirjoitetaan
+    reached: int    # kuinka pitkälle kursori ehti
+    used: list      # rivit jotka tunnistettiin tämän äänen riveiksi
+    skipped: list   # rivit jotka ohitettiin toisen äänen riveinä
 
 
-# Ikkuna otetaan yhtä paikkaa tavumäärää pidempänä. Silloin rivin loppuun
-# osuva ylimääräinen paikka mahtuu mukaan poistettavaksi, mutta ikkuna ei
-# ulotu seuraavan rivin paikkoihin niin että ne katoaisivat.
-SLACK = 1
+# Ikkuna otetaan tavumäärää pidempänä, jotta rivin tavujen väliin luetut
+# roskasanat mahtuvat mukaan. Ikkunan lopun ylimääräisiä paikkoja ei
+# poisteta, joten pituus ei ole vaarallinen — vain hyödyllinen.
+SLACK = 3
 
-# Osuman on alettava kursorin kohdalta. Pari paikkaa liukumaa sallitaan,
-# koska konelukeminen on voinut rikkoa juuri rivin ensimmäisen tavun.
+# Kuinka monta parasta kohtaa riviä kohti otetaan valintaan mukaan.
+TOP = 4
+
+# Kuinka suuri osa rivin tavuista saa jäädä osumatta. Oikein kohdistuva rivi
+# osuu lähes täysin, koska konelukeminen on enimmäkseen oikein; löysempi
+# raja päästää läpi väärään toistoon liukuneen rivin.
+TOLERANCE = 0.35
+
+# Osuman on alettava ikkunan alusta. Pari paikkaa liukumaa sallitaan, koska
+# konelukeminen on voinut rikkoa juuri rivin ensimmäisen tavun.
 HEAD = 2
 
 
-def _score(syls, slots):
-    """Rivin osuvuus paikkoihin kursorista alkaen, parina.
+def _matched(syls, slots):
+    """Montako rivin tavua osuu paikkoihin ikkunan alusta alkaen.
 
-    Ensimmäinen luku on se joka ratkaisee: kuinka suuri osa rivin tavuista
-    osuu. Ankkurointi on olennainen — ilman sitä pitkä rivi voi saada
-    korkean arvon osumalla ikkunan loppupäähän, ja tulla valituksi sitä
-    riviä ennen jonka paikoille se ei kuulu.
-
-    Toinen luku ratkaisee tasapelin. Samassa systeemissä äänet laulavat
-    usein samat sanat mutta eri välimerkeillä, ja välimerkeistä PDF:n rivit
-    eivät kerro kummalle ne kuuluvat. Silloin lähimmäksi konelukemisen omaa
-    tekstiä osuva rivi on oikea: se on tämän äänen rivi.
+    Ankkurointi on olennainen: ilman sitä pitkä rivi voi saada korkean
+    arvon osumalla ikkunan loppupäähän, ja tulla valituksi kohtaan jonne
+    se ei kuulu.
     """
     a = [_norm(s.text) for s in slots]
     b = [_norm(s.text) for s in syls]
     blocks = [bl for bl in difflib.SequenceMatcher(
         a=a, b=b, autojunk=False).get_matching_blocks() if bl.size]
     if not blocks or blocks[0].a > HEAD or blocks[0].b > HEAD:
-        return (0.0, 0.0)
-    share = sum(bl.size for bl in blocks) / len(syls)
-    exact = difflib.SequenceMatcher(
+        return 0
+    return sum(bl.size for bl in blocks)
+
+
+def _accepts(matched, n, tolerance):
+    """Riittääkö osuma rivin sijoittamiseen.
+
+    Kiinteä osuusraja hylkäisi lyhyet rivit: viiden tavun rivissä yksikin
+    kirjainvirhe pudottaa osuuden 80 prosenttiin. Siksi yksi virhe
+    sallitaan aina ja pitkässä rivissä sallittu määrä kasvaa pituuden
+    mukana. Kahta osumaa vähemmällä riviä ei sijoiteta lainkaan — yksi
+    tavu osuisi mihin tahansa toistoon.
+    """
+    return matched >= 2 and n - matched <= max(1, round(tolerance * n))
+
+
+def _exact(syls, slots):
+    """Sama vertailu välimerkit mukaan lukien.
+
+    Ratkaisee tasapelin. Samassa systeemissä äänet laulavat usein samat
+    sanat mutta eri välimerkeillä, eivätkä PDF:n rivit kerro kummalle
+    välimerkki kuuluu. Silloin lähimmäksi konelukemisen omaa tekstiä
+    osuva rivi on tämän äänen rivi.
+    """
+    return difflib.SequenceMatcher(
         a=[s.text for s in slots], b=[s.text for s in syls],
         autojunk=False).ratio()
-    return (share, exact)
 
 
-def match_part(rows, slots, threshold=0.55, lookahead=8):
+def _index(syllables):
+    """Vertailumuoto -> ne paikat joissa se esiintyy."""
+    index = {}
+    for i, s in enumerate(syllables):
+        index.setdefault(_norm(s.text), []).append(i)
+    return index
+
+
+def _candidate_starts(syls, index):
+    """Ne aloituskohdat joissa rivi voi ankkuroitua.
+
+    Osuman on alettava ikkunan alusta HEADin sisällä, joten jos rivin
+    tavu k osuu paikkaan p, ikkunan alku on välillä p-HEAD..p. Muut
+    kohdat eivät voi kelvata, joten niitä ei kannata pisteyttää.
+    """
+    starts = set()
+    for k, syl in enumerate(syls[:HEAD + 1]):
+        for p in index.get(_norm(syl.text), ()):
+            for d in range(HEAD + 1):
+                if p - d >= 0:
+                    starts.add(p - d)
+    return sorted(starts)
+
+
+@dataclass(frozen=True)
+class Placement:
+    """Yksi mahdollinen kohta yhdelle riville."""
+
+    row: int       # rivin järjestysnumero
+    start: int     # ensimmäinen paikka jonka rivi kattaa
+    end: int       # viimeisen kattamansa jälkeen
+    weight: float  # osuneiden tavujen määrä, tasapeli tarkkuudella
+    target: tuple  # tavoitetilat välille start..end
+
+
+def _placements(rows, syllables, tolerance, top):
+    """Parhaat mahdolliset kohdat jokaiselle riville."""
+    index = _index(syllables)
+    out = []
+    for i, row in enumerate(rows):
+        syls = tokenise(row.text)
+        if not syls:
+            continue
+        found = []
+        for start in _candidate_starts(syls, index):
+            window = syllables[start:start + len(syls) + SLACK]
+            matched = _matched(syls, window)
+            if _accepts(matched, len(syls), tolerance):
+                found.append((matched, start, window))
+        found.sort(key=lambda f: -f[0])
+        for matched, start, window in found[:top]:
+            target, lo, hi = align(syls, window)
+            if hi > lo:
+                out.append(Placement(i, start + lo, start + hi,
+                                     matched + _exact(syls, window),
+                                     tuple(target[lo:hi])))
+    return out
+
+
+def _choose(placements):
+    """Suurin yhteensopiva joukko kohtia.
+
+    Rivien on oltava järjestyksessä ja kohtien menemättä päällekkäin.
+    Ahne kursori valitsisi tässä peruuttamattomasti ja liukuisi väärään
+    toistoon; nyt väärä kohta häviää oikealle, koska oikeat kohdat
+    tukevat toisiaan ja väärä on niiden kanssa ristiriidassa.
+    """
+    if not placements:
+        return []
+    ps = sorted(placements, key=lambda p: (p.start, p.row))
+    best = [p.weight for p in ps]
+    prev = [-1] * len(ps)
+    for j, pj in enumerate(ps):
+        for i in range(j):
+            if ps[i].end <= pj.start and ps[i].row < pj.row:
+                if best[i] + pj.weight > best[j]:
+                    best[j] = best[i] + pj.weight
+                    prev[j] = i
+    k = max(range(len(ps)), key=lambda j: best[j])
+    chosen = []
+    while k != -1:
+        chosen.append(ps[k])
+        k = prev[k]
+    return chosen[::-1]
+
+
+def match_part(rows, syllables, tolerance=TOLERANCE, top=TOP):
     """Kohdistaa yhden äänen tavupaikat PDF:n riveihin.
 
-    PDF:n rivit ovat kaikkien äänten rivejä sekaisin, järjestyksessä ylhäältä
-    alas. Rivi hyväksytään kun se vastaa riittävän hyvin kursorin kohdalla
-    olevia paikkoja, muuten se ohitetaan toisen äänen rivinä.
+    PDF:n rivit ovat kaikkien äänten rivejä sekaisin, järjestyksessä
+    ylhäältä alas. Rivi joka ei osu mihinkään on toisen äänen rivi.
 
-    Samassa systeemissä äänet laulavat usein samaa tekstiä, jolloin valinta
-    niiden välillä on yhdentekevä. Siksi ehdokkaista otetaan paras eikä
-    ensimmäinen: siellä missä tekstit eroavat, ero itse ratkaisee valinnan.
-
-    Palauttaa Matchin. Sen reached kertoo mihin asti paikat tulivat
-    kohdistetuiksi: sen jälkeen tuleva tyhjä tavoitetila ei tarkoita
-    poistoa vaan sitä, ettei yksikään rivi ulottunut niin pitkälle.
+    Palauttaa Matchin. Sen handled kertoo mitkä paikat tulivat
+    kohdistetuiksi: muualla tyhjä tavoitetila ei tarkoita poistoa vaan
+    sitä, ettei yksikään rivi ulottunut siihen.
     """
-    target = [None] * len(slots)
-    used, skipped = [], []
-    cursor, i = 0, 0
+    known = vocabulary(rows)
+    chosen = _choose(_placements(rows, syllables, tolerance, top))
 
-    while i < len(rows) and cursor < len(slots):
-        best = None
-        for j in range(i, min(i + lookahead, len(rows))):
-            syls = tokenise(rows[j].text)
-            if not syls:
+    target = [None] * len(syllables)
+    handled = [False] * len(syllables)
+    for p in chosen:
+        for k, want in enumerate(p.target):
+            i = p.start + k
+            # Poisto on oikea vain roskalle. Jos PDF tuntee tavun,
+            # kohdistus on liukunut eikä paikkaa saa tyhjentää.
+            if want is None and _norm(syllables[i].text) in known:
                 continue
-            score = _score(syls, slots[cursor:cursor + len(syls) + SLACK])
-            if score[0] >= threshold and (best is None or score > best[0]):
-                best = (score, j, syls)
+            target[i] = want
+            handled[i] = True
 
-        if best is None:
-            skipped.append(rows[i])
-            i += 1
-            continue
-
-        _, j, syls = best
-        skipped.extend(rows[i:j])
-        window = slots[cursor:cursor + len(syls) + SLACK]
-        part, consumed = align(syls, window)
-        target[cursor:cursor + consumed] = part[:consumed]
-        cursor += consumed
-        used.append(rows[j])
-        i = j + 1
-
-    return Match(target, cursor, used, skipped)
+    taken = {p.row for p in chosen}
+    return Match(target, handled,
+                 max((p.end for p in chosen), default=0),
+                 [rows[p.row] for p in chosen],
+                 [r for i, r in enumerate(rows) if i not in taken])
 
 
 @dataclass
@@ -284,20 +385,45 @@ def find_part(root, part_id):
     return next(p for p in root.iter("part") if p.get("id") == part_id)
 
 
-def read_slots(part):
-    """Osaston tavupaikat järjestyksessä.
+def _verse(lyric):
+    try:
+        return int(lyric.get("number") or 1)
+    except ValueError:
+        return 1
 
-    Yksikkö on <lyric> eikä nuotti, koska konelukeminen on paikoin pannut
-    yhden tavun puolikkaat samalle nuotille eri säkeistöiksi. Kohdistus
-    tarvitsee ne erikseen.
-    """
-    slots = []
+
+def _lyrics_by_verse(part):
+    """Tuottaa (tahti, nuotti, sanarivit) jokaiselle sanoja kantavalle
+    nuotille, sanarivit säkeistönumeron mukaan järjestettynä."""
     for measure in part.iter("measure"):
         number = int(measure.get("number"))
         for note in measure.iter("note"):
-            for lyric in note.iter("lyric"):
-                slots.append(Slot(number, note, lyric))
-    return slots
+            lyrics = sorted(note.iter("lyric"), key=_verse)
+            if lyrics:
+                yield number, note, lyrics
+
+
+def read_slots(part):
+    """Osaston sanarivin tavupaikat järjestyksessä, yksi per nuotti.
+
+    Sanarivi luetaan säkeistö kerrallaan eikä nuotti kerrallaan, joten
+    pääjonoon kuuluu vain kunkin nuotin ensimmäinen sanarivi. Ylimääräiset
+    säkeistöt saa read_extras.
+    """
+    return [Slot(number, note, lyrics[0])
+            for number, note, lyrics in _lyrics_by_verse(part)]
+
+
+def read_extras(part):
+    """Nuottien ylimääräiset sanarivit järjestyksessä.
+
+    Konelukeminen on pannut näille esitysmerkintöjä ("sotto voce")
+    ja kahtia menneiden tavujen puolikkaita. Kuoro laulaa osissa 01 ja 14
+    yhtä tekstiä, joten toista sanariviä ei niissä ole.
+    """
+    return [Slot(number, note, lyric)
+            for number, note, lyrics in _lyrics_by_verse(part)
+            for lyric in lyrics[1:]]
 
 
 @dataclass(frozen=True)
@@ -309,15 +435,16 @@ class Change:
     after: str
 
 
-def apply_targets(slots, target, reached):
+def apply_targets(slots, target, handled):
     """Kirjoittaa tavoitetilat XML:ään ja palauttaa tehdyt muutokset.
 
-    Vain paikat joihin kohdistus ulottui käsitellään. Sen jälkeen tuleva
-    tyhjä tavoitetila ei ole poisto vaan kohdistamaton paikka, ja se
-    jätetään koskematta.
+    Vain kohdistetut paikat käsitellään. Muualla tyhjä tavoitetila ei ole
+    poisto vaan kohdistamaton paikka, ja se jätetään koskematta.
     """
     changes, touched = [], []
-    for i in range(reached):
+    for i, ok in enumerate(handled):
+        if not ok:
+            continue
         slot, want = slots[i], target[i]
         have = slot.syllable
         if want is None:
@@ -327,6 +454,33 @@ def apply_targets(slots, target, reached):
         elif want != have:
             _set_lyric(slot.element, want)
             changes.append(Change(slot.measure, have.text, want.text))
+    for note in touched:
+        _renumber_verses(note)
+    return changes
+
+
+def vocabulary(rows):
+    """Kaikki tavut jotka PDF:ssä esiintyvät, vertailumuodossa.
+
+    Poisto on oikea vain roskalle. Jos tavu esiintyy PDF:ssä jossain, se on
+    oikea tavu, ja sen poistaminen tarkoittaisi että kohdistus on liukunut.
+    """
+    return {_norm(s.text) for row in rows for s in tokenise(row.text)}
+
+
+def remove_extras(extras, handled_notes):
+    """Poistaa ylimääräiset sanarivit niiltä nuoteilta joiden pääsanarivi
+    tuli kohdistetuksi.
+
+    Ehto on olennainen: kohdistamattoman nuotin ylimääräinen sanarivi voi
+    olla mitä tahansa, eikä sitä ole mitään perustetta poistaa.
+    """
+    changes, touched = [], []
+    for slot in extras:
+        if id(slot.note) in handled_notes:
+            slot.note.remove(slot.element)
+            touched.append(slot.note)
+            changes.append(Change(slot.measure, slot.syllable.text, None))
     for note in touched:
         _renumber_verses(note)
     return changes
@@ -355,3 +509,88 @@ def _renumber_verses(note):
     """
     for n, lyric in enumerate(note.iter("lyric"), start=1):
         lyric.set("number", str(n))
+
+
+@dataclass(frozen=True)
+class Source:
+    """Konelukemisella tuotettu osa ja se PDF josta se luettiin."""
+
+    mxl: str
+    pdf: str
+    font: str          # PDF:n tekstifontti; sanat ovat sen yleisintä kokoa
+    parts: tuple       # (osaston tunnus, nimi raporttiin)
+    out: str
+
+
+SOURCES = [
+    Source(
+        mxl="01-Verdi_Requiem-OMR.mxl",
+        pdf="01-Verdi_Requiem.pdf",
+        font="Times-Roman",
+        parts=(("P13", "Kuoro S"), ("P14", "Kuoro A"),
+               ("P15", "Kuoro T"), ("P16", "Kuoro B")),
+        out="01-Verdi_Requiem-OMR-korjattu.mxl",
+    ),
+    Source(
+        mxl="14-Verdi_requiem_agnus-dei-OMR.mxl",
+        pdf="14-Verdi_requiem_agnus-dei.pdf",
+        font="Garamond",
+        parts=(("P1", "Kuoro S"), ("P2", "Kuoro A"),
+               ("P3", "Kuoro T"), ("P4", "Kuoro B")),
+        out="14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl",
+    ),
+]
+
+
+@dataclass
+class PartReport:
+    """Yhden osaston korjauksen tulos raporttia varten."""
+
+    part: str
+    name: str
+    slots: int
+    handled: int
+    changes: list
+    runs: list     # kohdistamattomat jaksot, kukin lista paikkoja
+    used: list     # rivit jotka tunnistettiin tämän äänen riveiksi
+    skipped: list  # rivit joille ei löytynyt paikkaa tästä äänestä
+
+
+def _runs(slots, handled):
+    """Kohdistamattomat paikat yhtenäisiksi jaksoiksi.
+
+    Jakso kertoo yhden kohdan jota PDF:n rivit eivät kattaneet. Näitä
+    syntyy siellä missä konelukeminen on pudottanut tavun kokonaan: silloin
+    paikkoja on tavuja vähemmän eikä kohdistus voi olla yksi yhteen.
+    """
+    runs, run = [], []
+    for slot, ok in zip(slots, handled):
+        if ok:
+            if run:
+                runs.append(run)
+                run = []
+        else:
+            run.append(slot)
+    if run:
+        runs.append(run)
+    return runs
+
+
+def correct(source, pages=None):
+    """Korjaa yhden osan kuorosanat ja palauttaa (puu, raportti)."""
+    root = load(source.mxl)
+    rows = extract_rows(source.pdf, source.font, pages)
+
+    report = []
+    for part_id, name in source.parts:
+        part = find_part(root, part_id)
+        slots, extras = read_slots(part), read_extras(part)
+        got = match_part(rows, [s.syllable for s in slots])
+        changes = apply_targets(slots, got.target, got.handled)
+        done = {id(s.note) for s, ok in zip(slots, got.handled) if ok}
+        changes += remove_extras(extras, done)
+        report.append(PartReport(part_id, name, len(slots),
+                                 sum(got.handled), changes,
+                                 _runs(slots, got.handled),
+                                 got.used, got.skipped))
+    return root, report

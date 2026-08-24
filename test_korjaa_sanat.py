@@ -3,7 +3,14 @@ import unittest
 
 from korjaa_sanat import (Change, Row, Syllable, align, apply_targets,
                           extract_rows, find_part, load, match_part,
-                          read_slots, tokenise)
+                          read_extras, read_slots, remove_extras,
+                          tokenise)
+from korjaa_sanat import SOURCES, correct, vocabulary
+
+
+def longest_gap(part_report):
+    """Pisin yhtenäinen kohdistamaton jakso paikkoja."""
+    return max((len(run) for run in part_report.runs), default=0)
 
 
 class TestTokenise(unittest.TestCase):
@@ -50,13 +57,14 @@ class TestAlign(unittest.TestCase):
                  Syllable("er", "begin"), Syllable("p", "single")]
         syls = [Syllable("et", "single"), Syllable("lux", "single"),
                 Syllable("per", "begin")]
-        target, consumed = align(syls, slots)
-        self.assertEqual(target, [
+        target, lo, hi = align(syls, slots)
+        self.assertEqual(target[lo:hi], [
             Syllable("et", "single"), Syllable("lux", "single"),
-            Syllable("per", "begin"), None,
+            Syllable("per", "begin"),
         ])
-        # Myös poistettu paikka on käsitelty, jotta kursori siirtyy sen yli.
-        self.assertEqual(consumed, 4)
+        # Neljäs paikka on ikkunan reunalla: se voi olla seuraavan rivin
+        # ensimmäinen tavu, joten sitä ei poisteta vaan raportoidaan.
+        self.assertEqual((lo, hi), (0, 3))
 
 
 class TestMatchPart(unittest.TestCase):
@@ -85,80 +93,128 @@ class TestMatchPart(unittest.TestCase):
         self.assertEqual(got.target[11], Syllable("per", "begin"))
 
 
-class TestMatchTail(unittest.TestCase):
-    def test_slots_beyond_the_given_pages_are_left_untouched(self):
-        # Tyhjä tavoitetila tarkoittaa poistoa, joten sitä ei saa sekoittaa
-        # paikkaan johon yksikään rivi ei ulottunut. Sivulta 1 saa bassolle
-        # sanat tahtiin 26; tahdin 28 "dc- cet" on vasta sivulla 2.
-        rows = extract_rows("01-Verdi_Requiem.pdf", "Times-Roman", pages=[1])
-        slots = read_slots(find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16"))
-        got = match_part(rows, [s.syllable for s in slots])
-
-        self.assertLess(got.reached, len(slots))
-        self.assertEqual(slots[got.reached - 1].measure, 26)
-        self.assertTrue(all(s.measure <= 26 for s in slots[:got.reached]))
-
-
 class TestTieBreak(unittest.TestCase):
     def test_punctuation_is_not_taken_from_a_tied_voice(self):
         # Systeemissä 3 sopraano, altto ja basso laulavat samat sanat mutta
         # eri välimerkeillä: sopraanolla "e-is," ja bassolla "e-is.". Sanojen
-        # perusteella rivit ovat tasapelissä, joten tasapeli on ratkaistava
-        # niin ettei basso saa sopraanon pilkkua.
-        rows = extract_rows("01-Verdi_Requiem.pdf", "Times-Roman", pages=[1])
+        # perusteella rivit ovat tasapelissä, joten basso ei saa sopraanon
+        # pilkkua tilalle.
+        rows = extract_rows("01-Verdi_Requiem.pdf", "Times-Roman")
         slots = read_slots(find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16"))
         got = match_part(rows, [s.syllable for s in slots])
 
-        changed = [(slots[i].measure, slots[i].syllable.text,
-                    got.target[i].text if got.target[i] else None)
-                   for i in range(got.reached)
-                   if got.target[i] != slots[i].syllable]
-        # Sivun 1 ainoa oikea virhe on tahdin 19 kahtia mennyt "per".
-        self.assertEqual(changed, [(19, "er", "per"), (19, "p", None)])
+        i = next(k for k, s in enumerate(slots)
+                 if s.measure == 26 and s.syllable.text == "is.")
+        self.assertTrue(got.handled[i])
+        self.assertEqual(got.target[i].text, "is.")
 
 
 class TestReadSlots(unittest.TestCase):
-    def test_both_verses_of_a_split_syllable_are_separate_slots(self):
-        # Tahdissa 19 yksi nuotti kantaa kahta sanaa eri säkeistöillä.
-        # Kohdistus tarvitsee ne kahtena paikkana, ei yhtenä.
+    def test_main_line_holds_one_syllable_per_note(self):
         part = find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16")
         slots = read_slots(part)
         self.assertEqual(
             [(s.measure, s.syllable.text) for s in slots
              if 17 <= s.measure <= 19],
-            [(17, "et"), (18, "lux"), (19, "er"), (19, "p")],
+            [(17, "et"), (18, "lux"), (19, "er")],
         )
+
+    def test_extra_verses_are_kept_out_of_the_main_line(self):
+        # Tenorin tahdissa 7 esitysmerkintä "sotto voce" on luettu
+        # säkeistöksi 2 oikeiden tavujen alle. Sanarivi luetaan säkeistö
+        # kerrallaan eikä nuotti kerrallaan, joten roska ei kuulu
+        # pääjonoon: siellä se katkaisisi kohdistuksen heti alkuun.
+        part = find_part(load("01-Verdi_Requiem-OMR.mxl"), "P15")
+        self.assertEqual([s.syllable.text for s in read_slots(part)[:5]],
+                         ["Re", "qui", "em,", "re", "qui"])
+        self.assertEqual([s.syllable.text for s in read_extras(part)[:2]],
+                         ["SOITO", "VOCE"])
 
 
 class TestApplyTargets(unittest.TestCase):
-    def test_removed_verse_leaves_one_lyric_numbered_one(self):
+    def test_rewritten_slot_gets_both_text_and_syllabic(self):
         part = find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16")
         slots = read_slots(part)
         target = [s.syllable for s in slots]
         i = next(k for k, s in enumerate(slots)
                  if s.measure == 19 and s.syllable.text == "er")
         target[i] = Syllable("per", "begin")
-        target[i + 1] = None
 
-        changes = apply_targets(slots, target, len(slots))
+        changes = apply_targets(slots, target, [True] * len(slots))
 
-        self.assertEqual(changes, [Change(19, "er", "per"),
-                                   Change(19, "p", None)])
-        lyrics = list(slots[i].note.iter("lyric"))
-        self.assertEqual(len(lyrics), 1)
-        self.assertEqual(lyrics[0].findtext("text"), "per")
-        self.assertEqual(lyrics[0].findtext("syllabic"), "begin")
-        self.assertEqual(lyrics[0].get("number"), "1")
+        self.assertEqual(changes, [Change(19, "er", "per")])
+        self.assertEqual(slots[i].element.findtext("text"), "per")
+        self.assertEqual(slots[i].element.findtext("syllabic"), "begin")
 
     def test_slots_beyond_reached_are_not_touched(self):
         part = find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16")
         slots = read_slots(part)
-        target = [None] * len(slots)
+        total = len(list(part.iter("lyric")))
 
-        changes = apply_targets(slots, target, 0)
+        changes = apply_targets(slots, [None] * len(slots),
+                                [False] * len(slots))
 
         self.assertEqual(changes, [])
-        self.assertEqual(len(list(part.iter("lyric"))), len(slots))
+        self.assertEqual(len(list(part.iter("lyric"))), total)
+
+
+class TestRemoveExtras(unittest.TestCase):
+    def test_extra_verse_is_removed_only_on_handled_notes(self):
+        part = find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16")
+        slots, extras = read_slots(part), read_extras(part)
+        main = next(s for s in slots
+                    if s.measure == 19 and s.syllable.text == "er")
+        self.assertEqual(next(s.syllable.text for s in extras
+                              if s.measure == 19), "p")
+
+        changes = remove_extras(extras, {id(main.note)})
+
+        self.assertEqual(changes, [Change(19, "p", None)])
+        lyrics = list(main.note.iter("lyric"))
+        self.assertEqual(len(lyrics), 1)
+        self.assertEqual(lyrics[0].findtext("text"), "er")
+        self.assertEqual(lyrics[0].get("number"), "1")
+        # Muiden nuottien ylimääräiset jäivät koskematta.
+        self.assertEqual(len(read_extras(part)), len(extras) - 1)
+
+
+class TestCorrect(unittest.TestCase):
+    def test_garbled_slot_does_not_stall_the_rest_of_the_part(self):
+        # P15:n alussa on roskaa jota PDF:ssä ei ole. Aiemmin kursori pysähtyi
+        # siihen ja loput 120 paikkaa jäivät yhdeksi aukoksi. Kohdistamaton
+        # kohta on aina jäljellä siellä missä konelukeminen on pudottanut
+        # tavun, mutta aukon pitää olla paikallinen eikä koko loppuosa.
+        source = next(s for s in SOURCES if s.mxl.startswith("01"))
+        _, report = correct(source)
+        for part in report:
+            self.assertLess(longest_gap(part), 30, part.name)
+
+    def test_a_syllable_the_pdf_knows_is_never_deleted(self):
+        # Poisto on oikea vain roskalle: esitysmerkinnälle, dynamiikalle,
+        # kirjainsotkulle. Jos tavu esiintyy PDF:ssä, se on oikea tavu, ja
+        # sen poistaminen olisi kohdistuksen liukumista — ei korjaus.
+        for source in SOURCES:
+            rows = extract_rows(source.pdf, source.font)
+            known = vocabulary(rows)
+            _, report = correct(source)
+            for pr in report:
+                for change in pr.changes:
+                    if change.after is None:
+                        self.assertNotIn(change.before.lower().strip(",.;:!?"),
+                                         known, "%s tahti %d" % (pr.name, change.measure))
+
+    def test_bass_misreads_are_fixed_and_no_notes_are_lost(self):
+        source = next(s for s in SOURCES if s.mxl.startswith("01"))
+        before = len(list(find_part(load(source.mxl), "P16").iter("note")))
+
+        root, report = correct(source)
+
+        bass = find_part(root, "P16")
+        # Korjaus koskee vain sanoja, joten nuottien määrä ei muutu.
+        self.assertEqual(len(list(bass.iter("note"))), before)
+        m28 = next(m for m in bass.iter("measure") if m.get("number") == "28")
+        self.assertEqual([ly.findtext("text") for ly in m28.iter("lyric")],
+                         ["Te", "de", "cet"])
 
 
 if __name__ == "__main__":
