@@ -1,8 +1,9 @@
 """korjaa-sanat.py:n testit. Aja: python3 -m unittest -v"""
 import unittest
 
-from korjaa_sanat import (Row, Syllable, align, extract_rows, find_part,
-                          load, match_part, read_slots, tokenise)
+from korjaa_sanat import (Change, Row, Syllable, align, apply_targets,
+                          extract_rows, find_part, load, match_part,
+                          read_slots, tokenise)
 
 
 class TestTokenise(unittest.TestCase):
@@ -127,6 +128,37 @@ class TestReadSlots(unittest.TestCase):
              if 17 <= s.measure <= 19],
             [(17, "et"), (18, "lux"), (19, "er"), (19, "p")],
         )
+
+
+class TestApplyTargets(unittest.TestCase):
+    def test_removed_verse_leaves_one_lyric_numbered_one(self):
+        part = find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16")
+        slots = read_slots(part)
+        target = [s.syllable for s in slots]
+        i = next(k for k, s in enumerate(slots)
+                 if s.measure == 19 and s.syllable.text == "er")
+        target[i] = Syllable("per", "begin")
+        target[i + 1] = None
+
+        changes = apply_targets(slots, target, len(slots))
+
+        self.assertEqual(changes, [Change(19, "er", "per"),
+                                   Change(19, "p", None)])
+        lyrics = list(slots[i].note.iter("lyric"))
+        self.assertEqual(len(lyrics), 1)
+        self.assertEqual(lyrics[0].findtext("text"), "per")
+        self.assertEqual(lyrics[0].findtext("syllabic"), "begin")
+        self.assertEqual(lyrics[0].get("number"), "1")
+
+    def test_slots_beyond_reached_are_not_touched(self):
+        part = find_part(load("01-Verdi_Requiem-OMR.mxl"), "P16")
+        slots = read_slots(part)
+        target = [None] * len(slots)
+
+        changes = apply_targets(slots, target, 0)
+
+        self.assertEqual(changes, [])
+        self.assertEqual(len(list(part.iter("lyric"))), len(slots))
 
 
 if __name__ == "__main__":

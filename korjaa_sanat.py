@@ -298,3 +298,60 @@ def read_slots(part):
             for lyric in note.iter("lyric"):
                 slots.append(Slot(number, note, lyric))
     return slots
+
+
+@dataclass(frozen=True)
+class Change:
+    """Yksi muutos raporttiin. after on None kun sana poistettiin."""
+
+    measure: int
+    before: str
+    after: str
+
+
+def apply_targets(slots, target, reached):
+    """Kirjoittaa tavoitetilat XML:ään ja palauttaa tehdyt muutokset.
+
+    Vain paikat joihin kohdistus ulottui käsitellään. Sen jälkeen tuleva
+    tyhjä tavoitetila ei ole poisto vaan kohdistamaton paikka, ja se
+    jätetään koskematta.
+    """
+    changes, touched = [], []
+    for i in range(reached):
+        slot, want = slots[i], target[i]
+        have = slot.syllable
+        if want is None:
+            slot.note.remove(slot.element)
+            touched.append(slot.note)
+            changes.append(Change(slot.measure, have.text, None))
+        elif want != have:
+            _set_lyric(slot.element, want)
+            changes.append(Change(slot.measure, have.text, want.text))
+    for note in touched:
+        _renumber_verses(note)
+    return changes
+
+
+def _set_lyric(lyric, syllable):
+    text = lyric.find("text")
+    if text is None:
+        text = ET.SubElement(lyric, "text")
+    text.text = syllable.text
+
+    syl = lyric.find("syllabic")
+    if syl is None:
+        # MusicXML vaatii <syllabic> ennen <text>.
+        syl = ET.Element("syllabic")
+        lyric.insert(list(lyric).index(text), syl)
+    syl.text = syllable.syllabic
+
+
+def _renumber_verses(note):
+    """Numeroi nuotin jäljelle jääneet sanarivit ykkösestä alkaen.
+
+    Ilman tätä poisto voi jättää nuotille pelkän säkeistön 2, ja yksikin
+    korkea säkeistönumero saa MuseScoren varaamaan tilan kaikille sitä
+    edeltäville sanariveille koko osan mitalta.
+    """
+    for n, lyric in enumerate(note.iter("lyric"), start=1):
+        lyric.set("number", str(n))
