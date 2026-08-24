@@ -7,7 +7,7 @@ import zipfile
 from korjaa_sanat import (Change, Row, Syllable, align, apply_targets,
                           extract_rows, find_part, load, match_part,
                           read_extras, read_slots, remove_extras,
-                          tokenise)
+                          syllables_with_x, tokenise)
 from korjaa_sanat import SOURCES, correct, save, vocabulary
 
 
@@ -40,6 +40,19 @@ class TestExtractRows(unittest.TestCase):
         self.assertEqual(len(rows), 12)
         self.assertEqual(rows[0].text, "Re-qui-em, re-qui-em ae-")
         self.assertEqual(rows[0].page, 1)
+
+    def test_row_carries_the_x_position_of_every_syllable(self):
+        # Tavun paikka nuotilla ratkeaa x-sijainnista, joten poiminnan on
+        # säilytettävä se. Sivun 1 systeemin 1 alin rivi on kuorobasso, ja
+        # sen ensimmäinen tavu "Re" alkaa x=266.
+        rows = extract_rows("01-Verdi_Requiem.pdf", "Times-Roman", pages=[1])
+        pairs = syllables_with_x(rows[3])
+
+        self.assertEqual([s.text for s, _ in pairs],
+                         ["Re", "qui", "em,", "re", "qui", "em", "ae"])
+        xs = [x for _, x in pairs]
+        self.assertEqual(round(xs[0]), 266)
+        self.assertEqual(xs, sorted(xs))
 
     def test_glyph_spacing_survives_cramped_engraving(self):
         # Osan 14 MusiXTeX asemoi joka kirjaimen erikseen, joten naiivi

@@ -24,28 +24,32 @@ class Syllable:
     syllabic: str  # single | begin | middle | end
 
 
-def tokenise(row):
-    """Pilkkoo PDF:stä poimitun sanarivin tavuiksi.
+def _split(text):
+    """Pilkkoo siivotun sanarivin tavuiksi indekseineen.
 
-    PDF:n välistys on epätasaista — tavuviivan ympärillä on välilyönti
-    milloin sattuu — joten välit siivotaan ensin pois viivan ja välimerkin
-    ympäriltä. Sen jälkeen sanaraja on välilyönti ja tavuraja viiva.
+    Sanaraja on välilyönti ja tavuraja viiva, ja viivan asema kertoo
+    tavun aseman sanassa. Indeksi on tavun ensimmäisen merkin paikka
+    tekstissä; sen kautta tavu löytää x-sijaintinsa.
     """
-    s = re.sub(r"\s*-\s*", "-", row)
-    s = re.sub(r"\s+([" + VALIMERKIT + r"])", r"\1", s)
-
     out = []
-    for word in s.split():
-        parts = word.split("-")
-        # Tyhjä osa alussa tarkoittaa että sana jatkaa edellistä tavua,
-        # tyhjä lopussa että tavu jatkuu seuraavaan.
-        jatkaa_alussa = parts[0] == ""
-        jatkuu_lopussa = parts[-1] == ""
-        core = [p for p in parts if p]
+    i = 0
+    while i < len(text):
+        if text[i] == " ":
+            i += 1
+            continue
+        j = text.index(" ", i) if " " in text[i:] else len(text)
 
-        for i, p in enumerate(core):
-            viiva_ennen = jatkaa_alussa if i == 0 else True
-            viiva_jalkeen = jatkuu_lopussa if i == len(core) - 1 else True
+        parts, at = [], i
+        for piece in text[i:j].split("-"):
+            parts.append((piece, at))
+            at += len(piece) + 1
+        jatkaa_alussa = parts[0][0] == ""
+        jatkuu_lopussa = parts[-1][0] == ""
+        core = [(p, k) for p, k in parts if p]
+
+        for n, (p, k) in enumerate(core):
+            viiva_ennen = jatkaa_alussa if n == 0 else True
+            viiva_jalkeen = jatkuu_lopussa if n == len(core) - 1 else True
             if viiva_ennen and viiva_jalkeen:
                 syllabic = "middle"
             elif viiva_jalkeen:
@@ -54,8 +58,24 @@ def tokenise(row):
                 syllabic = "end"
             else:
                 syllabic = "single"
-            out.append(Syllable(p, syllabic))
+            out.append((Syllable(p, syllabic), k))
+        i = j
     return out
+
+
+def tokenise(row):
+    """Pilkkoo PDF:stä poimitun sanarivin tavuiksi.
+
+    PDF:n välistys on epätasaista — tavuviivan ympärillä on välilyönti
+    milloin sattuu — joten välit siivotaan ensin pois viivan ja välimerkin
+    ympäriltä.
+    """
+    return [s for s, _ in _split(_clean(row))]
+
+
+def syllables_with_x(row):
+    """Rivin tavut ja kunkin x-sijainti PDF:n koordinaatistossa."""
+    return [(s, row.xs[k]) for s, k in _split(row.text)]
 
 
 @dataclass(frozen=True)
@@ -65,13 +85,41 @@ class Row:
     page: int
     y: float
     text: str
+    xs: tuple = ()   # x-sijainti per tekstin merkki
+
+
+def _clean_chars(pairs):
+    """Siivoaa välit tavuviivan ja välimerkin ympäriltä, sijainnit mukana.
+
+    Palauttaa (teksti, x per merkki). Sijainnit kulkevat mukana, koska
+    tavun x-sijainti ratkaisee sen nuotin johon tavu kuuluu.
+    """
+    tight = []
+    for c, x in pairs:
+        if c.isspace():
+            if tight and not tight[-1][0].isspace():
+                tight.append((" ", x))
+        else:
+            tight.append((c, x))
+
+    out = []
+    for i, (c, x) in enumerate(tight):
+        if c == " ":
+            after = tight[i + 1][0] if i + 1 < len(tight) else ""
+            before = out[-1][0] if out else ""
+            if after == "-" or before == "-" or after in VALIMERKIT:
+                continue
+        out.append((c, x))
+
+    while out and out[0][0] == " ":
+        out.pop(0)
+    while out and out[-1][0] == " ":
+        out.pop()
+    return "".join(c for c, _ in out), [x for _, x in out]
 
 
 def _clean(s):
-    """Siivoaa välit tavuviivan ja välimerkin ympäriltä."""
-    s = re.sub(r"\s*-\s*", "-", s)
-    s = re.sub(r"\s+([" + VALIMERKIT + r"])", r"\1", s)
-    return re.sub(r"\s+", " ", s).strip()
+    return _clean_chars([(c, 0.0) for c in s])[0]
 
 
 def _stext(pdf_path, pages):
@@ -121,12 +169,12 @@ def extract_rows(pdf_path, font, pages=None):
                 # Väli päätellään edellisen merkin oikeasta reunasta, ei
                 # sen alusta: leveä kirjain ei ole väli.
                 if edge is not None and left - edge > 0.15 * size:
-                    out.append(" ")
-                out.append(c)
+                    out.append((" ", left))
+                out.append((c, left))
                 edge = right
-            text = _clean("".join(out))
+            text, xs = _clean_chars(out)
             if text:
-                rows.append(Row(number, y, text))
+                rows.append(Row(number, y, text, tuple(xs)))
     return rows
 
 
