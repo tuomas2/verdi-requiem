@@ -351,6 +351,34 @@ Skripti tekee kolme asiaa:
 
 Ajossa menee noin 15 sekuntia, josta lähes kaikki on MuseScoren muunnos.
 
+### Soittimen vaihtaminen
+
+Soittimet ovat `harjoitus.py`:n alussa:
+
+    SOUND = {
+        "oma":     ("brass.trumpet.c", 56),   # se rivi jota luetaan
+        "kuoro":   ("voice.vocals", 52),      # choir aahs
+        "solisti": ("wind.reed.oboe", 68),
+        "piano":   ("keyboard.piano", 0),
+    }
+
+Ensimmäinen arvo on MuseScoren soitintunniste ja toinen ohjelmanumero.
+Numero on **nollapohjainen** kuten MuseScoressa, ei yksipohjainen kuten
+MusicXML:ssä — trumpetti on siis 56 eikä 57.
+
+Tunnisteita saa MuseScoren omista pohjatiedostoista, joita on 63:
+
+    grep -rho "<instrumentId>[^<]*" \
+        "/Applications/MuseScore 4.app/Contents/Resources/templates" | sort -u
+
+Se on kuitenkin vain osa MuseScoren listasta. Jos etsimäsi ei ole siellä,
+anna MuseScoren kertoa se itse: kirjoita soittimen nimi johonkin
+MusicXML-tiedostoon ja katso mitä tuonti tuotti. Juuri niin löytyi
+`brass.trumpet.c`, jota pohjissa ei ole — ja se on **C-trumpetti**, joka
+ei transponoi, toisin kuin pohjien `brass.trumpet.bflat`.
+
+Muutoksen jälkeen aja skripti uudelleen; se ylikirjoittaa `.mscz`:n.
+
 ### Miksi vasket soivat pianona
 
 Tuba mirumissa on oikea D-trumpettistemma. Jos se soisi trumpettina, se
@@ -371,3 +399,8 @@ Pianoraidoissa on noin 1,8 % vähemmän nuotteja kuin suoraan `.mxl`:stä
 viedyssä MIDIssä. Ero syntyy MuseScoren omassa `.mxl` → `.mscz`
 -muunnoksessa eikä tässä skriptissä — patchattu ja patchaamaton `.mscz`
 antavat identtisen MIDIn.
+
+Itse voit tarkistaa tuloksen avaamalla tiedoston ja painamalla play:
+näkyvissä pitää olla yksi viivasto, ja soinnista pitää erottua trumpetti
+kuoron seasta. Jos MuseScoren päivitys joskus rikkoo tiedoston, aja
+skripti uudelleen — lähdeaineistoon se ei koske.
