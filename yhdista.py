@@ -47,6 +47,7 @@ MOVEMENTS = [
     ("08-Verdi_Recordare.mxl",                      "II·7",  "Recordare"),
     ("09-Verdi_Ingemisco.mxl",                      "II·8",  "Ingemisco"),
     ("10-Verdi_Confutatis.mxl",                     "II·9",  "Confutatis"),
+    ("10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl",  "II·9b", "Dies irae (kertaus)"),
     ("11-Verdi_Lacrymosa.mxl",                      "II·10", "Lacrymosa"),
     ("12-Verdi_Offertorio.mxl",                     "III",   "Offertorio"),
     ("13-Verdi-Sanctus.mxl",                        "IV",    "Sanctus"),
@@ -109,6 +110,13 @@ MAPPING = {
     },
     "09-Verdi_Ingemisco.mxl": {"Solisti T": ["P1"], "Piano": ["P2"]},
     "10-Verdi_Confutatis.mxl": {"Solisti B": ["P1"], "Piano": ["P2"]},
+    "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": {
+        # Confutatiksen ja Lacrymosan välissä puuttunut "Dies irae" -paluu,
+        # konelukemisella talteen otettu erillisestä lähde-PDF:stä
+        # (Verdi_10bDies_irae.pdf, tahdit 573-623 alkuperäisessä numeroinnissa).
+        "Kuoro S": ["P1"], "Kuoro A": ["P2"], "Kuoro T": ["P3"], "Kuoro B": ["P4"],
+        "Piano": ["P5"],
+    },
     "11-Verdi_Lacrymosa.mxl": {
         "Solisti S": ["P1"], "Solisti M-S": ["P2"], "Solisti T": ["P3"], "Solisti B": ["P4"],
         "Kuoro S": ["P5"], "Kuoro A": ["P6"], "Kuoro T": ["P7"],
@@ -155,7 +163,8 @@ TITLE_PARTS = ["Solisti S", "Kuoro B"]
 # Konelukemisella tuotetut osat: niiden tahtien pituudet normalisoidaan.
 # Sanat on korjattu lähde-PDF:ää vasten, ks. korjaa_sanat.py.
 OMR_SOURCES = {"01-Verdi_Requiem-kasin.mxl",
-               "14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl"}
+               "14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl",
+               "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl"}
 
 SANCTUS = "13-Verdi-Sanctus.mxl"
 SINGER_PARTS = {

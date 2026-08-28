@@ -4,15 +4,17 @@
 
 | Tiedosto | Sisältö |
 |---|---|
-| `Verdi-Requiem-koko.mxl` | Koko teos, 15 viivastoa, 1756 tahtia |
-| `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, 13-14 sivua kukin |
-| `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa |
+| `Verdi-Requiem-koko.mxl` | Koko teos, 15 viivastoa, 1807 tahtia |
+| `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa — Basso I ajan tasalla, muut seitsemän odottavat uudelleenrakennusta II·9b:n jälkeen |
+| `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa — vanhentunut II·9b:n verran, ei vielä päivitetty |
 | `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys |
 | `harjoitus-*.mscz` | Harjoittelutiedosto: oma ääni trumpettina, muut piilossa |
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
-| `korjaa_sanat.py` | Korjaa osien 01 ja 14 kuorosanat lähde-PDF:ää vasten |
+| `korjaa_sanat.py` | Korjaa osien 01, 14 ja II·9b:n kuorosanat lähde-PDF:ää vasten |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
+| `Verdi_10bDies_irae.pdf` | II·9b:n lähde-PDF (käyttäjän löytämä) |
+| `10b-Verdi_Dies_irae_paluu-OMR*.mxl` | II·9b, konelukemisen tulos ja sanakorjattu versio |
 
 ## Työnkulku
 
@@ -143,17 +145,26 @@ Basso II tahdissa 4, molemmat sävelellä C3 sanalla "San-ctus".
 | Numero | Osa | Tahteja |
 |---|---|---:|
 | I | Requiem & Kyrie | 140 |
-| II | Dies irae (10 alaosaa) | 655 |
+| II | Dies irae (10 alaosaa + II·9b) | 706 |
 | III | Offertorio | 222 |
 | IV | Sanctus | 139 |
 | V | Agnus Dei | 74 |
 | VI | Lux aeterna | 105 |
 | VII | Libera me | 421 |
-| | **Yhteensä** | **1756** |
+| | **Yhteensä** | **1807** |
 
 Kuorobasso vaikenee kokonaan osissa II·3 Mors stupebit, II·5 Quid sum miser,
 II·7 Recordare, II·8 Ingemisco, II·9 Confutatis, III Offertorio ja VI Lux
 aeterna — ne ovat soolonumeroita. Se ei ole virhe.
+
+**II·9b "Dies irae (kertaus)"** on uusi, 51 tahdin osa Confutatiksen ja
+Lacrymosan välissä. Se puuttui aiemmin kokonaan — Verdin "Dies irae"
+-teema palaa täällä toisen kerran (kolmesta), eikä sillä ole omaa nimeä
+missään tavallisessa osaluettelossa, joten se ei ollut minkään
+lähdetiedostomme mukana. Löytyi erillisestä PDF:stä ja luettiin koneellisesti
+samalla tavalla kuin osat I ja V. Kuorobasson sanat on tarkistettu; nuotit
+ja muut äänet eivät vielä ole. Ks. `CLAUDE.md`: **Fixing OMR lyrics** ja
+**The missing Dies irae recall (II·9b)** tekniselle taustalle.
 
 ## Tunnetut rajoitukset
 

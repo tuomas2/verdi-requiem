@@ -17,18 +17,23 @@ the reading part must be dense.
 ## Where things stand
 
 Done and verified: the merge, the eight reading parts, the chorus **lyrics**
-of the two OMR movements, and a practice `.mscz` per singer.
+of the two OMR movements, a practice `.mscz` per singer, and — new — a
+previously **entirely missing** ~50-measure passage (the second "Dies irae"
+recall, between Confutatis and Lacrymosa) found, OMR'd, and wired in as
+movement "II·9b". Its chorus-bass lyrics are checked; everything else about
+it is not.
 
 Open, roughly in the order a singer would feel them:
 
 | Open | Where to read up |
 |---|---|
-| **Notes** of movements 01 and 14 are still unproofread | *OMR recipe*; the lyrics pass did not touch notes |
+| **Notes** of movements 01, 14 and II·9b are still unproofread | *OMR recipe*, *The missing Dies irae recall*; the lyrics pass did not touch notes |
 | Movement 01's Kyrie (from bar 91) still drops syllables | *What is left* — the OMR lost notes there, so it is note work, not text work |
 | Movement 14 is weak throughout — 25–81 % matched, 71 bass notes still wordless | same |
+| II·9b: Soprano/Alto/Tenor lyrics unchecked, 3-measure numbering disagreement | *The missing Dies irae recall* |
 | 13 lyric changes reported but deliberately not applied | `python3 korjaa_sanat.py --kuiva` lists them |
 | Movement I has no piano | *Movement I has no piano* |
-| Four assumptions made without the rehearsal score | *Open assumptions* |
+| Five assumptions made without the rehearsal score | *Open assumptions* |
 
 ## Layout of the directory
 
@@ -36,9 +41,10 @@ Open, roughly in the order a singer would feel them:
 |---|---|
 | `01…16-*.mxl` | Source movements, numbered by position in the whole work |
 | `01-*.pdf`, `14-*.pdf` | Source PDFs for the two movements that had no MusicXML |
-| `*.omr` | Audiveris projects for those two, for manual correction |
-| `*-OMR-korjattu.mxl` | Those two with their chorus lyrics fixed from the PDFs |
-| `Verdi-Requiem-koko.mxl` | Merged score, 15 staves, 1756 measures |
+| `Verdi_10bDies_irae.pdf` | Source PDF for II·9b, the missing "Dies irae" recall (see below) |
+| `*.omr` | Audiveris projects, for manual correction |
+| `*-OMR-korjattu.mxl` | OMR'd sections with their chorus lyrics fixed from the PDFs |
+| `Verdi-Requiem-koko.mxl` | Merged score, 15 staves, 1807 measures |
 | `stemma-*.mxl` / `.pdf` | Eight choir reading parts |
 | `stemmat-sisallys.txt` | Where each movement starts in all eight |
 | `yhdista.py` | The merge tool; mapping table at the top |
@@ -219,6 +225,7 @@ line to change in `yhdista.py`; see `YHDISTAMINEN.md` for how.
 | Assumption | Why | How to settle |
 |---|---|---|
 | Measure numbers restart in every movement | The rehearsal score was not available | Check whether the book numbers Dies irae 1–655 continuously |
+| Confutatis→Lacrymosa gap (II·9b) is 51 measures at book-numbers 573–623 | Three sources disagree by up to 3 measures on where Lacrymosa starts (624 / 621 / this file's own 623→624) | Get the choir book's own start numbers for Tuba mirum, Recordare, Confutatis (partly done — see *The missing Dies irae recall*) and localise the gap properly |
 | Sanctus chorus bass = Bass I | User has the higher of the two; Bass I is higher (median G3 vs D3) | Bass I enters at m. 2, Bass II at m. 4 |
 | Movement 05 soloist = mezzo | File says "Soprano solo" but Liber scriptus is the mezzo aria | Musicological, not a data question |
 | Movements 12, 15 soloist order | Parts are unnamed; inferred from standard score order | Compare with any full score |
@@ -349,6 +356,118 @@ syllables than the system has notes, meaning the OMR dropped notes as well as
 lyrics. Those need a person in MuseScore, and they also need the *notes*
 checked, so they are proofreading work either way.
 
+
+## The missing Dies irae recall (II·9b)
+
+Verdi's "Dies irae" theme returns three times: end of Liber scriptus, end of
+Confutatis, and the start of Libera me. **The second return was entirely
+missing from every source file** — Confutatis (`10-Verdi_Confutatis.mxl`)
+ends cleanly on the soloist's "gere curam mei finis" and Lacrymosa
+(`11-Verdi_Lacrymosa.mxl`) starts cold on "Lacrymosa dies illa", with nothing
+between them in any of the 16 source files. It is not a separately titled
+section in any standard listing (confirmed by web search and by the absence
+of anything between the two on CPDL's own page), which is exactly why a
+per-movement CPDL split would drop it — there is no title to hang a file on.
+
+The user found a PDF containing it (`Verdi_10bDies_irae.pdf`, "Print to PDF"
+export, vector text and noteheads — same good case as 01/14) and confirmed
+against it that the passage is real, substantial content (SATB + piano, not
+a one-bar transition).
+
+### Recipe: OMR it exactly like movements 01/14
+
+    Audiveris -batch -transcribe -export \
+      -constant org.audiveris.omr.image.ImageLoading.pdfResolution=450 \
+      -output DIR -- Verdi_10bDies_irae.pdf
+
+Audiveris was not installed (see *Environment*); reinstalled from the 5.11.0
+macOS arm64 `.dmg` via the `hdiutil convert`/`attach` trick, copied to
+`/Applications`, quarantine cleared with `xattr -dr` (a handful of read-only
+JRE license files refuse — harmless, they are not executables).
+
+Output: 5 parts (`Voice`×4 + `Piano`), 51 measures, **equal counts across
+parts** — `fix-mxl.py` was not needed this time. Structural cross-check: the
+one long tied note in the bass (4 measures, impossible to read confidently
+off a rendered image by eye) came out as G3, and independently matches where
+a person would place it by ear from the image. That agreement is the reason
+to trust OMR over eyeballing pixels for polyphonic passages — there is no way
+to "hear" a static image to check a guess, but OMR gives a second, structurally
+independent read.
+
+**Do not try to eyeball pitches from a rendered page for anything beyond a
+single already-known melodic line** (like the syllable/x-position work
+above). A sustained chord tone in an inner voice has no reliable landmark at
+screen resolution, and there is no way to verify a guess before it is already
+written into a file. This was tried first, got stuck on exactly that note,
+and was abandoned in favour of OMR mid-session.
+
+Lyrics: added as a fourth `Source` entry to `korjaa_sanat.py`'s `SOURCES`
+list — the pipeline needed zero code changes, only a new entry. The lyric
+font in this PDF reports as `F3` under `mutool draw -F stext` (a generic
+subset-font resource name, not a real family name like "Times-Roman"/
+"Garamond" — `extract_rows` just needs the exact string `stext` reports, so
+this is not a special case). Result: 109 changes, 0 uncertain proposals,
+72 % matched in the chorus bass. The `kohdistamatta` lines in the dry-run
+report for this file are stale/rejected-candidate noise, not real gaps —
+checked every one against the actual note/lyric data and against the source
+page images, and the chorus bass text is complete and correct start to
+finish (the only notes without their own lyric are legitimate tie
+continuations of an already-lyric'd note, or passing tones within a
+syllable's note group, both normal). **Soprano/Alto/Tenor were not checked
+this closely** — they show many more notes-without-lyric than the bass,
+plausibly genuine melismas (the bass just holds one pedal tone through the
+same passage where the upper voices have a triplet flourish) but not
+verified one by one the way the bass was.
+
+Wiring into `yhdista.py`: new file
+`10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl`, inserted between Confutatis and
+Lacrymosa in `MOVEMENTS` (numbered "II·9b", titled "Dies irae (kertaus)" —
+there is no standard number for it, see above), a `MAPPING` entry
+(P1–P4 → Kuoro S/A/T/B, P5 → Piano), and added to `OMR_SOURCES` for
+documentation (that set is not actually read anywhere else in the script —
+checked with `grep -rn OMR_SOURCES *.py` — so this is bookkeeping only, not
+functional). Verified with the usual note-count comparison:
+`Verdi-Requiem-koko.mxl` went from 1756 to 1807 measures (+51, exact), Kuoro
+B from 1824 to 1888 notes, and the file still converts in MuseScore without
+`-f` on the first try.
+
+### Open: which measure numbers is this actually at
+
+Three numbers for where Lacrymosa starts, from three sources, none agreeing:
+
+| Source | Lacrymosa starts at |
+|---|---|
+| User's rehearsal-score excerpt (first pass) | 624 |
+| `Verdi_10bDies_irae.pdf`'s own printed numbers (573–623, confirmed both ends) | → would be 624 |
+| User's actual choir book (second, later confirmation) | 621 |
+
+The PDF's own numbers agree with the *first* reading (624) but not the
+*second* (621, "meidän nuottikirjassa" — presumably the more authoritative
+one, since it is described as the choir's actual book rather than a found
+PDF). A 3-measure disagreement this late in the chain could be a genuine
+edition difference (bar-splitting, or an editorial cut) anywhere in the ~50
+intervening measures, not necessarily in this file. **Do not guess at a
+fix** — this needs the same treatment as the rest of *Open assumptions*
+below: get the choir book's own numbers for a few more anchor points
+(Tuba mirum, Recordare, Confutatis starts already partly done earlier in
+this same investigation) and localise it properly before touching anything.
+This is independent of whether `NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA` ever
+gets flipped — it stays `True` regardless, so none of this blocks day-to-day
+use of the file as it stands now.
+
+### What is left here specifically
+
+1. Soprano/Alto/Tenor lyrics for II·9b — same close-verification pass the
+   bass already got (see above).
+2. Notes for all four voices are OMR output, unproofread against the source
+   PDF beyond the one structural spot-check (the tied G3). Same category as
+   *What is left* for movements 01/14 below.
+3. The 3-measure numbering disagreement above.
+4. `harjoitus.py` / all eight `stemma-*` files besides Basso I have not been
+   rebuilt since this section was added — only `Verdi-Requiem-koko.mxl` and
+   `stemma-basso-1.mxl/.pdf` were regenerated and checked. Rerun
+   `yhdista.py --stemma "..."` for the other seven when needed; nothing
+   about them requires new work, they just have not been run.
 
 ## The practice file: one visible staff, everything still sounding
 

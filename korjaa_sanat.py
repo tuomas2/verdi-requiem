@@ -778,6 +778,14 @@ SOURCES = [
                ("P3", "Kuoro T"), ("P4", "Kuoro B")),
         out="14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl",
     ),
+    Source(
+        mxl="10b-Verdi_Dies_irae_paluu-OMR.mxl",
+        pdf="Verdi_10bDies_irae.pdf",
+        font="F3",
+        parts=(("P1", "Kuoro S"), ("P2", "Kuoro A"),
+               ("P3", "Kuoro T"), ("P4", "Kuoro B")),
+        out="10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl",
+    ),
 ]
 
 

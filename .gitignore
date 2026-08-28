@@ -1,6 +1,7 @@
 # MuseScoren automaattiset varmuuskopiot
 .mscbackup/
 *~
+*.autosave
 
 # macOS
 .DS_Store
