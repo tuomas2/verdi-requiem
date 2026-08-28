@@ -3,8 +3,9 @@
 
 Jokainen lähdetiedosto on oma osansa, ja niiden osastot kartoitetaan
 yhteiseen viivastojoukkoon niin että sama ääni pysyy koko teoksen ajan
-samalla rivillä. Tahtinumerointi säilyy lähteen mukaisena, eli alkaa
-joka osassa ykkösestä.
+samalla rivillä. Dies iraen (osa II) alaosien tahtinumerointi juoksee
+yhtenäisesti läpi koko osan; muualla numerointi alkaa joka osassa
+ykkösestä.
 
 Käyttö:  python3 yhdista.py [ulostulo.mxl]
 """
@@ -178,17 +179,21 @@ SINGER_PARTS = {
     "Basso II":       ("Kuoro B", "Kuoro B II"),
 }
 
-# Jos kuoroharjoitusten nuottikirja numeroikin Dies iraen yhtenäisesti, aseta
-# tämä epätodeksi ja anna alaosille siirtymä. Siirtymät ovat edeltävien
-# alaosien tahtimäärien summia: 02=+0, 03=+91, 04=+140, 05=+162, 06=+270,
-# 07=+323, 08=+385, 09=+449, 10=+506, 11=+577.
-NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = True
+# Siirtymät ovat edeltävien alaosien tahtimäärien summia: 02=+0, 03=+91,
+# 04=+140, 05=+162, 06=+270, 07=+323, 08=+385, 09=+449, 10=+506, 10b=+577,
+# 11=+628. Nämä on laskettu mekaanisesti lähdetiedostojen omista
+# tahtimääristä, ei tarkistettu kuoron painetun nuottikirjan sivuja vasten —
+# ks. CLAUDE.md "Open: which measure numbers is this actually at" siitä
+# miksi 10b:n ja Lacrymosan täsmällinen sijainti kirjassa on yhä auki.
+NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False
 DIES_IRAE_SIIRTYMAT = {
     "02-Verdi-Dies_irae.mxl": 0, "03-Verdi-Tuba_mirum.mxl": 91,
     "04-Verdi-Mors_stupebit.mxl": 140, "05-Verdi-Liber_scriptus.mxl": 162,
     "06-Verdi-Quid_sum_miser.mxl": 270, "07-Verdi-Rex.mxl": 323,
     "08-Verdi_Recordare.mxl": 385, "09-Verdi_Ingemisco.mxl": 449,
-    "10-Verdi_Confutatis.mxl": 506, "11-Verdi_Lacrymosa.mxl": 577,
+    "10-Verdi_Confutatis.mxl": 506,
+    "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": 577,
+    "11-Verdi_Lacrymosa.mxl": 628,
 }
 
 TARGETS_BY_NAME = [(t[0], t) for t in TARGETS]

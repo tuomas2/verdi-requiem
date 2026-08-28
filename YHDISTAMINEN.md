@@ -5,8 +5,8 @@
 | Tiedosto | Sisältö |
 |---|---|
 | `Verdi-Requiem-koko.mxl` | Koko teos, 15 viivastoa, 1807 tahtia |
-| `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa — Basso I ajan tasalla, muut seitsemän odottavat uudelleenrakennusta II·9b:n jälkeen |
-| `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa — vanhentunut II·9b:n verran, ei vielä päivitetty |
+| `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, kaikki ajan tasalla (II·9b mukana, tahtinumerointi juoksee Dies iraen läpi) |
+| `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa, ajan tasalla |
 | `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys |
 | `harjoitus-*.mscz` | Harjoittelutiedosto: oma ääni trumpettina, muut piilossa |
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
@@ -118,16 +118,21 @@ Kuoro B on se rivi jota luetaan. Kuoro S II – B II esiintyvät vain Sanctukses
 
 ## Tahtinumerointi
 
-Numerointi säilyy lähdetiedostojen mukaisena, eli **alkaa joka osassa ykkösestä**.
-MuseScore kunnioittaa MusicXML:n tahtinumeroita, joten osiorajoja ei tarvita.
+Numerointi alkaa joka pääosassa (I, III, IV, V, VI, VII) ykkösestä. Poikkeus
+on osa II, Dies irae: sen kymmenen alaosaa ja II·9b juoksevat yhtenäisesti
+1:stä 706:een, koska kuoron nuottikirja numeroi Dies iraen niin. MuseScore
+kunnioittaa MusicXML:n tahtinumeroita, joten osiorajoja ei tarvita kummassakaan
+tapauksessa.
 
-Tämä on oletus, joka on tehty ilman kuoron nuottikirjaa. Jos kirja numeroikin
-Dies iraen yhtenäisesti läpi, aseta `yhdista.py`:ssä
+Toteutus on `yhdista.py`:n `DIES_IRAE_SIIRTYMAT`-taulukko ja kytkin
 
     NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False
 
-jolloin `DIES_IRAE_SIIRTYMAT` lisää alaosiin vakiosiirtymän ja numerointi juoksee
-1–655 koko numeron II läpi.
+Siirtymät on laskettu mekaanisesti alaosien omista tahtimääristä, ei
+tarkistettu kuoron painetun nuottikirjan sivuja vasten yksi kerrallaan.
+II·9b:n ja Lacrymosan täsmällinen sijainti kirjassa on siksi yhä auki —
+ks. `CLAUDE.md`: **The missing Dies irae recall (II·9b)** → "Open: which
+measure numbers is this actually at".
 
 ## Oletukset jotka voi joutua korjaamaan
 

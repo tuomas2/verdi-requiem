@@ -21,7 +21,9 @@ of the two OMR movements, a practice `.mscz` per singer, and — new — a
 previously **entirely missing** ~50-measure passage (the second "Dies irae"
 recall, between Confutatis and Lacrymosa) found, OMR'd, and wired in as
 movement "II·9b". Its chorus-bass lyrics are checked; everything else about
-it is not.
+it is not. Also new: Dies irae's ten sub-movements plus II·9b now number
+continuously (1–706) instead of each restarting at 1, matching how the
+choir's rehearsal book numbers that section — see *Open assumptions*.
 
 Open, roughly in the order a singer would feel them:
 
@@ -30,7 +32,7 @@ Open, roughly in the order a singer would feel them:
 | **Notes** of movements 01, 14 and II·9b are still unproofread | *OMR recipe*, *The missing Dies irae recall*; the lyrics pass did not touch notes |
 | Movement 01's Kyrie (from bar 91) still drops syllables | *What is left* — the OMR lost notes there, so it is note work, not text work |
 | Movement 14 is weak throughout — 25–81 % matched, 71 bass notes still wordless | same |
-| II·9b: Soprano/Alto/Tenor lyrics unchecked, 3-measure numbering disagreement | *The missing Dies irae recall* |
+| II·9b: Soprano/Alto/Tenor lyrics unchecked; its exact position vs. the choir book is still 3–5 measures uncertain | *The missing Dies irae recall* |
 | 13 lyric changes reported but deliberately not applied | `python3 korjaa_sanat.py --kuiva` lists them |
 | Movement I has no piano | *Movement I has no piano* |
 | Five assumptions made without the rehearsal score | *Open assumptions* |
@@ -224,8 +226,8 @@ line to change in `yhdista.py`; see `YHDISTAMINEN.md` for how.
 
 | Assumption | Why | How to settle |
 |---|---|---|
-| Measure numbers restart in every movement | The rehearsal score was not available | Check whether the book numbers Dies irae 1–655 continuously |
-| Confutatis→Lacrymosa gap (II·9b) is 51 measures at book-numbers 573–623 | Three sources disagree by up to 3 measures on where Lacrymosa starts (624 / 621 / this file's own 623→624) | Get the choir book's own start numbers for Tuba mirum, Recordare, Confutatis (partly done — see *The missing Dies irae recall*) and localise the gap properly |
+| ~~Measure numbers restart in every movement~~ — **settled**: Dies irae (02–11, incl. II·9b) now numbers 1–706 continuously; every other movement still restarts at 1 | The user confirmed the choir's rehearsal book numbers Dies irae continuously | Done — `NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False`, offsets computed mechanically from each sub-movement's own measure count (verified against the actual files, not hand-summed) |
+| Confutatis→Lacrymosa gap (II·9b) is 51 measures, computed at 578–628 (Lacrymosa starts 629) | Mechanical cumulative count from source files' own measure counts. Three other sources disagree by up to 5 measures on where this gap sits (PDF's own printed numbers say 573–623/624; the choir book itself said 621) | Get the choir book's own start numbers for Tuba mirum, Recordare, Confutatis (partly done — see *The missing Dies irae recall*) to find which sub-movement's own bar count differs from the book, and localise the gap properly |
 | Sanctus chorus bass = Bass I | User has the higher of the two; Bass I is higher (median G3 vs D3) | Bass I enters at m. 2, Bass II at m. 4 |
 | Movement 05 soloist = mezzo | File says "Soprano solo" but Liber scriptus is the mezzo aria | Musicological, not a data question |
 | Movements 12, 15 soloist order | Parts are unnamed; inferred from standard score order | Compare with any full score |
@@ -433,27 +435,35 @@ B from 1824 to 1888 notes, and the file still converts in MuseScore without
 
 ### Open: which measure numbers is this actually at
 
-Three numbers for where Lacrymosa starts, from three sources, none agreeing:
+Dies irae now numbers continuously (`NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA =
+False`), with 10b's offset computed the same mechanical way as every other
+sub-movement: the sum of the actual measure counts of 02–10 (577), verified
+against the files themselves, not hand-summed. That places 10b at 578–628
+and Lacrymosa's start at 629.
 
-| Source | Lacrymosa starts at |
-|---|---|
-| User's rehearsal-score excerpt (first pass) | 624 |
-| `Verdi_10bDies_irae.pdf`'s own printed numbers (573–623, confirmed both ends) | → would be 624 |
-| User's actual choir book (second, later confirmation) | 621 |
+That computed 578 does not agree with three other numbers for this same
+spot, none of which agree with each other either:
 
-The PDF's own numbers agree with the *first* reading (624) but not the
-*second* (621, "meidän nuottikirjassa" — presumably the more authoritative
-one, since it is described as the choir's actual book rather than a found
-PDF). A 3-measure disagreement this late in the chain could be a genuine
-edition difference (bar-splitting, or an editorial cut) anywhere in the ~50
-intervening measures, not necessarily in this file. **Do not guess at a
-fix** — this needs the same treatment as the rest of *Open assumptions*
-below: get the choir book's own numbers for a few more anchor points
-(Tuba mirum, Recordare, Confutatis starts already partly done earlier in
-this same investigation) and localise it properly before touching anything.
-This is independent of whether `NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA` ever
-gets flipped — it stays `True` regardless, so none of this blocks day-to-day
-use of the file as it stands now.
+| Source | 10b starts at | Lacrymosa starts at |
+|---|---|---|
+| Computed from source files' own measure counts (what's in `yhdista.py` now) | 578 | 629 |
+| User's rehearsal-score excerpt (first pass) | — | 624 |
+| `Verdi_10bDies_irae.pdf`'s own printed numbers (573–623, confirmed both ends) | 573 | → would be 624 |
+| User's actual choir book (second, later confirmation) | — | 621 |
+
+The gap between the computed 578 and the PDF's own 573 (5 measures) is
+*larger* than the gap already noted between the two book-adjacent readings,
+624 and 621 (3 measures) — and it must sit somewhere in movements 02–10,
+not in 10b itself, since 10b's own length (51 measures) is not in question.
+**Do not guess at a fix.** This needs the same treatment as the rest of
+*Open assumptions* above: get the choir book's own numbers for a few more
+anchor points (Tuba mirum, Recordare, Confutatis starts — partly done
+earlier in this same investigation, but not written down anywhere, so
+gather them again) and localise which sub-movement's bar count disagrees
+with the book before touching the offsets. None of this blocks day-to-day
+use of the file as it stands now — the numbering is internally consistent
+and continuous, just not yet proven to match the physical book digit for
+digit past Confutatis.
 
 ### What is left here specifically
 
@@ -462,12 +472,7 @@ use of the file as it stands now.
 2. Notes for all four voices are OMR output, unproofread against the source
    PDF beyond the one structural spot-check (the tied G3). Same category as
    *What is left* for movements 01/14 below.
-3. The 3-measure numbering disagreement above.
-4. `harjoitus.py` / all eight `stemma-*` files besides Basso I have not been
-   rebuilt since this section was added — only `Verdi-Requiem-koko.mxl` and
-   `stemma-basso-1.mxl/.pdf` were regenerated and checked. Rerun
-   `yhdista.py --stemma "..."` for the other seven when needed; nothing
-   about them requires new work, they just have not been run.
+3. The measure-numbering disagreement above (computed 578 vs. the book).
 
 ## The practice file: one visible staff, everything still sounding
 
