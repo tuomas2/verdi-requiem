@@ -37,7 +37,7 @@ TARGETS = [
 # ---------------------------------------------------------------- osat
 # (tiedosto, numero partituurissa, nimi)
 MOVEMENTS = [
-    ("01-Verdi_Requiem-OMR-korjattu.mxl",           "I",     "Requiem & Kyrie"),
+    ("01-Verdi_Requiem-kasin.mxl",                  "I",     "Requiem & Kyrie"),
     ("02-Verdi-Dies_irae.mxl",                      "II·1",  "Dies irae"),
     ("03-Verdi-Tuba_mirum.mxl",                     "II·2",  "Tuba mirum"),
     ("04-Verdi-Mors_stupebit.mxl",                  "II·3",  "Mors stupebit"),
@@ -62,7 +62,7 @@ MOVEMENTS = [
 #   ("P5", 14, None, 1)               kuten yllä, mutta kohdeviivastolle 1
 # Useampi viipale samassa listassa yhdistyy samalle riville.
 MAPPING = {
-    "01-Verdi_Requiem-OMR-korjattu.mxl": {
+    "01-Verdi_Requiem-kasin.mxl": {
         # Audiveris pilkkoi solistiviivastot useaan osastoon; ne yhdistetään.
         "Solisti S": ["P7", "P3", "P1"],
         "Solisti M-S": ["P8", "P4", "P2"],
@@ -154,7 +154,7 @@ TITLE_PARTS = ["Solisti S", "Kuoro B"]
 # laulaja lukee tavallista riviä kaikissa muissa osissa.
 # Konelukemisella tuotetut osat: niiden tahtien pituudet normalisoidaan.
 # Sanat on korjattu lähde-PDF:ää vasten, ks. korjaa_sanat.py.
-OMR_SOURCES = {"01-Verdi_Requiem-OMR-korjattu.mxl",
+OMR_SOURCES = {"01-Verdi_Requiem-kasin.mxl",
                "14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl"}
 
 SANCTUS = "13-Verdi-Sanctus.mxl"
