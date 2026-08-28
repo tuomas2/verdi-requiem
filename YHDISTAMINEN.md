@@ -180,6 +180,16 @@ julkaisukuntoisista lähteistä.
 Sanat on nyt korjattu koneellisesti lähde-PDF:ää vasten, ks. **Sanojen
 korjaus** alla. Nuotteja se ei koske: ne pitää edelleen oikaisulukea.
 
+**Poikkeus edelliseen: Lacrymosan (11) kuorobassolla oli aito virhe, ei
+OMR:stä johtuva.** Rivin loppupuolella (n. 30 tahtia) oli joko tyhjää tai
+väärää tekstiä — sanat vaikuttivat kopioituneen väärään kohtaan alkuperäisen
+tiedoston teossa. Löytyi ja korjattiin 2026-08-28 vertaamalla toiseen,
+käyttäjän löytämään Lacrymosa-PDF:ään. Tekninen tausta: `CLAUDE.md` ->
+**Lacrymosa's chorus bass: wrong text, not missing measures**. Muiden äänten
+(Sopraano/Altto/Tenori, solistit) samaa tiedostoa ei ole tarkistettu yhtä
+tarkasti — sama virhetyyppi voisi periaatteessa olla muuallakin näissä 14
+"luotettavassa" osassa.
+
 **MuseScore ilmoitti aiemmin tiedoston korruptoituneeksi.** Se on korjattu.
 Syy oli lähteissä 05 ja 16: niiden pianostemmassa on nuotteja, joissa on
 kaksinkertainen nuottiarvo puolella kestolla (`<time-modification>` 2:1).

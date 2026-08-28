@@ -23,7 +23,11 @@ recall, between Confutatis and Lacrymosa) found, OMR'd, and wired in as
 movement "II·9b". Its chorus-bass lyrics are checked; everything else about
 it is not. Also new: Dies irae's ten sub-movements plus II·9b now number
 continuously (1–706) instead of each restarting at 1, matching how the
-choir's rehearsal book numbers that section — see *Open assumptions*.
+choir's rehearsal book numbers that section — see *Open assumptions*. Also
+new: **movement 11's own chorus bass (Kuoro B) had ~30 measures of wrong or
+missing lyrics near the end** — not an OMR file, a genuine bug in the
+original CPDL source, undetected until now — found and fixed; see
+*Lacrymosa's chorus bass: wrong text, not missing measures*.
 
 Open, roughly in the order a singer would feel them:
 
@@ -33,6 +37,7 @@ Open, roughly in the order a singer would feel them:
 | Movement 01's Kyrie (from bar 91) still drops syllables | *What is left* — the OMR lost notes there, so it is note work, not text work |
 | Movement 14 is weak throughout — 25–81 % matched, 71 bass notes still wordless | same |
 | II·9b: Soprano/Alto/Tenor lyrics unchecked; its exact position vs. the choir book is still 3–5 measures uncertain | *The missing Dies irae recall* |
+| Lacrymosa fix: a few melisma-internal syllable placements are best-guess, not page-verified one by one | *Lacrymosa's chorus bass* |
 | 13 lyric changes reported but deliberately not applied | `python3 korjaa_sanat.py --kuiva` lists them |
 | Movement I has no piano | *Movement I has no piano* |
 | Five assumptions made without the rehearsal score | *Open assumptions* |
@@ -44,6 +49,7 @@ Open, roughly in the order a singer would feel them:
 | `01…16-*.mxl` | Source movements, numbered by position in the whole work |
 | `01-*.pdf`, `14-*.pdf` | Source PDFs for the two movements that had no MusicXML |
 | `Verdi_10bDies_irae.pdf` | Source PDF for II·9b, the missing "Dies irae" recall (see below) |
+| `Verdi_Lacymosa.pdf` | Reference PDF used to fix movement 11's chorus-bass lyric bug (see *Lacrymosa's chorus bass*) — not itself an `.mxl` source, just a comparison copy |
 | `*.omr` | Audiveris projects, for manual correction |
 | `*-OMR-korjattu.mxl` | OMR'd sections with their chorus lyrics fixed from the PDFs |
 | `Verdi-Requiem-koko.mxl` | Merged score, 15 staves, 1807 measures |
@@ -473,6 +479,98 @@ digit past Confutatis.
    PDF beyond the one structural spot-check (the tied G3). Same category as
    *What is left* for movements 01/14 below.
 3. The measure-numbering disagreement above (computed 578 vs. the book).
+
+## Lacrymosa's chorus bass: wrong text, not missing measures
+
+Found 2026-08-28, while cross-checking the new continuous numbering against a
+second Lacrymosa PDF the user located for comparison (`Verdi_Lacymosa.pdf`,
+another "Print to PDF" export, same CPDL edition, vector text — the same good
+case as 01/14/II·9b). The user first noticed their own reading part ends on
+"par-ce" where the reference PDF ends on "A-men" — i.e. the *last* two
+measures looked wrong. Checking properly showed the real damage was much
+bigger.
+
+**This file is not one of the OMR movements.** `11-Verdi_Lacrymosa.mxl` came
+from the CPDL Finale 2014 + Dolet batch like 10 other movements, and was
+believed reliable. It wasn't, for one voice: the chorus bass (`Kuoro B`, the
+line the user reads) had its final ~30 measures' text either **silent where
+the real part sings**, or **carrying the wrong words** — apparently a chunk of
+its own much-earlier "Lacrymosa dies illa...huic ergo parce" text got
+duplicated onto later measures that actually carry "dona eis requiem...
+Amen". The notes/rhythm were mostly fine underneath; only the lyric layer (and
+a handful of wholly-missing measures) was wrong. This is a plain authoring bug
+in a "trusted" source file, unrelated to OMR — it had been sitting undetected
+since the original merge.
+
+### How it was found and fixed
+
+1. Compared `11-Verdi_Lacrymosa.mxl`'s `Kuoro B` (P8) lyric stream against
+   every other voice in the same file (`P1`–`P7`): all seven others reach
+   "...dona eis requiem. Amen."; only `P8` stopped at "...huic ergo parce"
+   with three trailing rest measures.
+2. OMR'd the new PDF whole (`Audiveris -batch -transcribe -export
+   -constant ...pdfResolution=450`, same recipe as always) — 16 pages, 10
+   staves per system where the full choir is active, so a ~22-minute run,
+   much longer than the 51-measure II·9b job.
+3. **The OMR part numbering is not stable across the piece.** This PDF's
+   layout hides inactive staves (it opens with just 2 of the eventual 10:
+   Mezzosoprano solo + Bass solo, with Soprano/Tenor solo and the four chorus
+   parts entering one at a time as the fugato progresses). Audiveris's "P8"
+   therefore does *not* reliably mean chorus bass in the early measures — it
+   only stabilises once the full 8-voice texture is established partway in
+   (confirmed measure-for-measure against page images). Trusting OMR's
+   part-N labelling blindly from measure 1 would have been wrong.
+4. Where OMR's `P8` and the source's `P8` had matching notes but conflicting
+   lyrics, **direct visual inspection of the actual page settled it**, not
+   OMR's OCR and not the source file's say-so alone: rendered the relevant
+   pages at 200–250 dpi and read the chorus-bass staff (identifiable as the
+   4th of 4, or 8th of 8, visible bass-clef vocal staff — soloists-then-chorus
+   in both groupings) directly. This caught things neither source had right:
+   OMR's own OCR mangled several short syllables (`D0`→`Do`, `qu1`→`qui`,
+   `J`→`Je`, `me,`→`ne,` — the familiar single-letter-miss failure mode from
+   the lyrics-fixing work on 01/14) and missed the "A" of "Amen" outright
+   (confirmed by eye on the final page: all 8 vocal staves sing "A - - - men"
+   together on the closing chord, chorus bass included, both notes G3).
+5. Patched only what was actually wrong: added the ~18 notes at measures
+   46–51 that the source had as bare rests (copied from OMR, divisions
+   rescaled ×2 to match the source's own `divisions=4`), and rewrote the
+   lyric *text* — not the notes, which already matched — for measures 54–56
+   and 58–75. Measures 1–45, 52–53, and 76–78 were already correct and left
+   untouched.
+6. A companion divisi part (`P9`, "the chorus-bass divisi at 54–56" from the
+   *Merging* notes) already had the right notes for that spot and needed no
+   change — confirmed by the fact that its notes independently matched
+   OMR's second voice at those measures exactly.
+
+### Verification
+
+Per-part note counts in `11-Verdi_Lacrymosa.mxl` were compared before/after:
+only `Kuoro B` changed (+18 notes, from the added measures; every other part,
+including the divisi `P9`, identical). Re-running `yhdista.py` reproduced
+that same +18 in the merged score's `Kuoro B` total (1888→1906) with the
+overall measure count unchanged at 1807 — i.e. content filled in, nothing
+added or removed elsewhere. The file converts in MuseScore without `-f`
+(checked directly, not just via the merged score). The corrected reading
+part was rendered and read back: `stemma-basso-1.pdf` now shows "...re-qui-em,
+re-qui-em, do-na e-is-re-qui-em. **A men.**" where it previously showed
+"...par-ce." at the same spot.
+
+### What is still open here
+
+The overall text and its measure-by-measure boundaries are page-verified for
+the passage as a whole, but a few individual syllable-to-note placements
+*inside* melismas (which exact note gets a new syllable vs. continues one)
+are best-effort reconstructions from the visible word order, not confirmed
+note-by-note against the page for every single note. If this ever needs
+tightening, re-render `Verdi_Lacymosa.pdf` pages 9–12 (`mutool draw -r 250`)
+and check bar-by-bar against `11-Verdi_Lacrymosa.mxl`'s `Kuoro B`, measures
+46–64.
+
+**Soprano/Alto/Tenor and the soloists in this same file were not audited.**
+Only chorus bass was checked this closely, because it is the line the user
+reads; the same class of bug (duplicated/misplaced lyric text) could in
+principle exist elsewhere in this "trusted" batch of 10 movements and would
+not necessarily be caught by anything currently in this pipeline.
 
 ## The practice file: one visible staff, everything still sounding
 
