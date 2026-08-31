@@ -7,6 +7,7 @@
 | `Verdi-Requiem-koko.mxl` | Koko teos, 15 viivastoa, 1807 tahtia |
 | `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, kaikki ajan tasalla (II·9b mukana, tahtinumerointi juoksee Dies iraen läpi) |
 | `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa, ajan tasalla |
+| `sisallys.py` | Rakentaa tuon luettelon uudelleen valmiista stemma-PDF:istä |
 | `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys |
 | `harjoitus-*.mscz` | Harjoittelutiedosto: oma ääni trumpettina, muut piilossa |
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
@@ -105,8 +106,9 @@ tilanhukkaa; nimi on otsikossa.
 `--vain` ottaa pilkulla erotellun listan viivastonimiä, esimerkiksi
 `--vain "Kuoro B,Piano"` jos haluat bassostemman pianosäestyksen kanssa.
 
-Sisällysluettelon sivunumerot on poimittu valmiista PDF:stä, joten päivitä
-`stemmat-sisallys.txt` jos sivutus muuttuu.
+Sisällysluettelon sivunumerot poimitaan valmiista PDF:istä, joten aja
+`python3 sisallys.py` aina kun stemmat on renderöity uudelleen — se kirjoittaa
+`stemmat-sisallys.txt`:n uudestaan.
 
 ## Viivastot
 
@@ -179,6 +181,20 @@ julkaisukuntoisista lähteistä.
 
 Sanat on nyt korjattu koneellisesti lähde-PDF:ää vasten, ks. **Sanojen
 korjaus** alla. Nuotteja se ei koske: ne pitää edelleen oikaisulukea.
+
+**Poikkeus: osan V (Agnus Dei) kuorobasso on nyt oikaisuluettu kokonaan.**
+Koko rivi tahdista 1 tahtiin 74 on verrattu kuoron omaan MuseScore-tiedostoon
+(`musescore/06_agnus_dei`), ja se täsmää nyt **nuotti nuotilta, ilman yhtään
+eroa** — lisäksi jokainen 74 tahdista on nyt tahtilajin mukaan täysimittainen.
+Korjattuja kohtia oli 15: neljä tahtia oli kokonaan tyhjä (t. 59, 60, 69 ja
+72 — näistä 72 on teoksen loppusointu, joten osa loppui aiemmin kesken
+sanaan "do"), kuudessa tahdissa oli väärä kesto, kahdesta puuttui korukuvio
+ja kahdesta tavu. Nyt stemma päättyy oikein sanoihin "do – na.".
+
+Muita ääniä (Sopraano/Altto/Tenori) samasta osasta **ei ole tarkistettu** — ne
+ovat yhä konelukemisen tuloksena, ja niiltä puuttuu mm. sama loppusointu
+tahdista 72. Tekninen tausta: `CLAUDE.md` -> **2026-08-31 (later): Agnus Dei's
+chorus bass, whole movement verified**.
 
 **Poikkeus edelliseen: Lacrymosan (11) kuorobassolla oli aito virhe, ei
 OMR:stä johtuva.** Rivin loppupuolella (n. 30 tahtia) oli joko tyhjää tai
@@ -258,8 +274,17 @@ saadaan luettua suoraan lähteestä.
 
 Tulos menee tiedostoihin `01-Verdi_Requiem-OMR-korjattu.mxl` ja
 `14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl`, ja `yhdista.py` käyttää niitä.
-Konelukemisen alkuperäisiin tiedostoihin ei kosketa, joten korjaus on
-ajettavissa uudelleen jos konelukeminen joskus tehdään uusiksi.
+Konelukemisen alkuperäisiin tiedostoihin ei kosketa.
+
+> **Varoitus: älä aja `korjaa_sanat.py`:tä ajattelematta.** Se lukee
+> konelukemisen *alkuperäiset* tiedostot ja kirjoittaa `-OMR-korjattu.mxl`:t
+> kokonaan uudelleen. Kaikki käsin tehdyt korjaukset — osan V kuorobasson
+> taukojaksot ja sen 15 nuotti- ja kestokorjausta — ovat vain näissä
+> `-korjattu`-tiedostoissa, joten pelkkä uudelleenajo **pyyhkii ne pois**, ja
+> huomaat sen vasta kun vanhat virheet ilmestyvät takaisin stemmaan. Jos
+> sanojen korjaus on ajettava uudelleen, vertaa tulosta committoituun
+> tiedostoon ja tee käsin tehdyt korjaukset uudelleen — tai palauta tiedosto
+> gitistä jälkikäteen.
 
 ### Mitä se korjasi
 

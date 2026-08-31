@@ -34,15 +34,21 @@ choir's own MuseScore files and (where available) source PDFs — two fixed
 chorus stave by mistake; Agnus Dei bar 27's wrong clef/register was OMR
 reading the wrong staff after the chorus drops out for a solo passage), one
 left open pending the physical score; see *2026-08-31: three more chorus-bass
-spots the user flagged by ear*.
+spots the user flagged by ear*. Also new, and the biggest single result so far
+for the line the user actually reads: **Agnus Dei's `Kuoro B` has been compared
+against the choir's own MuseScore file across the whole movement and now matches
+it note for note, with zero differences** — 15 defects found and fixed, closing
+the bars 59–74 item that the previous session left open as needing a re-OMR (it
+did not); see *2026-08-31 (later): Agnus Dei's chorus bass, whole movement
+verified against the choir file*.
 
 Open, roughly in the order a singer would feel them:
 
 | Open | Where to read up |
 |---|---|
-| **Notes** of movements 01, 14 and II·9b are still unproofread | *OMR recipe*, *The missing Dies irae recall*; the lyrics pass did not touch notes |
+| **Notes** of movements 01 and II·9b are still unproofread (movement 14's `Kuoro B` is now done; its S/A/T are not) | *OMR recipe*, *The missing Dies irae recall*; the lyrics pass did not touch notes |
 | Movement 01's Kyrie (from bar 91) still drops syllables | *What is left* — the OMR lost notes there, so it is note work, not text work |
-| Movement 14 is weak throughout — 25–81 % matched, 71 bass notes still wordless; `Kuoro B` bars 27–58 fixed (was OMR reading the wrong staff at solo/tutti boundaries), but bars 59–74 need a proper re-OMR pass — manual page-reading gave inconsistent results there, and even the other voices show unexplained gaps | same, and *2026-08-31* section |
+| Movement 14's `Kuoro B` is **settled** — notes match the choir file exactly, all 74 bars are metrically valid, 29 remaining wordless notes are melisma-internal or chord second notes. Its **Soprano/Alto/Tenor are not**: 48–59 % of their notes carry no syllable, and they still show fabricated content and contentless measures in bars 59–74 | *2026-08-31 (later)* section |
 | II·9b: Soprano/Alto/Tenor lyrics unchecked; its exact position vs. the choir book is still 3–5 measures uncertain | *The missing Dies irae recall* |
 | Lacrymosa fix: a few melisma-internal syllable placements are best-guess, not page-verified one by one; also the divisi `P9`'s leftover duplicate text at bars 682–684 still needs a proper (non-1:1) syllable placement | *Lacrymosa's chorus bass*, *2026-08-31* section |
 | Liber scriptus ~bar 240: bass sings "Dies irae" 3 times, user recalls 6 from the choir's own file — notes confirmed correct in all voices, but a real Soprano-vs-A/T/B text disagreement at bars 248–255 is unresolved without the physical score | *2026-08-31* section |
@@ -64,6 +70,7 @@ Open, roughly in the order a singer would feel them:
 | `Verdi-Requiem-koko.mxl` | Merged score, 15 staves, 1807 measures |
 | `stemma-*.mxl` / `.pdf` | Eight choir reading parts |
 | `stemmat-sisallys.txt` | Where each movement starts in all eight |
+| `sisallys.py` | Rebuilds that listing from the eight PDFs; run it after any re-render |
 | `yhdista.py` | The merge tool; mapping table at the top |
 | `korjaa_sanat.py` | Fixes OMR lyric errors against the source PDFs |
 | `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |
@@ -261,6 +268,21 @@ Do not hand-add the numbers — an early hand sum was wrong.
 their source PDFs. `--kuiva` reports without writing. Output goes to
 `*-OMR-korjattu.mxl`; the OMR originals are never touched, so the pass is
 repeatable if the OMR is ever redone for the piano.
+
+> **DO NOT run `korjaa_sanat.py` without reading this first.** Its `Source`
+> entries read the OMR *originals* (`14-…-agnus-dei-OMR.mxl`) and rewrite the
+> `-OMR-korjattu.mxl` files **from scratch**. Every manual fix since the
+> original OMR lives only in the `-korjattu` files — movement 14's chorus-bass
+> tacet spans, its 15 note/duration fixes, movement 01's hand fixes — so a
+> plain re-run **silently destroys all of them** and the loss shows up only as
+> the old bugs reappearing in the reading part. The script's own
+> "originals are never touched, so the pass is repeatable" design note was
+> written when the `-korjattu` files really were pure derivatives; they are
+> not any more. Before re-running: either diff the result against the
+> committed `-korjattu` file and re-apply the manual work, or restore from
+> git afterwards. (Movement 01's `01-Verdi_Requiem-kasin.mxl` is the
+> hand-corrected copy `yhdista.py` actually reads, which is why movement 01
+> is less exposed than 14.)
 
 **Both source PDFs carry their lyrics as real text**, not as glyph images —
 `mutool draw -F stext` extracts them. This is the fact the whole approach
@@ -677,6 +699,12 @@ again from bar 40; merged score's `Kuoro B` count changed from 1861 to 1795
 40–41 — `ensure_filled`'s "empty measures patched" count dropped from 28 to
 26, exactly matching the two bars that got real content instead).
 
+**Bars 59–74 — SUPERSEDED, see the next section.** The paragraph below is
+kept because its diagnosis of *why the manual attempt failed* is still
+correct and worth not repeating; its conclusion ("needs a re-OMR") turned out
+to be wrong. The passage was settled the same day without re-OMR, by
+comparing against the choir file instead of reading pixels.
+
 **Still not fixed — bars 59–74 (rest of the movement):** the same class of
 problem continues, but attempts to nail it down by reading the PDF pixel by
 pixel (even cropped at 400 dpi, isolating just the bass-clef staff's own
@@ -725,6 +753,132 @@ entirely. Soprano's own notes there are independently confirmed correct
 corruption — but the *text* disagreement between Soprano and A/T/B is
 unresolved. **Needs the physical rehearsal score**, bars 248–255 (Liber
 scriptus local 86–93), checked against both readings above.
+
+## 2026-08-31 (later): Agnus Dei's chorus bass, whole movement verified
+
+The user asked for the obvious next thing: compare `Kuoro B` of movement 14
+against the choir's own file **from the first bar to the last**, rather than
+chasing one flagged spot at a time. That closed the bars 59–74 item the
+section above had left open as "needs a re-OMR" — **it did not need one**.
+
+### Result: an exact match
+
+`14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl`'s `Kuoro B` (`P4`) now agrees
+with `musescore/06_agnus_dei`'s chorus `Bass 1`+`Bass 2` **note for note over
+all 74 bars, with zero differences**, and every one of those 74 bars is
+metrically valid (4/4, four beats). 15 defects were found and fixed:
+
+| Bar | Defect | Fix |
+|---|---|---|
+| 4 | full-measure rest with `duration` 36, not 48 | duration corrected |
+| 16, 23 | missing grace note (acciaccatura) `F3` before the bar's last `E3` | grace note added |
+| 26, 63 | measure only 3 beats long | trailing quarter rest added |
+| 42 | `B2` written as `duration` 36 with `type` half — measure 5 beats | duration corrected to 24 |
+| 59 | measure held a clef and **no note at all**; should be a whole note | `C3` whole + syllable "Do" |
+| 60 | **entirely contentless** `<measure .../>` | `C3` whole + "na," |
+| 62 | `E3` carried no syllable | "e" added |
+| 64 | 2 beats, missing its bracketing rests | quarter rest added at each end |
+| 67 | 3 beats — the `G3` fell a beat early | quarter rest inserted before it |
+| 68 | `G2` carried no syllable | "e" added |
+| 69 | **entirely contentless** | `Ab2` whole + "is," |
+| 72 | **entirely contentless** — the movement's final chord | `C3` whole + "na." |
+| 74 | **entirely contentless** | full-measure rest |
+
+Before the fix the reading part ended on an unterminated "do" at bar 71; it
+now ends "do – na." on a whole note, and bars 73–74 collapse into a clean
+2-bar multimeasure rest.
+
+### The methodological lesson: never pitch-compare without chord members
+
+The first pass of this comparison **reported two wrong-pitch findings that
+were not real**: bars 45 and 64 appeared to have `G2 C3` where the choir file
+had `F3 E3` / `G3 G3`. Both are **divisi chords**, and the comparison script
+was walking `<note>` elements while skipping any with a `<chord>` child — so
+it saw only each chord's first (lower) note and never the upper one, which was
+correct all along.
+
+What settled it is worth keeping: the choir file's **`Bass 2`** has
+`r G2 C3 r` at exactly its bars 26 and 36 — and those are the **only two bars
+in the whole movement where `Bass 2` sings at all**. Two independent files
+agreeing on a two-bar divisi that occurs nowhere else is not a coincidence.
+So: when comparing pitches, either fold chord members into the comparison or
+compare `Bass 1` and `Bass 2` as a pair. A skipped chord member does not look
+like missing data, it looks like a **wrong note**, which is the most alarming
+and most misleading possible false positive.
+
+### Why this worked where the previous manual attempt failed
+
+The earlier attempt tried to *derive* the content from the rendered page and
+got inconsistent bar-boundary reads. This pass never asked the page to
+produce content. It used the choir file to form one specific hypothesis per
+bar ("is there a whole note here, and is it `C3`?") and used the page only to
+confirm or refute it. Confirming a named hypothesis at 200 dpi is reliable;
+deriving pitches from pixels is not — that asymmetry is the whole trick, and
+it is the same discipline the *Lacrymosa* fix used.
+
+Two things made it cheap:
+
+- **This PDF prints its bar numbers**, boxed at each system start (50, 55, 59,
+  63, 68 on pages 4–5). They agree with the file's own `<measure number>`
+  exactly. That is a free, unambiguous anchor, and the previous attempt's
+  "inconsistent bar-boundary reads" problem simply does not arise once you
+  read the printed number instead of counting barlines.
+- **`<print>` elements give the OMR's own page/system layout**, so the page
+  holding any bar is computable before rendering anything:
+  page 1 = 1–20, 2 = 21–35, 3 = 36–49, 4 = 50–62, 5 = 63–74.
+
+### Third independent confirmation of the tacet fix
+
+The previous session's most invasive change — replacing OMR's fabricated
+notes at bars 27–39 and 46–58 with plain rests — is now confirmed a third
+time. The choir file rests across exactly the same three spans, and page 4
+prints only **two** vocal staves for bars 50–58 (the S + M-S soloists) before
+the chorus's four staves reappear at bar 59.
+
+### And it explains the 30-measure gap
+
+*The choir's own MuseScore practice files* below asks why the choir's Agnus
+Dei is 44 bars against our 74, and warns not to trust it until that is
+explained. It is now explained exactly, and it is pure chorus-only trimming:
+
+| Our tacet span | Choir's | Bars trimmed |
+|---|---|---|
+| 1–13 | 1–3 | 10 |
+| 27–39 | 17–20 | 9 |
+| 46–58 | 27–30 | 9 |
+| 73–74 | (none) | 2 |
+
+10 + 9 + 9 + 2 = **30**, and 74 − 44 = 30. Nothing is missing from either
+file.
+
+### Verification
+
+- Per-part note counts before/after: only `P4` changed, **+6** (4 whole notes,
+  2 grace notes) — `P1`, `P2`, `P3`, `P5`, `P6` byte-for-byte identical in
+  count, measure count unchanged at 74.
+- `mscore` converts the movement with no warnings and **without `-f`**, 6 pages.
+- The merge reproduced the same +6: `Kuoro B` 1795 → 1801, total measures
+  unchanged at 1807, and `ensure_filled`'s "contentless measures patched"
+  count fell from 26 to 21 — exactly the five measures that got real content
+  (59, 60, 69, 72, 74).
+- All eight reading parts and the practice `.mscz` were re-rendered (seven of
+  the eight had been stale since the *Lacrymosa bar 674* fix). `stemmat-
+  sisallys.txt` was regenerated; `B I`/`B II` are now 13 pages, not 14.
+- 32 tests pass.
+- The result was read back off `stemma-basso-1.pdf` page 9 as a rendered
+  image, not just from the data.
+
+### Still open here: Soprano, Alto, Tenor
+
+Only the bass was done. The other three chorus voices of movement 14 are
+still OMR output and still visibly wrong in the same stretch: `Kuoro T` has a
+contentless bar at 60, and all of `Kuoro S`/`Kuoro A`/`Kuoro T` have one at
+72, so the final chord is missing from three of the four voices. Lyric
+coverage is 48–59 % for them against the bass's 66 % (and the bass's
+remaining 29 wordless notes are melisma-internal notes and chord second
+notes, which correctly carry none). The same method applies unchanged — the
+choir file has `Soprano`, `Alto`, `Tenor 1` and `Tenor 2` — and the offsets
+worked out above (−10, −19, −28, −28) should carry straight over.
 
 ## The choir's own MuseScore practice files
 
@@ -836,8 +990,11 @@ a placeholder row, not a second real line.
    and possibly to help pin down its position relative to Confutatis/
    Lacrymosa (the *Open: which measure numbers* question) — it's chorus-book
    material, which is exactly the kind of anchor that's been missing.
-3. Before trusting Agnus Dei for anything, work out the rest of that
-   30-measure gap — it might be more solo-passage trimming (harmless) or it
+3. ~~Before trusting Agnus Dei for anything, work out the rest of that
+   30-measure gap~~ — **done, and it was harmless**: all 30 bars are
+   solo-passage trimming, accounted for span by span in *2026-08-31 (later)*.
+   The original note, for context: it might be more solo-passage trimming
+   (harmless) or it
    might be a real content difference.
 4. Same pitch-matching method, systematically, for the S/A/T lines too —
    everything above only ever looked at the bass, since that's the line the
