@@ -27,7 +27,14 @@ choir's rehearsal book numbers that section — see *Open assumptions*. Also
 new: **movement 11's own chorus bass (Kuoro B) had ~30 measures of wrong or
 missing lyrics near the end** — not an OMR file, a genuine bug in the
 original CPDL source, undetected until now — found and fixed; see
-*Lacrymosa's chorus bass: wrong text, not missing measures*.
+*Lacrymosa's chorus bass: wrong text, not missing measures*. Also new: three
+more chorus-bass spots the user flagged by ear, cross-checked against the
+choir's own MuseScore files and (where available) source PDFs — two fixed
+(Lacrymosa bar 674's "eis requiem" was the soloists' line copied into the
+chorus stave by mistake; Agnus Dei bar 27's wrong clef/register was OMR
+reading the wrong staff after the chorus drops out for a solo passage), one
+left open pending the physical score; see *2026-08-31: three more chorus-bass
+spots the user flagged by ear*.
 
 Open, roughly in the order a singer would feel them:
 
@@ -35,13 +42,14 @@ Open, roughly in the order a singer would feel them:
 |---|---|
 | **Notes** of movements 01, 14 and II·9b are still unproofread | *OMR recipe*, *The missing Dies irae recall*; the lyrics pass did not touch notes |
 | Movement 01's Kyrie (from bar 91) still drops syllables | *What is left* — the OMR lost notes there, so it is note work, not text work |
-| Movement 14 is weak throughout — 25–81 % matched, 71 bass notes still wordless | same |
+| Movement 14 is weak throughout — 25–81 % matched, 71 bass notes still wordless; also now precisely localized: bars 36–41 need re-transcribing (wrong-register OMR / entirely contentless) | same, and *2026-08-31* section |
 | II·9b: Soprano/Alto/Tenor lyrics unchecked; its exact position vs. the choir book is still 3–5 measures uncertain | *The missing Dies irae recall* |
-| Lacrymosa fix: a few melisma-internal syllable placements are best-guess, not page-verified one by one | *Lacrymosa's chorus bass* |
+| Lacrymosa fix: a few melisma-internal syllable placements are best-guess, not page-verified one by one; also the divisi `P9`'s leftover duplicate text at bars 682–684 still needs a proper (non-1:1) syllable placement | *Lacrymosa's chorus bass*, *2026-08-31* section |
+| Liber scriptus ~bar 240: bass sings "Dies irae" 3 times, user recalls 6 from the choir's own file — notes confirmed correct in all voices, but a real Soprano-vs-A/T/B text disagreement at bars 248–255 is unresolved without the physical score | *2026-08-31* section |
 | 13 lyric changes reported but deliberately not applied | `python3 korjaa_sanat.py --kuiva` lists them |
 | Movement I has no piano | *Movement I has no piano* |
 | Five assumptions made without the rehearsal score | *Open assumptions* |
-| A second, independent note source (`musescore/`) turned up — unexplored beyond a pitch-matching sanity check | *The choir's own MuseScore practice files* |
+| A second, independent note source (`musescore/`) turned up — now used for three targeted fixes, still not exhaustively explored beyond that | *The choir's own MuseScore practice files* |
 
 ## Layout of the directory
 
@@ -573,6 +581,113 @@ Only chorus bass was checked this closely, because it is the line the user
 reads; the same class of bug (duplicated/misplaced lyric text) could in
 principle exist elsewhere in this "trusted" batch of 10 movements and would
 not necessarily be caught by anything currently in this pipeline.
+
+## 2026-08-31: three more chorus-bass spots the user flagged by ear
+
+The user, singing along, flagged three specific spots as sounding wrong.
+Method for all three: pitch/rhythm-match the project's `Kuoro B` (and, where
+relevant, the other voices) against the choir's own MuseScore files
+(`musescore/`, see below — converted to MusicXML with `mscore -o x.musicxml
+file.mscz`) using the same `difflib.SequenceMatcher` approach as the
+MuseScore-comparison work, then, where a source PDF exists, confirm visually
+by rendering pages (`mutool draw -r 250`) rather than trusting pitch-matching
+alone — same discipline as the Lacrymosa fix above.
+
+### Fixed: Lacrymosa bar 674, "eis requiem" was the soloists' line, not the chorus's
+
+`11-Verdi_Lacrymosa.mxl`, `Kuoro B` (`P8`), continuous bars 674–679 (local
+46–51) — exactly the six bars the original Lacrymosa fix (above) had
+*added* from OMR to replace bare rests. Turned out that addition was wrong:
+those six bars' notes and lyrics ("e-is re-qui-em, pi-e Je-su Do-mi-ne,")
+are pitch-for-pitch, syllable-for-syllable identical to `Solisti B` (`P4`) at
+the same bars — i.e. the earlier fix copied the **soloist's** line into the
+chorus stave. Confirmed two independent ways: `musescore/04_dies_irae_2`'s
+chorus `Bass 1`/`Bass 2` are both bare rests for the whole span (zero
+counterpart — a pure insertion with nothing to match), and
+`Verdi_Lacymosa.pdf` pages 9–10 show, rendered, that only the vocal-quartet
+soloists sing "eis requiem, pie Jesu Domine, dona eis, dona" here — the
+chorus staves are tacet and re-enter only on "Pi-e Je-su Do-mi-ne" a few
+bars later (already correct in our file, ~bar 682, matching the user's own
+"from 682 on it looks right"). **Fixed**: bars 46–51 replaced with plain
+whole-bar rests, matching what was there before the original fix. Verified:
+file converts and exports MIDI cleanly; merged score's `Kuoro B` count drops
+by exactly 18 (the notes that were removed).
+
+Still open: the divisi `P9` at the same passage's bars 54–56 (2 682–684)
+still carries the leftover "Lacrymosa dies illa..." duplicate text (the same
+bug class as the original fix, just never scrubbed from the divisi part).
+Its *notes* are confirmed correct (they match the choir's own `Bass 1`
+closely — note the two parts' PDF/MuseScore roles cross momentarily here:
+generally `P8`↔Bass 1 and `P9`↔Bass 2 by pitch-match ratio over the whole
+movement, but at this one spot `P8` sits on what the choir file calls
+`Bass 2` and `P9` on `Bass 1` — a real voice-crossing, not a bug). Only the
+*text* needs fixing, but `P9`'s rhythm (5+4+1 notes) doesn't map 1:1 onto
+`P8`'s simpler "Pi-e Je-su" (2+2+1 notes), so it needs a proper syllable
+placement, not a blind copy — left undone.
+
+### Fixed: Agnus Dei bar 27, OMR read the wrong staff after the chorus drops out
+
+`14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl`, `Kuoro B` (`P4`) — confirmed
+by rendering `14-Verdi_requiem_agnus-dei.pdf` page 2 directly: **the whole
+chorus is tacet for bars 27–35** (9 bars) — this is the second of the piece's
+three "Agnus Dei... qui tollis peccata mundi, dona" statements, and like the
+first (bars 1–13, already known and handled in `MAPPING`), it's soloists
+only (S + M-S), no chorus staves printed at all. OMR didn't know that: it
+inserted a spurious `<clef>` (treble G-2, mid-part, no `clef-octave-change`)
+at bar 27 — the part is otherwise bass clef throughout — and filled these
+bars with notes a fourth-to-sixth too high, not reverting to the correct F-4
+clef until bar 40. `musescore/06_agnus_dei`'s chorus `Bass 1`/`Bass 2` agree:
+almost entirely rests across the equivalent span. **Fixed**: bars 27–35
+replaced with plain whole-bar rests; the spurious `<clef>` element removed
+from bar 27's `<attributes>` (its `<print>` system-layout was kept — that's
+real page-layout data, not the bug). Verified: converts cleanly (`mscore -o
+x.pdf`, 6 pages, exit-0 this time), rendered page 2 shows the fourth (bass)
+staff correctly going silent from bar 27 while the two solo staves continue;
+merged score's `Kuoro B` count drops by exactly 27 (the wrong-register notes
+removed).
+
+**Not fixed — needs a person, not a guess:** bars 36–39 are real chorus
+content (the PDF shows full SATB active again, "do-na e-is, do-na e-is
+re-qui-em...") but currently still carry the same wrong-clef/wrong-register
+OMR garbage as 27–35 (the clef doesn't correct until bar 40). Per this
+project's own rule against eyeballing pitches in a dense polyphonic texture,
+these bars were left untouched rather than transcribed by eye from the
+rendered page — needs either a targeted re-OMR of this span or a careful
+bar-by-bar page check. **Also newly found, unrelated to the clef bug:** bars
+40–41 in the same part are completely contentless (`<measure>` with no
+`<print>`/`<attributes>`/note at all — zero duration) — an old, separate OMR
+gap that `yhdista.py`'s `ensure_filled` silently papers over with a rest
+during the merge, so it never surfaced as a merge error, but the *real*
+chorus content is still missing there too (the PDF shows the chorus singing
+"na e-is do-na e is re-qui-em" through this stretch). Both gaps (36–39 and
+40–41) are part of the same "movement 14 notes need proofreading" open item,
+now localized precisely.
+
+### Open, unresolved: Liber scriptus ~bar 240, how many times does the bass sing "Dies irae"?
+
+Continuous bar 240 falls at the end of `05-Verdi-Liber_scriptus.mxl` (local
+bar 78/108, continuous 240–267) — the *first* of the piece's three "Dies
+irae" theme returns (the other two are II·9b and the Confutatis→Lacrymosa
+gap, both above). The user recalled the bass singing "Dies irae" six times
+here (from the choir's own MuseScore file); the current text has it three
+times (240–241, 259–261, 262–267) plus "Dies illa" twice (242–243, 257–258).
+
+Pitch-matched **every voice** (S/A/T/B) against `musescore/02_dies_irae`'s
+equivalent `Bass 1`/`Soprano 1` across the whole passage (continuous
+235–267): **all four voices' notes match the choir source exactly**, note
+for note — nothing is missing or extra. So this is purely a "which words
+under which notes" question, not a notes problem, and MuseScore's own files
+carry no lyrics at all, so they can't settle it further.
+
+The one concrete lead: Alto/Tenor/Bass sing "Solvet saeclum in favilla"
+*twice* (bars 248–251 and 252... continuous 248–255, before "Teste David cum
+Sybilla"), while Soprano, at the same bars, instead has extra "Dies irae,
+dies illa" repeats and skips the second "solvet saeclum"/"teste David"
+entirely. Soprano's own notes there are independently confirmed correct
+(matched the choir source too) — so it's a real, different melodic line, not
+corruption — but the *text* disagreement between Soprano and A/T/B is
+unresolved. **Needs the physical rehearsal score**, bars 248–255 (Liber
+scriptus local 86–93), checked against both readings above.
 
 ## The choir's own MuseScore practice files
 
