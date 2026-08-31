@@ -42,7 +42,7 @@ Open, roughly in the order a singer would feel them:
 |---|---|
 | **Notes** of movements 01, 14 and II·9b are still unproofread | *OMR recipe*, *The missing Dies irae recall*; the lyrics pass did not touch notes |
 | Movement 01's Kyrie (from bar 91) still drops syllables | *What is left* — the OMR lost notes there, so it is note work, not text work |
-| Movement 14 is weak throughout — 25–81 % matched, 71 bass notes still wordless; also now precisely localized: bars 36–41 need re-transcribing (wrong-register OMR / entirely contentless) | same, and *2026-08-31* section |
+| Movement 14 is weak throughout — 25–81 % matched, 71 bass notes still wordless; `Kuoro B` bars 27–58 fixed (was OMR reading the wrong staff at solo/tutti boundaries), but bars 59–74 need a proper re-OMR pass — manual page-reading gave inconsistent results there, and even the other voices show unexplained gaps | same, and *2026-08-31* section |
 | II·9b: Soprano/Alto/Tenor lyrics unchecked; its exact position vs. the choir book is still 3–5 measures uncertain | *The missing Dies irae recall* |
 | Lacrymosa fix: a few melisma-internal syllable placements are best-guess, not page-verified one by one; also the divisi `P9`'s leftover duplicate text at bars 682–684 still needs a proper (non-1:1) syllable placement | *Lacrymosa's chorus bass*, *2026-08-31* section |
 | Liber scriptus ~bar 240: bass sings "Dies irae" 3 times, user recalls 6 from the choir's own file — notes confirmed correct in all voices, but a real Soprano-vs-A/T/B text disagreement at bars 248–255 is unresolved without the physical score | *2026-08-31* section |
@@ -625,43 +625,80 @@ movement, but at this one spot `P8` sits on what the choir file calls
 `P8`'s simpler "Pi-e Je-su" (2+2+1 notes), so it needs a proper syllable
 placement, not a blind copy — left undone.
 
-### Fixed: Agnus Dei bar 27, OMR read the wrong staff after the chorus drops out
+### Fixed: Agnus Dei bars 27–58, OMR read the wrong staff every time the chorus drops out
 
-`14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl`, `Kuoro B` (`P4`) — confirmed
-by rendering `14-Verdi_requiem_agnus-dei.pdf` page 2 directly: **the whole
-chorus is tacet for bars 27–35** (9 bars) — this is the second of the piece's
-three "Agnus Dei... qui tollis peccata mundi, dona" statements, and like the
-first (bars 1–13, already known and handled in `MAPPING`), it's soloists
-only (S + M-S), no chorus staves printed at all. OMR didn't know that: it
-inserted a spurious `<clef>` (treble G-2, mid-part, no `clef-octave-change`)
-at bar 27 — the part is otherwise bass clef throughout — and filled these
-bars with notes a fourth-to-sixth too high, not reverting to the correct F-4
-clef until bar 40. `musescore/06_agnus_dei`'s chorus `Bass 1`/`Bass 2` agree:
-almost entirely rests across the equivalent span. **Fixed**: bars 27–35
-replaced with plain whole-bar rests; the spurious `<clef>` element removed
-from bar 27's `<attributes>` (its `<print>` system-layout was kept — that's
-real page-layout data, not the bug). Verified: converts cleanly (`mscore -o
-x.pdf`, 6 pages, exit-0 this time), rendered page 2 shows the fourth (bass)
-staff correctly going silent from bar 27 while the two solo staves continue;
-merged score's `Kuoro B` count drops by exactly 27 (the wrong-register notes
-removed).
+`14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl`, `Kuoro B` (`P4`). The user
+first flagged bar 27 (spurious treble clef); checking further, the same bug
+recurs at bar 46, and a related content gap runs through bar 58 — the whole
+back half of the movement needed the same treatment.
 
-**Not fixed — needs a person, not a guess:** bars 36–39 are real chorus
-content (the PDF shows full SATB active again, "do-na e-is, do-na e-is
-re-qui-em...") but currently still carry the same wrong-clef/wrong-register
-OMR garbage as 27–35 (the clef doesn't correct until bar 40). Per this
-project's own rule against eyeballing pitches in a dense polyphonic texture,
-these bars were left untouched rather than transcribed by eye from the
-rendered page — needs either a targeted re-OMR of this span or a careful
-bar-by-bar page check. **Also newly found, unrelated to the clef bug:** bars
-40–41 in the same part are completely contentless (`<measure>` with no
-`<print>`/`<attributes>`/note at all — zero duration) — an old, separate OMR
-gap that `yhdista.py`'s `ensure_filled` silently papers over with a rest
-during the merge, so it never surfaced as a merge error, but the *real*
-chorus content is still missing there too (the PDF shows the chorus singing
-"na e-is do-na e is re-qui-em" through this stretch). Both gaps (36–39 and
-40–41) are part of the same "movement 14 notes need proofreading" open item,
-now localized precisely.
+The piece's structure (confirmed by rendering
+`14-Verdi_requiem_agnus-dei.pdf` pages 2–4 directly, and cross-checked
+against `musescore/06_agnus_dei`'s independently-made chorus `Bass 1`/
+`Bass 2`, which are silent across the same spans): "Agnus Dei... qui tollis
+peccata mundi, dona" is stated three times, alternating soloists-only
+(S + M-S, no chorus staff printed at all) with full chorus. Bars 1–13
+(soloists) were already known and handled in `MAPPING`. The other two
+soloist-only stretches were not: **bars 27–35** and **bars 46–58**. OMR
+didn't know either was soloists-only: it inserted a spurious `<clef>`
+(treble G-2, no `clef-octave-change`, part is otherwise bass clef
+throughout) at the start of each — bar 27 and bar 46 — and filled the bars
+with notes a fourth-to-sixth too high.
+
+One more wrinkle at the first chorus-tacet boundary: bars 36–39, right after
+the clef nominally reverts to F-4 at bar 40, turned out to be **also**
+fabricated — not a register error this time, but OMR mechanically copying
+the `Kuoro T` line down an octave into `Kuoro B`. Both staves *look*
+plausible in isolation (same rhythm, correctly hyphenated Latin, matching
+octave-parallel motion — the kind of thing that's easy to wave through), but
+rendering `14-Verdi_requiem_agnus-dei.pdf` page 3 at 400 dpi and cropping
+just the clef of that system settled it: **both** of the two staves printed
+there are treble clef, i.e. two tenor-range voices (`Kuoro S`/`Kuoro A` are
+independently confirmed resting there too) — there is no bass-clef staff
+in the source at bars 36–39 at all. `Kuoro B` doesn't enter for real until
+bar 40.
+
+**Fixed**: bars 27–39 and 46–58 all replaced with plain whole-bar rests
+(clef elements removed, `<print>` system-layout kept where present — that's
+real page-layout data, not the bug). Bars 40–41, previously *entirely
+contentless* (`<measure>` with no note at all — a separate, older OMR gap
+that `yhdista.py`'s `ensure_filled` was silently papering over with a rest
+during the merge, so it never surfaced as an error) were filled with the two
+plain whole notes (C3, C3) that `musescore/06_agnus_dei`'s chorus `Bass 1`
+has at exactly that point, immediately before the already-correct bar 42 —
+lyrics "Do-"/"na," fitted from the untouched `Kuoro S` part's phrasing at the
+equivalent spot. Bar 42's first note was also missing its lyric entirely
+(bar 43 already started mid-word, `syllabic="end"` on "na", with no "do"
+anywhere before it) — added as `begin:"do"`. Verified: converts cleanly
+(`mscore`, 6 pages, exit 0), rendered pages show the bass staff correctly
+silent for both tacet stretches while the solo staves continue, and correct
+again from bar 40; merged score's `Kuoro B` count changed from 1861 to 1795
+(22 fabricated notes removed at 36–39, more at 46–58, 2 real notes added at
+40–41 — `ensure_filled`'s "empty measures patched" count dropped from 28 to
+26, exactly matching the two bars that got real content instead).
+
+**Still not fixed — bars 59–74 (rest of the movement):** the same class of
+problem continues, but attempts to nail it down by reading the PDF pixel by
+pixel (even cropped at 400 dpi, isolating just the bass-clef staff's own
+text row per system) produced **inconsistent bar-boundary reads on repeat
+attempts** — a rare admission-worthy point, but real: two crops of the same
+passage were read as starting on different words. Worse, `Kuoro S`/`Kuoro
+A`/`Kuoro T` — otherwise the reliable anchors used everywhere else in this
+fix — themselves show unexplained rests and zero-content measures in this
+same stretch (bars 65–74 especially, including the identical "entirely
+contentless measure" bug at 72 in *three* parts, not just bass). That's a
+different, probably wider OMR failure than the "wrong staff read at a
+solo/tutti boundary" pattern diagnosed above, and guessing at a fix here —
+across four voices, without a reliable independent source for any of
+them — would be exactly the kind of pixel-eyeballing this project's own
+rules warn against. `musescore/06_agnus_dei`'s chorus `Bass 1`/`Bass 2` do
+give a clean, confirmed 6-measure chunk of real notes (whole, whole, half+
+half, ...) that structurally must map to somewhere around bars 59–64 — but
+without a reliable bar-anchor at the far end, committing it to specific bar
+numbers would be a guess. **Needs a proper re-OMR of this page range**
+(`Audiveris -batch -transcribe -export` on a fresh 450 dpi rasterisation of
+pages 4–5, same recipe as everywhere else in this file) rather than another
+manual attempt.
 
 ### Open, unresolved: Liber scriptus ~bar 240, how many times does the bass sing "Dies irae"?
 
