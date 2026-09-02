@@ -7,7 +7,8 @@ fraasin hajoaminen kahdelle riville tekee stemmasta lukukelvottoman.
 import unittest
 import xml.etree.ElementTree as ET
 
-from yhdista import normalise_lyrics, verse_number
+from yhdista import (DIES_IRAE_ALUT, DIES_IRAE_SIIRTYMAT, normalise_lyrics,
+                     saumaraportti, verse_number)
 
 
 def measure(*notes):
@@ -104,6 +105,49 @@ class NoLyrics(unittest.TestCase):
         m = measure((1, []), (1, []))
         normalise_lyrics(m)
         self.assertEqual(rows(m), [])
+
+
+class DiesIraenNumerointi(unittest.TestCase):
+    """Alkunumerot ovat kuoron nuottikirjasta, eivät laskettuja.
+
+    Nämä on naulattu tähän siksi, että aiemmin ne laskettiin lähdetiedostojen
+    tahtimääristä ja olivat kuudessa kohdassa väärin. Jos joku laskee ne
+    joskus uudelleen "oikein", tämä testi kaatuu.
+    """
+
+    KIRJA = {"02-Verdi-Dies_irae.mxl": 1, "03-Verdi-Tuba_mirum.mxl": 91,
+             "04-Verdi-Mors_stupebit.mxl": 143,
+             "05-Verdi-Liber_scriptus.mxl": 162,
+             "06-Verdi-Quid_sum_miser.mxl": 271, "07-Verdi-Rex.mxl": 322,
+             "08-Verdi_Recordare.mxl": 386, "09-Verdi_Ingemisco.mxl": 450,
+             "10-Verdi_Confutatis.mxl": 507,
+             "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": 573,
+             "11-Verdi_Lacrymosa.mxl": 621}
+
+    def test_alut_ovat_kirjan_mukaiset(self):
+        self.assertEqual(DIES_IRAE_ALUT, self.KIRJA)
+
+    def test_siirtyma_on_alkunumero_miinus_yksi(self):
+        for tiedosto, alku in DIES_IRAE_ALUT.items():
+            self.assertEqual(DIES_IRAE_SIIRTYMAT[tiedosto], alku - 1, tiedosto)
+
+
+class Saumaraportti(unittest.TestCase):
+    """Saumojen epäjatkuvuus on tarkoituksellista mutta ei saa jäädä piiloon."""
+
+    def test_jatkuva_numerointi_ei_raportoi_mitaan(self):
+        self.assertEqual(saumaraportti([("A", 1, 10), ("B", 11, 20)]), [])
+
+    def test_paallekkaiset_numerot_raportoidaan(self):
+        rivit = saumaraportti([("II·9", 507, 577), ("II·9b", 573, 623)])
+        self.assertIn("5 numeroa toistuu", rivit[1])
+
+    def test_puuttuvat_numerot_raportoidaan(self):
+        rivit = saumaraportti([("II·2", 91, 139), ("II·3", 143, 164)])
+        self.assertIn("3 numeroa puuttuu", rivit[1])
+
+    def test_yksi_alue_ei_tuota_raporttia(self):
+        self.assertEqual(saumaraportti([("A", 1, 10)]), [])
 
 
 if __name__ == "__main__":

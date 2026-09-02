@@ -152,19 +152,35 @@ lähdetiedostoon, joten niillä ei vielä ole vastaavaa taulukkoa.
 
 Numerointi alkaa joka pääosassa (I, III, IV, V, VI, VII) ykkösestä. Poikkeus
 on osa II, Dies irae: sen kymmenen alaosaa ja II·9b juoksevat yhtenäisesti
-1:stä 706:een, koska kuoron nuottikirja numeroi Dies iraen niin. MuseScore
+1:stä 698:aan, koska kuoron nuottikirja numeroi Dies iraen niin. MuseScore
 kunnioittaa MusicXML:n tahtinumeroita, joten osiorajoja ei tarvita kummassakaan
 tapauksessa.
 
-Toteutus on `yhdista.py`:n `DIES_IRAE_SIIRTYMAT`-taulukko ja kytkin
+Toteutus on `yhdista.py`:n `DIES_IRAE_ALUT`-taulukko ja kytkin
 
     NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False
 
-Siirtymät on laskettu mekaanisesti alaosien omista tahtimääristä, ei
-tarkistettu kuoron painetun nuottikirjan sivuja vasten yksi kerrallaan.
-II·9b:n ja Lacrymosan täsmällinen sijainti kirjassa on siksi yhä auki —
-ks. `CLAUDE.md`: **The missing Dies irae recall (II·9b)** → "Open: which
-measure numbers is this actually at".
+Taulukossa on **kunkin alaosan ensimmäisen tahdin numero kuoron
+nuottikirjassa**, kirjasta luettuna (2026-09-02), ei laskettuna:
+
+    II·1 Dies irae 1, II·2 Tuba mirum 91, II·3 Mors stupebit 143,
+    II·4 Liber scriptus 162, II·5 Quid sum miser 271, II·6 Rex tremendae 322,
+    II·7 Recordare 386, II·8 Ingemisco 450, II·9 Confutatis 507,
+    II·9b Dies irae (kertaus) 573, II·10 Lacrymosa 621
+
+Aiemmin nämä laskettiin lähdetiedostojen omista tahtimääristä, ja kuusi
+yhdestätoista oli väärin — Lacrymosassa jo kahdeksan tahtia. CPDL:n
+osakohtaiset tiedostot eivät katkea samoista kohdista kuin kirja, joten
+numerointi ei jatku saumojen yli aukottomasti: viidessä saumassa muutama
+numero toistuu ja kolmessa muutama puuttuu lähteistä. `yhdista.py` tulostaa
+nämä joka ajolla. Lukustemmoissa se ei näy, koska kaikki toistuvat tahdit
+ovat kuorolle taukoa ja katoavat taukopalkkeihin. Ks. `CLAUDE.md`:
+**2026-09-02 (later): the book's own bar numbers for Dies irae**.
+
+Huom: jos vanhoissa muistiinpanoissa on Dies iraen tahtinumeroita ennen
+2026-09-02, ne ovat vanhassa numeroinnissa — Lacrymosasta vähennetään 8,
+II·9b:stä 5, Rex tremendaesta 2, Tuba mirumista ja Liber scriptuksesta 1,
+ja Mors stupebitiin lisätään 2.
 
 ## Oletukset jotka voi joutua korjaamaan
 
@@ -182,7 +198,7 @@ Basso II tahdissa 4, molemmat sävelellä C3 sanalla "San-ctus".
 | Numero | Osa | Tahteja |
 |---|---|---:|
 | I | Requiem & Kyrie | 140 |
-| II | Dies irae (10 alaosaa + II·9b) | 706 |
+| II | Dies irae (10 alaosaa + II·9b) | 698 |
 | III | Offertorio | 222 |
 | IV | Sanctus | 139 |
 | V | Agnus Dei | 74 |

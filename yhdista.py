@@ -179,22 +179,31 @@ SINGER_PARTS = {
     "Basso II":       ("Kuoro B", "Kuoro B II"),
 }
 
-# Siirtymät ovat edeltävien alaosien tahtimäärien summia: 02=+0, 03=+91,
-# 04=+140, 05=+162, 06=+270, 07=+323, 08=+385, 09=+449, 10=+506, 10b=+577,
-# 11=+628. Nämä on laskettu mekaanisesti lähdetiedostojen omista
-# tahtimääristä, ei tarkistettu kuoron painetun nuottikirjan sivuja vasten —
-# ks. CLAUDE.md "Open: which measure numbers is this actually at" siitä
-# miksi 10b:n ja Lacrymosan täsmällinen sijainti kirjassa on yhä auki.
+# Kunkin Dies iraen alaosan ensimmäisen tahdin numero **kuoron painetussa
+# nuottikirjassa**. Nämä eivät ole laskettuja vaan kirjasta luettuja: laulaja
+# tarkisti ne harjoituksissa 2026-09-02, ja niiden mukaan numerointi täsmää
+# kirjan kanssa alaosan sisällä alusta loppuun.
+#
+# Aiemmin nämä laskettiin lähdetiedostojen omista tahtimääristä (alut 1, 92,
+# 141, 163, 271, 324, 386, 450, 507, 578, 629), mikä oli kuudessa kohdassa
+# väärin ja Lacrymosassa jo kahdeksan tahtia pielessä. CPDL:n osakohtaiset
+# tiedostot eivät katkea samoista kohdista kuin kirja: viidessä saumassa
+# meillä on tahteja, joita kirja laskee jo seuraavaan alaosaan, ja kolmessa
+# saumassa kirjassa on tahteja, joita lähteissä ei ole lainkaan (tarkistettu
+# vertaamalla saumojen musiikkia — kyse ei ole kahdennuksista). Siksi numerot
+# eivät jatku saumojen yli aukottomasti; ks. `saumat()` alempana ja CLAUDE.md
+# luku *2026-09-02 (later): the book's own bar numbers for Dies irae*.
 NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False
-DIES_IRAE_SIIRTYMAT = {
-    "02-Verdi-Dies_irae.mxl": 0, "03-Verdi-Tuba_mirum.mxl": 91,
-    "04-Verdi-Mors_stupebit.mxl": 140, "05-Verdi-Liber_scriptus.mxl": 162,
-    "06-Verdi-Quid_sum_miser.mxl": 270, "07-Verdi-Rex.mxl": 323,
-    "08-Verdi_Recordare.mxl": 385, "09-Verdi_Ingemisco.mxl": 449,
-    "10-Verdi_Confutatis.mxl": 506,
-    "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": 577,
-    "11-Verdi_Lacrymosa.mxl": 628,
+DIES_IRAE_ALUT = {
+    "02-Verdi-Dies_irae.mxl": 1, "03-Verdi-Tuba_mirum.mxl": 91,
+    "04-Verdi-Mors_stupebit.mxl": 143, "05-Verdi-Liber_scriptus.mxl": 162,
+    "06-Verdi-Quid_sum_miser.mxl": 271, "07-Verdi-Rex.mxl": 322,
+    "08-Verdi_Recordare.mxl": 386, "09-Verdi_Ingemisco.mxl": 450,
+    "10-Verdi_Confutatis.mxl": 507,
+    "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": 573,
+    "11-Verdi_Lacrymosa.mxl": 621,
 }
+DIES_IRAE_SIIRTYMAT = {f: alku - 1 for f, alku in DIES_IRAE_ALUT.items()}
 
 TARGETS_BY_NAME = [(t[0], t) for t in TARGETS]
 
@@ -671,6 +680,30 @@ def build_attributes(div, beats, btype, clef, staves, fifths=0,
     return a
 
 
+def saumaraportti(alueet):
+    """Kerro missä Dies iraen numerointi ei jatku saumojen yli aukottomasti.
+
+    Alaosien alkunumerot tulevat kuoron nuottikirjasta (`DIES_IRAE_ALUT`),
+    eivätkä CPDL:n osakohtaiset tiedostot katkea samoista kohdista kuin kirja.
+    Siksi osa numeroista toistuu ja osa jää väliin. Se on tarkoituksellista —
+    kirjan kanssa täsmääminen on tärkeämpää kuin katkeamaton juoksutus — mutta
+    se ei saa olla hiljainen yllätys, joten se tulostetaan joka ajolla.
+    """
+    if len(alueet) < 2:
+        return []
+    rivit = []
+    for (_, _, loppu), (nimi, alku, _) in zip(alueet, alueet[1:]):
+        if alku <= loppu:
+            rivit.append(f"  {nimi:6} alkaa {alku}, edellinen päättyi {loppu}"
+                         f"  -> {loppu - alku + 1} numeroa toistuu")
+        elif alku > loppu + 1:
+            rivit.append(f"  {nimi:6} alkaa {alku}, edellinen päättyi {loppu}"
+                         f"  -> {alku - loppu - 1} numeroa puuttuu lähteistä")
+    if not rivit:
+        return []
+    return ["Dies iraen saumat (numerointi kirjan mukaan, ks. DIES_IRAE_ALUT):"] + rivit
+
+
 def title_direction(label):
     d = ET.Element("direction", {"placement": "above"})
     dt = ET.SubElement(d, "direction-type")
@@ -744,6 +777,7 @@ def main():
     evened = 0
     stats = {name: 0 for name, *_ in TARGETS}
 
+    alueet = []
     for filename, numero, otsikko in MOVEMENTS:
         src = load(filename)
         src_parts = {p.get("id"): p for p in src.findall("part")}
@@ -755,6 +789,9 @@ def main():
         offset = 0
         if not NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA:
             offset = DIES_IRAE_SIIRTYMAT.get(filename, 0)
+        if filename in DIES_IRAE_ALUT:
+            alueet.append((numero, offset + int(numbers[0]),
+                           offset + int(numbers[-1])))
 
         for name, abbr, staves, clef in TARGETS:
             target = parts[name]
@@ -866,6 +903,8 @@ def main():
         print(f"tasattu {evened} vääränmittaista tahtia (konelukemisen osat)")
     if repaired:
         print(f"korjattu {repaired} kaksinkertaista nuottiarvoa (piano)")
+    for rivi in saumaraportti(alueet):
+        print(rivi)
     for w in dict.fromkeys(warnings):
         print("VAROITUS:", w)
 

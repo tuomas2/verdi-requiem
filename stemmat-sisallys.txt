@@ -18,7 +18,7 @@ sivunumerot kussakin stemma-PDF:ssä
   III  Offertorio                7      7      7      7      7      7      7      7
   IV   Sanctus                   8      8      7      7      7      7      7      7
   V    Agnus Dei                 9      9      8      8      8      8      9      8
-  VI   Lux aeterna              10     10      9      9      9     10      9      9
-  VII  Libera me                10     10      9      9     10     10      9      9
+  VI   Lux aeterna              10     10      9      9      9      9      9      9
+  VII  Libera me                10     10      9      9      9     10      9      9
 -----------------------------------------------------------------------------------
-       sivuja                   16     15     14     14     15     15     14     14
+       sivuja                   16     15     14     14     14     15     14     14

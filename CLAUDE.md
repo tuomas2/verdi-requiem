@@ -22,15 +22,16 @@ previously **entirely missing** ~50-measure passage (the second "Dies irae"
 recall, between Confutatis and Lacrymosa) found, OMR'd, and wired in as
 movement "II·9b". Its chorus-bass lyrics are checked; everything else about
 it is not. Also new: Dies irae's ten sub-movements plus II·9b now number
-continuously (1–706) instead of each restarting at 1, matching how the
-choir's rehearsal book numbers that section — see *Open assumptions*. Also
+continuously instead of each restarting at 1, matching how the
+choir's rehearsal book numbers that section — and since 2026-09-02 the
+sub-movements' start numbers are the book's own, read from it, not computed. Also
 new: **movement 11's own chorus bass (Kuoro B) had ~30 measures of wrong or
 missing lyrics near the end** — not an OMR file, a genuine bug in the
 original CPDL source, undetected until now — found and fixed; see
 *Lacrymosa's chorus bass: wrong text, not missing measures*. Also new: three
 more chorus-bass spots the user flagged by ear, cross-checked against the
 choir's own MuseScore files and (where available) source PDFs — two fixed
-(Lacrymosa bar 674's "eis requiem" was the soloists' line copied into the
+(Lacrymosa bar 666's "eis requiem" was the soloists' line copied into the
 chorus stave by mistake; Agnus Dei bar 27's wrong clef/register was OMR
 reading the wrong staff after the chorus drops out for a solo passage), one
 left open pending the physical score; see *2026-08-31: three more chorus-bass
@@ -61,8 +62,8 @@ Open, roughly in the order a singer would feel them:
 | Movement 01's chorus-bass **text** now reads complete (86 % of its notes carry a syllable; the 15 that do not are melisma-internal). Its **notes** are still unproofread, and S/A/T are untouched | *2026-09-02* section |
 | Movement 14's `Kuoro B` is **settled** — notes match the choir file exactly, all 74 bars are metrically valid, 29 remaining wordless notes are melisma-internal or chord second notes. Its **Soprano/Alto/Tenor are not**: 48–59 % of their notes carry no syllable, and they still show fabricated content and contentless measures in bars 59–74 | *2026-08-31 (later)* section |
 | II·9b: Soprano/Alto/Tenor lyrics unchecked; its exact position vs. the choir book is still 3–5 measures uncertain | *The missing Dies irae recall* |
-| Lacrymosa fix: a few melisma-internal syllable placements are best-guess, not page-verified one by one; also the divisi `P9`'s leftover duplicate text at bars 682–684 still needs a proper (non-1:1) syllable placement | *Lacrymosa's chorus bass*, *2026-08-31* section |
-| Liber scriptus ~bar 240: bass sings "Dies irae" 3 times, user recalls 6 from the choir's own file — notes confirmed correct in all voices, but a real Soprano-vs-A/T/B text disagreement at bars 248–255 is unresolved without the physical score | *2026-08-31* section |
+| Lacrymosa fix: a few melisma-internal syllable placements are best-guess, not page-verified one by one; also the divisi `P9`'s leftover duplicate text at bars 674–676 still needs a proper (non-1:1) syllable placement | *Lacrymosa's chorus bass*, *2026-08-31* section |
+| Liber scriptus ~bar 239: bass sings "Dies irae" 3 times, user recalls 6 from the choir's own file — notes confirmed correct in all voices, but a real Soprano-vs-A/T/B text disagreement at bars 247–254 is unresolved without the physical score | *2026-08-31* section |
 | 13 lyric changes reported but deliberately not applied | `python3 korjaa_sanat.py --kuiva` lists them |
 | Movement I has no piano | *Movement I has no piano* |
 | Five assumptions made without the rehearsal score | *Open assumptions* |
@@ -88,7 +89,7 @@ Open, roughly in the order a singer would feel them:
 | `nayta.py` | Prints a staff's notes, voices and **lyric rows** per bar — the first tool for any reported error |
 | `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |
 | `harjoitus-*.mscz` | The result, one per singer |
-| `test_*.py` | Tests; all of them: `python3 -m unittest discover -p 'test_*.py'` (62) |
+| `test_*.py` | Tests; all of them: `python3 -m unittest discover -p 'test_*.py'` (68) |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
 | `tiivistys.mss` | MuseScore style: multimeasure rests |
 | `musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files* |
@@ -262,8 +263,8 @@ line to change in `yhdista.py`; see `YHDISTAMINEN.md` for how.
 
 | Assumption | Why | How to settle |
 |---|---|---|
-| ~~Measure numbers restart in every movement~~ — **settled**: Dies irae (02–11, incl. II·9b) now numbers 1–706 continuously; every other movement still restarts at 1 | The user confirmed the choir's rehearsal book numbers Dies irae continuously | Done — `NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False`, offsets computed mechanically from each sub-movement's own measure count (verified against the actual files, not hand-summed) |
-| Confutatis→Lacrymosa gap (II·9b) is 51 measures, computed at 578–628 (Lacrymosa starts 629) | Mechanical cumulative count from source files' own measure counts. Three other sources disagree by up to 5 measures on where this gap sits (PDF's own printed numbers say 573–623/624; the choir book itself said 621) | Get the choir book's own start numbers for Tuba mirum, Recordare, Confutatis (partly done — see *The missing Dies irae recall*) to find which sub-movement's own bar count differs from the book, and localise the gap properly |
+| ~~Measure numbers restart in every movement~~ — **settled**: Dies irae (02–11, incl. II·9b) numbers 1–698 continuously; every other movement still restarts at 1 | The user confirmed the choir's rehearsal book numbers Dies irae continuously | Done — `NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False`, and since 2026-09-02 the per-sub-movement start numbers are read from the book itself (`DIES_IRAE_ALUT`), not computed |
+| ~~Confutatis→Lacrymosa gap (II·9b) is 51 measures, computed at 578–628~~ — **settled**: the singer read the book's own start numbers and II·9b is at 573–623, Lacrymosa at 621 | The computed numbers were wrong in six places | Done — see *2026-09-02 (later): the book's own bar numbers for Dies irae* |
 | Sanctus chorus bass = Bass I | User has the higher of the two; Bass I is higher (median G3 vs D3) | Bass I enters at m. 2, Bass II at m. 4 |
 | Movement 05 soloist = mezzo | File says "Soprano solo" but Liber scriptus is the mezzo aria | Musicological, not a data question |
 | Movements 12, 15 soloist order | Parts are unnamed; inferred from standard score order | Compare with any full score |
@@ -486,37 +487,23 @@ functional). Verified with the usual note-count comparison:
 B from 1824 to 1888 notes, and the file still converts in MuseScore without
 `-f` on the first try.
 
-### Open: which measure numbers is this actually at
+### Settled: which measure numbers this is actually at — **573–623**
 
-Dies irae now numbers continuously (`NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA =
-False`), with 10b's offset computed the same mechanical way as every other
-sub-movement: the sum of the actual measure counts of 02–10 (577), verified
-against the files themselves, not hand-summed. That places 10b at 578–628
-and Lacrymosa's start at 629.
+This used to be the longest open question in this file: four sources gave four
+different answers (computed 578, a first rehearsal-score reading 624, the
+`Verdi_10bDies_irae.pdf`'s own printed 573–623, and the choir book's 621 for
+Lacrymosa), and the advice was "do not guess at a fix, get the book's own
+numbers for more anchor points".
 
-That computed 578 does not agree with three other numbers for this same
-spot, none of which agree with each other either:
-
-| Source | 10b starts at | Lacrymosa starts at |
-|---|---|---|
-| Computed from source files' own measure counts (what's in `yhdista.py` now) | 578 | 629 |
-| User's rehearsal-score excerpt (first pass) | — | 624 |
-| `Verdi_10bDies_irae.pdf`'s own printed numbers (573–623, confirmed both ends) | 573 | → would be 624 |
-| User's actual choir book (second, later confirmation) | — | 621 |
-
-The gap between the computed 578 and the PDF's own 573 (5 measures) is
-*larger* than the gap already noted between the two book-adjacent readings,
-624 and 621 (3 measures) — and it must sit somewhere in movements 02–10,
-not in 10b itself, since 10b's own length (51 measures) is not in question.
-**Do not guess at a fix.** This needs the same treatment as the rest of
-*Open assumptions* above: get the choir book's own numbers for a few more
-anchor points (Tuba mirum, Recordare, Confutatis starts — partly done
-earlier in this same investigation, but not written down anywhere, so
-gather them again) and localise which sub-movement's bar count disagrees
-with the book before touching the offsets. None of this blocks day-to-day
-use of the file as it stands now — the numbering is internally consistent
-and continuous, just not yet proven to match the physical book digit for
-digit past Confutatis.
+That is exactly what happened on 2026-09-02: the singer read the book's start
+number for every Dies irae sub-movement and handed them over. **10b is at
+573–623, which is the 10b PDF's own printed numbering exactly** — the one
+source that had been right all along — and Lacrymosa starts at 621, i.e. the
+book counts the last three bars of the 10b PDF as the start of Lacrymosa.
+The computed 578 was wrong because the mechanical cumulative count assumed
+CPDL's per-movement files break at the same bars the book does, and in six
+places they do not. See *2026-09-02 (later): the book's own bar numbers for
+Dies irae*.
 
 ### What is left here specifically
 
@@ -525,7 +512,7 @@ digit past Confutatis.
 2. Notes for all four voices are OMR output, unproofread against the source
    PDF beyond the one structural spot-check (the tied G3). Same category as
    *What is left* for movements 01/14 below.
-3. The measure-numbering disagreement above (computed 578 vs. the book).
+3. ~~The measure-numbering disagreement~~ — settled, see above.
 
 ## Lacrymosa's chorus bass: wrong text, not missing measures
 
@@ -630,9 +617,9 @@ MuseScore-comparison work, then, where a source PDF exists, confirm visually
 by rendering pages (`mutool draw -r 250`) rather than trusting pitch-matching
 alone — same discipline as the Lacrymosa fix above.
 
-### Fixed: Lacrymosa bar 674, "eis requiem" was the soloists' line, not the chorus's
+### Fixed: Lacrymosa bar 666, "eis requiem" was the soloists' line, not the chorus's
 
-`11-Verdi_Lacrymosa.mxl`, `Kuoro B` (`P8`), continuous bars 674–679 (local
+`11-Verdi_Lacrymosa.mxl`, `Kuoro B` (`P8`), continuous bars 666–671 (local
 46–51) — exactly the six bars the original Lacrymosa fix (above) had
 *added* from OMR to replace bare rests. Turned out that addition was wrong:
 those six bars' notes and lyrics ("e-is re-qui-em, pi-e Je-su Do-mi-ne,")
@@ -644,13 +631,14 @@ counterpart — a pure insertion with nothing to match), and
 `Verdi_Lacymosa.pdf` pages 9–10 show, rendered, that only the vocal-quartet
 soloists sing "eis requiem, pie Jesu Domine, dona eis, dona" here — the
 chorus staves are tacet and re-enter only on "Pi-e Je-su Do-mi-ne" a few
-bars later (already correct in our file, ~bar 682, matching the user's own
-"from 682 on it looks right"). **Fixed**: bars 46–51 replaced with plain
+bars later (already correct in our file, ~bar 674, matching the user's own
+"from 674 on it looks right"; they said 682, in the old numbering).
+**Fixed**: bars 46–51 replaced with plain
 whole-bar rests, matching what was there before the original fix. Verified:
 file converts and exports MIDI cleanly; merged score's `Kuoro B` count drops
 by exactly 18 (the notes that were removed).
 
-Still open: the divisi `P9` at the same passage's bars 54–56 (2 682–684)
+Still open: the divisi `P9` at the same passage's bars 54–56 (2 674–676)
 still carries the leftover "Lacrymosa dies illa..." duplicate text (the same
 bug class as the original fix, just never scrubbed from the divisi part).
 Its *notes* are confirmed correct (they match the choir's own `Bass 1`
@@ -743,30 +731,30 @@ numbers would be a guess. **Needs a proper re-OMR of this page range**
 pages 4–5, same recipe as everywhere else in this file) rather than another
 manual attempt.
 
-### Open, unresolved: Liber scriptus ~bar 240, how many times does the bass sing "Dies irae"?
+### Open, unresolved: Liber scriptus ~bar 239, how many times does the bass sing "Dies irae"?
 
-Continuous bar 240 falls at the end of `05-Verdi-Liber_scriptus.mxl` (local
-bar 78/108, continuous 240–267) — the *first* of the piece's three "Dies
+Continuous bar 239 falls at the end of `05-Verdi-Liber_scriptus.mxl` (local
+bar 78/108, continuous 239–266) — the *first* of the piece's three "Dies
 irae" theme returns (the other two are II·9b and the Confutatis→Lacrymosa
 gap, both above). The user recalled the bass singing "Dies irae" six times
 here (from the choir's own MuseScore file); the current text has it three
-times (240–241, 259–261, 262–267) plus "Dies illa" twice (242–243, 257–258).
+times (239–240, 258–260, 261–266) plus "Dies illa" twice (241–242, 256–257).
 
 Pitch-matched **every voice** (S/A/T/B) against `musescore/02_dies_irae`'s
 equivalent `Bass 1`/`Soprano 1` across the whole passage (continuous
-235–267): **all four voices' notes match the choir source exactly**, note
+234–266): **all four voices' notes match the choir source exactly**, note
 for note — nothing is missing or extra. So this is purely a "which words
 under which notes" question, not a notes problem, and MuseScore's own files
 carry no lyrics at all, so they can't settle it further.
 
 The one concrete lead: Alto/Tenor/Bass sing "Solvet saeclum in favilla"
-*twice* (bars 248–251 and 252... continuous 248–255, before "Teste David cum
+*twice* (bars 247–250 and 251... continuous 247–254, before "Teste David cum
 Sybilla"), while Soprano, at the same bars, instead has extra "Dies irae,
 dies illa" repeats and skips the second "solvet saeclum"/"teste David"
 entirely. Soprano's own notes there are independently confirmed correct
 (matched the choir source too) — so it's a real, different melodic line, not
 corruption — but the *text* disagreement between Soprano and A/T/B is
-unresolved. **Needs the physical rehearsal score**, bars 248–255 (Liber
+unresolved. **Needs the physical rehearsal score**, bars 247–254 (Liber
 scriptus local 86–93), checked against both readings above.
 
 ## 2026-08-31 (later): Agnus Dei's chorus bass, whole movement verified
@@ -877,7 +865,7 @@ file.
   count fell from 26 to 21 — exactly the five measures that got real content
   (59, 60, 69, 72, 74).
 - All eight reading parts and the practice `.mscz` were re-rendered (seven of
-  the eight had been stale since the *Lacrymosa bar 674* fix). `stemmat-
+  the eight had been stale since the *Lacrymosa bar 666* fix). `stemmat-
   sisallys.txt` was regenerated; `B I`/`B II` are now 13 pages, not 14.
 - 32 tests pass.
 - The result was read back off `stemma-basso-1.pdf` page 9 as a rendered
@@ -941,8 +929,8 @@ row and `i` alone on the row below.
 
 The fix is a better rule, and finding the right one needed measurement, not
 taste. Collapsing every verse to 1 part-wide would have been wrong: `Kuoro B`
-also carries genuine second lyric lines at bars 369–371 (Rex tremendae) and
-682–684 (the Lacrymosa divisi), where **two voices share the staff and sing
+also carries genuine second lyric lines at bars 367–369 (Rex tremendae) and
+674–676 (the Lacrymosa divisi), where **two voices share the staff and sing
 different words**. The discriminator that separates the two cases cleanly is
 the `<voice>` element:
 
@@ -950,7 +938,7 @@ the `<voice>` element:
 |---|---|---|---|
 | I m108 `le`/`i`/`son,` | 1 | no | one text line → all to verse 1 |
 | I m78 `is.` + junk `S` | 1 | **yes** | two rows are needed → leave |
-| Rex m369–371, Lacr. m682–684 | **2** | no | divisi, two real texts → leave |
+| Rex m367–369, Lacr. m674–676 | **2** | no | divisi, two real texts → leave |
 
 So: *if all of a measure's lyrics belong to one voice and no note carries two
 of them, they are one text line and all belong on row 1; otherwise fall back to
@@ -1046,7 +1034,7 @@ but decide several whole classes of bug, so guessing from a PDF or from
 MuseScore's window cannot find them.
 
 Measure numbers repeat — every main movement restarts at 1 (Dies irae is the
-exception, 1–706 continuous) — so `nayta.py` prints the movement title beside
+exception, 1–698 continuous) — so `nayta.py` prints the movement title beside
 each hit. Check you are looking at the movement the singer meant.
 
 ### 2. Trust the singer's bar number, but locate the bar independently
@@ -1133,7 +1121,7 @@ this shipped something. Checks that have caught real problems:
 - Per-staff note counts before and after. A lyric-only change must leave every
   count identical; anything else means content moved.
 - `mscore` converts without `-f`.
-- `python3 -m unittest discover -p 'test_*.py'` — 62 tests.
+- `python3 -m unittest discover -p 'test_*.py'` — 68 tests.
 
 ### The two movements not yet in the table
 
@@ -1151,6 +1139,109 @@ hand-edited file against the file it was derived from
 difference into a new `Osa` entry. Movement 14's diff will be larger — it
 includes note-level fixes and two tacet spans — but the danger warning above
 `korjaa_sanat.py` disappears for each movement that moves over.
+
+## 2026-09-02 (later): the book's own bar numbers for Dies irae
+
+The singer read the choir's rehearsal book and handed over the start bar of
+every Dies irae sub-movement. This settles the single longest-running open
+question in this file and **changes bar numbers that earlier sections quote**
+— see the translation table at the end.
+
+### What changed
+
+`yhdista.py` no longer computes the offsets. `DIES_IRAE_ALUT` now holds the
+book's own first-bar number per sub-movement, and the offset is that minus one:
+
+| Sub-movement | computed (old) | book (now) | shift |
+|---|---|---|---|
+| II·1 Dies irae | 1 | 1 | — |
+| II·2 Tuba mirum | 92 | **91** | −1 |
+| II·3 Mors stupebit | 141 | **143** | +2 |
+| II·4 Liber scriptus | 163 | **162** | −1 |
+| II·5 Quid sum miser | 271 | 271 | — |
+| II·6 Rex tremendae | 324 | **322** | −2 |
+| II·7 Recordare | 386 | 386 | — |
+| II·8 Ingemisco | 450 | 450 | — |
+| II·9 Confutatis | 507 | 507 | — |
+| II·9b Dies irae (kertaus) | 578 | **573** | −5 |
+| II·10 Lacrymosa | 629 | **621** | −8 |
+
+Six of eleven were wrong, and the error grew to eight bars by Lacrymosa. Note
+that 573 is exactly what `Verdi_10bDies_irae.pdf` prints on its own pages — the
+source that had been right all along while three other readings disagreed.
+
+### Why the mechanical count was wrong, and why it cannot be fixed by counting
+
+The old offsets were cumulative sums of each source file's own measure count.
+That assumes CPDL's per-movement split falls on the same bar as the book's, and
+in eight of the ten seams it does not. Measured directly:
+
+- Five seams **overlap**: our earlier sub-movement runs past where the book
+  starts the next one (by 1, 3, 2, 5 and 3 bars).
+- Three seams have a **gap**: the book has bars that no source file contains
+  (3, 1 and 2 bars).
+
+Net, our Dies irae holds 8 more bars than the book counts. This was checked
+rather than assumed: the music at every overlapping seam was compared bar by
+bar — all parts together, and then the piano parts alone — and **none of it
+matches**. So the extra bars are not duplicated content that could be trimmed,
+and the gaps are not bars we could recover; the two sets of files simply carve
+the piece up differently. Adding or deleting bars would therefore lose or
+invent music, so the numbering is fixed per sub-movement instead and the seams
+are left discontinuous.
+
+### The seams are discontinuous, and that is deliberate
+
+`yhdista.py` prints the discontinuities on every run (`saumaraportti`) so they
+cannot become a silent surprise:
+
+    Dies iraen saumat (numerointi kirjan mukaan, ks. DIES_IRAE_ALUT):
+      II·2   alkaa 91, edellinen päättyi 91  -> 1 numeroa toistuu
+      II·3   alkaa 143, edellinen päättyi 139  -> 3 numeroa puuttuu lähteistä
+      …
+
+**In the reading parts this is invisible**, and that was verified before
+committing to the approach: in every one of the five overlapping seams, the
+earlier sub-movement's overlapping bars are **chorus rests in all four voices**.
+They disappear into a multimeasure rest, and the singer sees nothing but a
+section change. The one bar where a chorus voice does sing on a repeated number
+is Dies irae's own bar 91 (the final "…surus!"), and the bar it repeats —
+Tuba mirum's first — is a chorus rest. Rendered `stemma-basso-1.pdf` page 6
+shows the worst case, the five-bar Confutatis→II·9b overlap: a rest block
+`[548–576]`, bar 577 rest, then the II·9b title and `573`.
+
+The gaps are equally harmless: all three fall where the following sub-movement
+has no chorus at all (Mors stupebit, Quid sum miser, Recordare). Padding them
+with rest bars was considered and rejected — it would invent silence the score
+does not have, and the practice `.mscz` plays through those seams.
+
+### Translation table for older notes in this file
+
+Every continuous Dies irae bar number written here before 2026-09-02 uses the
+old numbering. All such references have been renumbered in place, but if an
+old number turns up in a commit message, a comment or the user's memory:
+
+| In | subtract |
+|---|---|
+| Tuba mirum, Liber scriptus | 1 |
+| Rex tremendae | 2 |
+| II·9b | 5 |
+| Lacrymosa | 8 |
+| Mors stupebit | **add** 2 |
+| all others | unchanged |
+
+So the old "Lacrymosa bar 674" is now 666, "682–684" is 674–676, "Liber
+scriptus bar 240" is 239, and "Rex 369–371" is 367–369.
+
+### Verification
+
+- All eleven sub-movements start on the book's number, read back out of the
+  merged score's own `<measure number>` values, not from the table that set them.
+- Dies irae now spans 1–698 (was 1–706).
+- Note counts per staff unchanged — only numbering moved. Measure count 1807.
+- All eight parts re-rendered; page counts unchanged except T I (15 → 14).
+- `test_yhdista.py` pins the book numbers so nobody recomputes them
+  "correctly" again, and pins the seam report. 68 tests.
 
 ## The choir's own MuseScore practice files
 
