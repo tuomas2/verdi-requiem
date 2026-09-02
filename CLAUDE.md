@@ -40,14 +40,20 @@ against the choir's own MuseScore file across the whole movement and now matches
 it note for note, with zero differences** — 15 defects found and fixed, closing
 the bars 59–74 item that the previous session left open as needing a re-OMR (it
 did not); see *2026-08-31 (later): Agnus Dei's chorus bass, whole movement
-verified against the choir file*.
+verified against the choir file*. And new after the choir's first rehearsals:
+**the reading parts now print a bar number over every bar** (and the bar range
+over every multimeasure rest), because the singer needs to find a single bar on
+the conductor's call; plus four chorus-bass lyric fixes in movement I that the
+user heard as wrong, one of which was a real `yhdista.py` bug that split a word
+across two lyric lines — see *2026-09-02: bar numbers on every bar, and movement
+I's chorus-bass lyrics*.
 
 Open, roughly in the order a singer would feel them:
 
 | Open | Where to read up |
 |---|---|
 | **Notes** of movements 01 and II·9b are still unproofread (movement 14's `Kuoro B` is now done; its S/A/T are not) | *OMR recipe*, *The missing Dies irae recall*; the lyrics pass did not touch notes |
-| Movement 01's Kyrie (from bar 91) still drops syllables | *What is left* — the OMR lost notes there, so it is note work, not text work |
+| Movement 01's chorus-bass **text** now reads complete (86 % of its notes carry a syllable; the 15 that do not are melisma-internal). Its **notes** are still unproofread, and S/A/T are untouched | *2026-09-02* section |
 | Movement 14's `Kuoro B` is **settled** — notes match the choir file exactly, all 74 bars are metrically valid, 29 remaining wordless notes are melisma-internal or chord second notes. Its **Soprano/Alto/Tenor are not**: 48–59 % of their notes carry no syllable, and they still show fabricated content and contentless measures in bars 59–74 | *2026-08-31 (later)* section |
 | II·9b: Soprano/Alto/Tenor lyrics unchecked; its exact position vs. the choir book is still 3–5 measures uncertain | *The missing Dies irae recall* |
 | Lacrymosa fix: a few melisma-internal syllable placements are best-guess, not page-verified one by one; also the divisi `P9`'s leftover duplicate text at bars 682–684 still needs a proper (non-1:1) syllable placement | *Lacrymosa's chorus bass*, *2026-08-31* section |
@@ -880,6 +886,124 @@ notes, which correctly carry none). The same method applies unchanged — the
 choir file has `Soprano`, `Alto`, `Tenor 1` and `Tenor 2` — and the offsets
 worked out above (−10, −19, −28, −28) should carry straight over.
 
+## 2026-09-02: bar numbers on every bar, and movement I's chorus-bass lyrics
+
+The choir's first rehearsals happened, and the user came back with one feature
+request and three lyric complaints, all in movement I and all heard by ear
+while singing.
+
+### Bar numbers on every bar
+
+`tiivistys.mss` — the style used for the eight reading parts, and through
+`harjoitus.py` for the practice `.mscz` too — now also sets
+
+    <showMeasureNumber>1</showMeasureNumber>
+    <showMeasureNumberOne>1</showMeasureNumberOne>
+    <measureNumberSystem>0</measureNumberSystem>
+    <measureNumberInterval>1</measureNumberInterval>
+    <mmRestShowMeasureNumberRange>1</mmRestShowMeasureNumberRange>
+
+`measureNumberSystem` is the switch that matters: 1 means "only at the start of
+a system", which was the default and the thing the user was fighting. With it
+off, `measureNumberInterval` 1 numbers every bar. `mmRestShowMeasureNumberRange`
+prints the span under a compressed rest (`[79–93]`), which is redundant with the
+per-bar numbers but free and reassuring.
+
+Cost: **exactly one page per part** (B I 13 → 14, and +1 for each of the other
+seven). It is not the range line and it is not the font size — rendering with
+`mmRestShowMeasureNumberRange` off, and again with `measureNumberFontSize` 6,
+both still gave 14 pages. It is the vertical space the number row itself takes
+above each system.
+
+### The three lyric complaints
+
+The user reported these by bar number "from the bass part", which is worth
+noting: they had to count from each system's start to do it, which is precisely
+why they asked for the numbers. Two of the three were dead-on, which is a good
+reason to trust their bar numbers when they give them.
+
+**Bar 108, "e-le-i-son" printed on two lyric lines — a real `yhdista.py` bug.**
+The user guessed the cause exactly ("maybe you can see the confusion in the
+xml"). Audiveris had put the syllables of one word on lyric verses 2, 1 and 2.
+`normalise_lyrics` was supposed to catch that, but its rule was *per measure*
+and only fired when the measure had **no** verse-1 syllable at all — so a
+measure that mixed them kept the split, and the part printed `le … son,` on one
+row and `i` alone on the row below.
+
+The fix is a better rule, and finding the right one needed measurement, not
+taste. Collapsing every verse to 1 part-wide would have been wrong: `Kuoro B`
+also carries genuine second lyric lines at bars 369–371 (Rex tremendae) and
+682–684 (the Lacrymosa divisi), where **two voices share the staff and sing
+different words**. The discriminator that separates the two cases cleanly is
+the `<voice>` element:
+
+| Case | Voices with lyrics | A note with 2 lyrics | Verdict |
+|---|---|---|---|
+| I m108 `le`/`i`/`son,` | 1 | no | one text line → all to verse 1 |
+| I m78 `is.` + junk `S` | 1 | **yes** | two rows are needed → leave |
+| Rex m369–371, Lacr. m682–684 | **2** | no | divisi, two real texts → leave |
+
+So: *if all of a measure's lyrics belong to one voice and no note carries two
+of them, they are one text line and all belong on row 1; otherwise fall back to
+the old "lift to row 1 only if row 1 is empty" rule.* `test_yhdista.py` (new,
+9 tests) pins all three rows of that table.
+
+Effect beyond the reported bug: it also lifted 3 syllables in `Kuoro S`, 3 in
+`Kuoro A` (including the stray verse-**8** one) and 7 in `Kuoro T` onto row 1.
+Every one was checked and every one is a real syllable (`qui`, `in`, `bi`,
+`lu`, `rae,`, `di`, `es`), not OMR junk.
+
+**Bars 126 and 129, two missing `i` syllables — confirmed against the PDF.**
+The user said "son" belongs on the first note of bar 127 and the next
+`e-le-i-son` must spread over four notes ending on the single note of bar 130.
+Page 9 (system 2, bars 126–128) and page 10 (system 1, bars 129–135) of
+`01-Verdi_Requiem.pdf` show exactly that, syllable over notehead: 126 = `le`,
+`i`; 127 = `son,`, `e`; 128 = `le`; 129 = `i`; 130 = `son,`. Our file had `i`
+one note late in both phrases and no `son,` in the first. Fixed.
+
+**Bar 51, "om-nis" — done as asked, but the source PDF disagrees.** The user
+wants `nis` on the last note of bar 52, i.e. the melisma sung on `om`.
+`01-Verdi_Requiem.pdf` page 3 prints it the other way: `om` on bar 51 beat 1,
+`nis` on beat 3, and the extension line running through bar 52 to `ca` — the
+melisma on the `i` of `nis`. Both are sung; which one a choir uses is the
+conductor's call, and the user is the one in the room. Applied their version;
+`om` stays `syllabic="begin"` so MuseScore draws `om – – – nis` across the
+melisma by itself, no `<extend/>` needed. **One line to revert** if the
+rehearsal score says otherwise: move the `<lyric>` back from bar 52's fourth
+note to bar 51's second.
+
+### Also fixed, not reported: the stray `S` at bar 78
+
+`Kuoro B` bar 78 carried OMR junk — a lone `S` on verse 2, sitting under the
+real `is.` on the same note. It is visible in the old `stemma-basso-1.pdf` page
+1. Page 4 of the source PDF has nothing there. Deleted. (This is the one case
+where the new `normalise_lyrics` rule deliberately does *not* help: two lyrics
+on one note need two rows, so the rule leaves them alone and the junk had to go
+from the data.)
+
+### Where the fixes live
+
+All four data fixes are in `01-Verdi_Requiem-kasin.mxl`, part `P16`, edited
+directly — that file is the hand-corrected copy `yhdista.py` reads and
+`korjaa_sanat.py` never writes (it writes `-OMR-korjattu.mxl`), so this is the
+safe layer. All 31 remaining verse-2 syllables in `P16` were set to verse 1 at
+the same time: the chorus bass has a single text line everywhere in this
+movement's PDF, and `normalise_lyrics` was already promoting all but two of
+them anyway, so the output change is only the two that mattered.
+
+### Verification
+
+- Per-staff note counts unchanged across the board (`Kuoro B` 1801 before and
+  after) — only lyrics moved. Measure count still 1807.
+- The merged score and all eight parts convert without `-f`; full score 362
+  pages.
+- 41 tests pass (32 before, +9 new).
+- Read back off the rendered `stemma-basso-1.pdf`, not just from the data:
+  page 1 shows `om – – nis` and no stray `S`, page 2 shows `e-le-i-son` on one
+  row at 107–108 and the corrected syllables at 125–130.
+- All eight parts, `stemmat-sisallys.txt` and `harjoitus-basso-1.mscz`
+  regenerated.
+
 ## The choir's own MuseScore practice files
 
 2026-08-30: the user handed over a folder of 8 zip files, unzipped and sorted
@@ -943,11 +1067,15 @@ a placeholder row, not a second real line.
 - **Movement 1: 95 % pitch match**, project's `01` `Kuoro B` (P16, 287 notes)
   against the choir's `Bass 1` (275 notes). The differences are specific and
   actionable, not noise:
-  - **Measures 79–93 are bare rests in `01-Verdi_Requiem-kasin.mxl`'s chorus
-    bass, with real notes in the choir file at the same spot** — this is
-    almost certainly the OMR data loss already flagged in *Open* as
-    "Movement 01's Kyrie (from bar 91) still drops syllables"; the choir file
-    looks like it could fill that gap directly.
+  - ~~**Measures 79–93 are bare rests in `01-Verdi_Requiem-kasin.mxl`'s
+    chorus bass, with real notes in the choir file at the same spot**~~ —
+    **retracted 2026-09-02, this was a false alarm.** Page 5 of
+    `01-Verdi_Requiem.pdf` shows those bars given to the four *soloists*
+    ("Soprano" / "Tenor" / "Bass" cues printed over their staves); the four
+    chorus staves are tacet and enter at bar 94, which is exactly what our
+    file has. The bar numbers in this comparison came from a `difflib`
+    alignment of two files of different lengths (127 vs. 140 bars) and are
+    approximate — treat them as "somewhere near", never as bar numbers.
   - Four smaller single-note mismatches worth a manual check: an OMR `B3`
     where the choir file has `Bb3` (~measure 35), a `C3`/`B2` disagreement
     around measure 52, a `D3`/`D4` octave disagreement around measure 116,
@@ -982,10 +1110,10 @@ a placeholder row, not a second real line.
 
 ### Thoughts on how this could be used — not started
 
-1. Highest value, most concrete: use the choir's `Bass 1` line to fill
-   `01`'s measures 79–93 and check the four flagged single-note spots — this
-   alone would close a chunk of the "Movement 01's Kyrie... drops syllables"
-   open item.
+1. ~~Highest value, most concrete: use the choir's `Bass 1` line to fill
+   `01`'s measures 79–93~~ — there is nothing to fill, see the retraction
+   above. What remains from that comparison is the **four flagged single-note
+   spots** (~35, ~52, ~116, ~124–126), still unchecked.
 2. Use `4 Dies irae 2` to cross-check `II·9b`'s currently-unproofread notes,
    and possibly to help pin down its position relative to Confutatis/
    Lacrymosa (the *Open: which measure numbers* question) — it's chorus-book

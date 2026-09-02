@@ -559,14 +559,31 @@ def verse_number(value):
 def normalise_lyrics(measure):
     """Yhtenäistä sanarivien numerot ja siirrä eksyneet tavut pääriville.
 
-    Jos tahdissa ei ole yhtään tavua rivillä 1 mutta joitakin korkeammilla
-    riveillä, ne kuuluvat pääriville: MuseScore varaisi muuten tilan kaikille
-    riveille ykkösestä siihen korkeimpaan, mikä työntää sanat kauas
-    viivastosta ja väljentää koko osan.
+    Yksi ääni laulaa yhtä tekstiä, joten jos tahdin kaikki tavut kuuluvat
+    samalle äänelle eikä yksikään nuotti kanna kahta tavua, ne ovat yksi
+    tekstirivi ja kuuluvat kaikki riville 1. Tämä ei ole kosmetiikkaa: OMR
+    merkitsi osan I tahdissa 108 sanan "e-le-i-son" tavut riveille 2, 1 ja 2,
+    ja stemmaan tuli kaksi puolikasta tekstiriviä keskeltä sanaa.
+
+    Kahta poikkeusta ei yhdistetä. Kaksi tavua samalla nuotilla *tarvitsee*
+    kaksi riviä, ja jos tahdissa on kaksi ääntä (divisi), rivit erottavat
+    niiden erilliset tekstit toisistaan — esimerkiksi Lacrymosan tahdit
+    682-684. Silloin jäljelle jää vanha sääntö: jos rivi 1 on kokonaan tyhjä,
+    tavut nostetaan sille, koska MuseScore varaisi muuten tilan kaikille
+    riveille ykkösestä siihen korkeimpaan ja työntäisi sanat kauas
+    viivastosta.
     """
-    lyrics = [lyric for note in measure.findall("note")
-              for lyric in note.findall("lyric")]
+    by_note = [(note.findtext("voice") or "1", note.findall("lyric"))
+               for note in measure.findall("note")]
+    lyrics = [lyric for _voice, note_lyrics in by_note
+              for lyric in note_lyrics]
     if not lyrics:
+        return
+    voices = {voice for voice, note_lyrics in by_note if note_lyrics}
+    stacked = any(len(note_lyrics) > 1 for _voice, note_lyrics in by_note)
+    if len(voices) == 1 and not stacked:
+        for lyric in lyrics:
+            lyric.set("number", "1")
         return
     numbers = [verse_number(lyric.get("number")) for lyric in lyrics]
     shift = 1 not in numbers

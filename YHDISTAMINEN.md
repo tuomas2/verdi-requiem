@@ -8,7 +8,7 @@
 | `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, kaikki ajan tasalla (II·9b mukana, tahtinumerointi juoksee Dies iraen läpi) |
 | `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa, ajan tasalla |
 | `sisallys.py` | Rakentaa tuon luettelon uudelleen valmiista stemma-PDF:istä |
-| `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys |
+| `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys ja tahtinumero joka tahtiin |
 | `harjoitus-*.mscz` | Harjoittelutiedosto: oma ääni trumpettina, muut piilossa |
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
@@ -92,6 +92,12 @@ tahtien määrä. Esimerkiksi Quid sum miser, jossa kuorobasso vaikenee kokonaan
 kutistuu yhdeksi 52 tahdin palkiksi. Vaikutus on 26 sivusta 19:ään. Osien
 otsikot ja kaksoistahtiviivat katkaisevat tiivistyksen, joten osanvaihdot ja
 tahtinumeroinnin nollaukset säilyvät.
+
+Sama tiedosto kytkee myös **tahtinumeron jokaiseen tahtiin** viivaston
+yläpuolelle, ei vain rivin ensimmäiseen, ja tiivistetyn taukopalkin alle sen
+tahtivälin (`[79-93]`). Harjoituksissa etsitään yksittäistä tahtia, ja rivin
+alusta laskeminen on hidasta ja menee helposti yhden pieleen. Hinta on yksi
+sivu lisää kussakin kahdeksassa stemmassa (esim. B I 13 -> 14 sivua).
 
 Sama tyyli käyttöliittymässä: Format -> Style -> Load Style -> `tiivistys.mss`.
 Jätä tyyli pois koko partituurin PDF:stä; tiivistys on tarkoitettu yhden
