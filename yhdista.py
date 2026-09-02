@@ -42,7 +42,7 @@ MOVEMENTS = [
     ("02-Verdi-Dies_irae.mxl",                      "II·1",  "Dies irae"),
     ("03-Verdi-Tuba_mirum.mxl",                     "II·2",  "Tuba mirum"),
     ("04-Verdi-Mors_stupebit.mxl",                  "II·3",  "Mors stupebit"),
-    ("05-Verdi-Liber_scriptus.mxl",                 "II·4",  "Liber scriptus"),
+    ("05-Verdi-Liber_scriptus-kasin.mxl",           "II·4",  "Liber scriptus"),
     ("06-Verdi-Quid_sum_miser.mxl",                 "II·5",  "Quid sum miser"),
     ("07-Verdi-Rex.mxl",                            "II·6",  "Rex tremendae"),
     ("08-Verdi_Recordare.mxl",                      "II·7",  "Recordare"),
@@ -92,7 +92,7 @@ MAPPING = {
         "D-trumpetti": ["P5"], "Trombone": ["P6"],
     },
     "04-Verdi-Mors_stupebit.mxl": {"Solisti B": ["P1"], "Piano": ["P2"]},
-    "05-Verdi-Liber_scriptus.mxl": {
+    "05-Verdi-Liber_scriptus-kasin.mxl": {
         # Tiedostossa "Soprano solo", mutta Liber scriptus on mezzon aaria.
         "Solisti M-S": ["P1"],
         "Kuoro S": ["P2"], "Kuoro A": ["P3"], "Kuoro T": ["P4"], "Kuoro B": ["P5"],
@@ -196,7 +196,8 @@ SINGER_PARTS = {
 NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False
 DIES_IRAE_ALUT = {
     "02-Verdi-Dies_irae.mxl": 1, "03-Verdi-Tuba_mirum.mxl": 91,
-    "04-Verdi-Mors_stupebit.mxl": 143, "05-Verdi-Liber_scriptus.mxl": 162,
+    "04-Verdi-Mors_stupebit.mxl": 143,
+    "05-Verdi-Liber_scriptus-kasin.mxl": 162,
     "06-Verdi-Quid_sum_miser.mxl": 271, "07-Verdi-Rex.mxl": 322,
     "08-Verdi_Recordare.mxl": 386, "09-Verdi_Ingemisco.mxl": 450,
     "10-Verdi_Confutatis.mxl": 507,

@@ -7,7 +7,8 @@ jokaisen toimenpiteen pitää kaatua kun lähtötilanne ei ole odotettu.
 import unittest
 import xml.etree.ElementTree as ET
 
-from korjaa_kasin import OSA_I, Osa, load, find_part, sovella, yksi_sanarivi
+from korjaa_kasin import (OSAT_II4, OSA_I, Osa, load, find_part, sovella,
+                          yksi_sanarivi)
 
 
 def osa(korjaukset, yksi_rivi=False):
@@ -70,6 +71,26 @@ class Toimenpiteet(unittest.TestCase):
         p = part([("C3", []), (None, [])])
         sovella(p, osa([("1", 1, "poista_nuotti", "rest")]))
         self.assertEqual(len(p.find("measure").findall("note")), 1)
+
+    def test_kopioi_tahti_tuo_nuotit_ja_sanat(self):
+        p = part([("C3", [("1", "begin", "Di")]), ("C3", [("1", "end", "es")])],
+                 [(None, [])])
+        sovella(p, osa([("2", None, "kopioi_tahti", "1")]))
+        self.assertEqual(rows(p),
+                         [("1", 0, "1", "begin", "Di"), ("1", 1, "1", "end", "es"),
+                          ("2", 0, "1", "begin", "Di"), ("2", 1, "1", "end", "es")])
+
+    def test_kopioi_tahti_kaataa_jos_kohteessa_on_nuotteja(self):
+        # Jos kohde ei ole pelkkä tauko, ollaan väärässä tahdissa ja
+        # kopiointi tuhoaisi musiikkia.
+        p = part([("C3", [])], [("D3", [])])
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("2", None, "kopioi_tahti", "1")]))
+
+    def test_kopioi_tahti_kaataa_jos_lahdetta_ei_ole(self):
+        p = part([(None, [])])
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", None, "kopioi_tahti", "9")]))
 
     def test_tavun_siirto_on_poisto_ja_lisays(self):
         p = part([("C3", [("1", "end", "nis")])], [("D3", [])])
@@ -189,6 +210,42 @@ class OsaIKokonaisuutena(unittest.TestCase):
         rivit = {ly.get("number") for m in self.part.findall("measure")
                  for n in m.findall("note") for ly in n.findall("lyric")}
         self.assertEqual(rivit, {"1"})
+
+
+class LiberScriptusKokonaisuutena(unittest.TestCase):
+    """Puuttuva "Di-es i-rae." kaikilla neljällä äänellä, oikeaa lähdettä vasten."""
+
+    KUVIO = [(None, 256), ("D", 192), ("D", 64), ("D", 256), ("D", 256)]
+    SANAT = ["Di", "es", "i", "rae."]
+
+    def test_kaikki_nelja_aanta_saavat_kuvion_tahteihin_68_70_72(self):
+        for lahde in OSAT_II4:
+            root = load(lahde.mxl)
+            p = find_part(root, lahde.osasto)
+            sovella(p, lahde)
+            tahdit = {m.get("number"): m for m in p.findall("measure")}
+            oktaavi = "4" if lahde.nimi in ("Kuoro S", "Kuoro A") else "3"
+            for numero in ("68", "70", "72"):
+                notes = tahdit[numero].findall("note")
+                with self.subTest(aani=lahde.nimi, tahti=numero):
+                    self.assertEqual(len(notes), 5)
+                    self.assertIsNotNone(notes[0].find("rest"))
+                    for n, (step, kesto) in zip(notes, self.KUVIO):
+                        self.assertEqual(n.findtext("duration"), str(kesto))
+                        if step:
+                            self.assertEqual(n.findtext("pitch/step"), step)
+                            self.assertEqual(n.findtext("pitch/octave"), oktaavi)
+                    self.assertEqual(
+                        [n.findtext("lyric/text") for n in notes[1:]], self.SANAT)
+
+    def test_lahdetiedostoa_ei_muuteta(self):
+        # Korjaus kirjoittaa aina uuteen tiedostoon; lähde pysyy taukoina.
+        root = load(OSAT_II4[0].mxl)
+        p = find_part(root, "P5")
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        for numero in ("68", "70", "72"):
+            notes = tahdit[numero].findall("note")
+            self.assertTrue(all(n.find("rest") is not None for n in notes))
 
 
 if __name__ == "__main__":

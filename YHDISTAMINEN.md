@@ -13,7 +13,7 @@
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
 | `korjaa_sanat.py` | Korjaa osien 01, 14 ja II·9b:n kuorosanat lähde-PDF:ää vasten |
-| `korjaa_kasin.py` | Käsin todennetut korjaukset osan I kuorobassoon, taulukkona |
+| `korjaa_kasin.py` | Käsin todennetut korjaukset (osa I, Liber scriptus), taulukkona |
 | `nayta.py` | Näyttää viivaston nuotit, äänet ja sanarivit tahdeittain |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
 | `Verdi_10bDies_irae.pdf` | II·9b:n lähde-PDF (käyttäjän löytämä) |
@@ -151,6 +151,11 @@ lähde on muuttunut, joten korjaus ei voi hiljaa osua väärään tahtiin.
 Tarkempi menetelmä — miten kohta todennetaan lähde-PDF:stä ennen kirjaamista
 ja mistä tietää onko vika datassa vai skriptissä — on `CLAUDE.md`:n luvussa
 *Recipe: a singer reports a wrong syllable by ear*.
+
+Jos kokonainen kohta puuttuu eikä kyse ole vain tavusta, sama taulukko osaa
+kopioida valmiin tahdin toisaalta samasta stemmasta (`kopioi_tahti`) — niin
+korjattiin Liber scriptuksen puuttuneet "Di-es i-rae." -välihuudahdukset
+tahdeissa 229, 231 ja 233.
 
 Osien 11 (Lacrymosa) ja 14 (Agnus Dei) korjaukset on aikanaan tehty suoraan
 lähdetiedostoon, joten niillä ei vielä ole vastaavaa taulukkoa.

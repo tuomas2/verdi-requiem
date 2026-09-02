@@ -117,7 +117,7 @@ class DiesIraenNumerointi(unittest.TestCase):
 
     KIRJA = {"02-Verdi-Dies_irae.mxl": 1, "03-Verdi-Tuba_mirum.mxl": 91,
              "04-Verdi-Mors_stupebit.mxl": 143,
-             "05-Verdi-Liber_scriptus.mxl": 162,
+             "05-Verdi-Liber_scriptus-kasin.mxl": 162,
              "06-Verdi-Quid_sum_miser.mxl": 271, "07-Verdi-Rex.mxl": 322,
              "08-Verdi_Recordare.mxl": 386, "09-Verdi_Ingemisco.mxl": 450,
              "10-Verdi_Confutatis.mxl": 507,

@@ -63,7 +63,7 @@ Open, roughly in the order a singer would feel them:
 | Movement 14's `Kuoro B` is **settled** — notes match the choir file exactly, all 74 bars are metrically valid, 29 remaining wordless notes are melisma-internal or chord second notes. Its **Soprano/Alto/Tenor are not**: 48–59 % of their notes carry no syllable, and they still show fabricated content and contentless measures in bars 59–74 | *2026-08-31 (later)* section |
 | II·9b: Soprano/Alto/Tenor lyrics unchecked; its exact position vs. the choir book is still 3–5 measures uncertain | *The missing Dies irae recall* |
 | Lacrymosa fix: a few melisma-internal syllable placements are best-guess, not page-verified one by one; also the divisi `P9`'s leftover duplicate text at bars 674–676 still needs a proper (non-1:1) syllable placement | *Lacrymosa's chorus bass*, *2026-08-31* section |
-| Liber scriptus ~bar 239: bass sings "Dies irae" 3 times, user recalls 6 from the choir's own file — notes confirmed correct in all voices, but a real Soprano-vs-A/T/B text disagreement at bars 247–254 is unresolved without the physical score | *2026-08-31* section |
+| Liber scriptus: the "user recalls 6" half is **solved** (six one-bar interjections, three of which were missing — see *2026-09-03 (later)*); the Soprano-vs-A/T/B text disagreement at bars 247–254 is still unresolved without the physical score | *2026-08-31* section |
 | 13 lyric changes reported but deliberately not applied | `python3 korjaa_sanat.py --kuiva` lists them |
 | Movement I has no piano | *Movement I has no piano* |
 | Five assumptions made without the rehearsal score | *Open assumptions* |
@@ -85,11 +85,11 @@ Open, roughly in the order a singer would feel them:
 | `sisallys.py` | Rebuilds that listing from the eight PDFs; run it after any re-render |
 | `yhdista.py` | The merge tool; mapping table at the top |
 | `korjaa_sanat.py` | Fixes OMR lyric errors against the source PDFs |
-| `korjaa_kasin.py` | The hand-verified fixes on top of that, as a table; writes `01-…-kasin.mxl` |
+| `korjaa_kasin.py` | The hand-verified fixes on top of that, as a table; writes the `*-kasin.mxl` files |
 | `nayta.py` | Prints a staff's notes, voices and **lyric rows** per bar — the first tool for any reported error |
 | `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |
 | `harjoitus-*.mscz` | The result, one per singer |
-| `test_*.py` | Tests; all of them: `python3 -m unittest discover -p 'test_*.py'` (68) |
+| `test_*.py` | Tests; all of them: `python3 -m unittest discover -p 'test_*.py'` (73) |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
 | `tiivistys.mss` | MuseScore style for the reading parts: multimeasure rests, a bar number on every bar, extra air between systems |
 | `musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files* |
@@ -1013,8 +1013,10 @@ line the user reads, but nothing in it is bass-specific.
 | Symptom | Layer | File |
 |---|---|---|
 | Movement I chorus bass: wrong/missing/extra syllable | hand-corrections table | `korjaa_kasin.py`, `OSA_I.korjaukset` |
+| Liber scriptus (II·4), any voice | hand-corrections table | `korjaa_kasin.py`, `OSAT_II4` |
 | Any movement: the source file is right but the **part** is wrong | tool bug | `yhdista.py` + a test |
 | Movements 11/14/II·9b: wrong syllable | still baked into the source `.mxl` | see the last section below |
+| A passage is **missing entirely** | copy it from `musescore/` if the figure already exists elsewhere in the part | `kopioi_tahti`, see *2026-09-03 (later)* |
 | Systematic OCR text error in an OMR movement | PDF-driven pass | `korjaa_sanat.py` |
 
 **The source-vs-part check is one command and it settles the layer question:**
@@ -1121,7 +1123,7 @@ this shipped something. Checks that have caught real problems:
 - Per-staff note counts before and after. A lyric-only change must leave every
   count identical; anything else means content moved.
 - `mscore` converts without `-f`.
-- `python3 -m unittest discover -p 'test_*.py'` — 68 tests.
+- `python3 -m unittest discover -p 'test_*.py'` — 73 tests.
 
 ### The two movements not yet in the table
 
@@ -1274,6 +1276,78 @@ Two things worth knowing before touching this again:
 Page margins were left at 15 mm deliberately. Trimming them would buy back
 about a third of a system per page, but the margin is itself annotation space,
 which is the whole point of the change.
+
+## 2026-09-03 (later): three missing "Dies irae" interjections in Liber scriptus
+
+The singer reported that bars 229, 231 and 233 should each have a short
+`Di-es i-rae.` from the whole chorus, and that the bass part had nothing there
+at all. They were right, and they were missing from **all four chorus voices**.
+
+### What was there and what was missing
+
+In Liber scriptus the chorus interrupts the mezzo's aria with a one-bar
+figure — quarter rest, then a dotted eighth, a sixteenth and two quarters, all
+on one note (S and A on D4, T and B on D3), text `Di-es i-rae.`
+`05-Verdi-Liber_scriptus.mxl` has **three** of these, at local bars 16, 30 and
+52 (continuous 177, 191, 213). The choir's own file has **six**. The other
+three were whole-bar rests in every voice.
+
+### Locating them: the mezzo is the anchor, not the bass
+
+The choir file (`musescore/02_dies_irae`) is a condensed chorus-only cut of
+`02`+`03`+`05`, so its bar numbers do not map to ours by any single offset —
+matching its Bass 1 alone would have given a plausible-looking but wrong
+answer. What settles it is that the file also carries the **Mezzo-soprano**
+part, which is not condensed inside a stretch. Aligning the two mezzo lines
+(`difflib` over per-bar pitch tuples) gives four clean blocks:
+
+| choir bars | our local bars | offset |
+|---|---|---|
+| 120–125 | 12–17 | +108 |
+| 126–130 | 26–30 | +100 |
+| 132–135 | 49–52 | +83 |
+| **136–177** | **64–105** | **+72** |
+
+The last block is a 42-bar exact match, and the choir's six interjections sit
+at 124, 130, 135, 140, 142 and 144. The first three land on our 16, 30 and 52 —
+the ones we already have, which is the check that the mapping is right — and
+140, 142, 144 land on local 68, 70, 72, i.e. **continuous 229, 231 and 233**.
+Exactly the bars the singer named, arrived at from the other end.
+
+### The fix invents nothing
+
+All six occurrences are note-for-note identical in both files, in all four
+voices. So the correction is a **copy of the part's own bar 52** into 68, 70
+and 72 — new operation `kopioi_tahti` in `korjaa_kasin.py`, which refuses to
+run unless the target is nothing but rests. Lyrics come along with the notes,
+so `Di-es i-rae.` needed no typing and cannot be mis-hyphenated.
+
+`05-Verdi-Liber_scriptus-kasin.mxl` is the new derived file; `yhdista.py` reads
+it in place of the raw source (the filename is a key in **three** places —
+`MOVEMENTS`, `MAPPING` and `DIES_IRAE_ALUT` — plus the pin in `test_yhdista.py`).
+
+### And nothing else is missing there
+
+Since the choir file was open anyway, its Bass 1 was diffed against our whole
+`02`+`03`+`05` chorus bass, bar by bar. **174 of its 177 bars now match.** Of
+the three that do not:
+
+- Two (choir 117–118) are ours being *richer*, not poorer: we have `A3`+`C#4`
+  as a chord where the choir file's Bass 1 has only the `C#4` — the divisi.
+- One is a real single-note disagreement, **flagged not fixed**: at II·1 bar 28,
+  the last syllable `la,` of "Da-vid cum Sy-bil-la," is `A3` in our file and
+  `A2` an octave lower in the choir's Bass 1 (their Bass 2 rests, so it is not
+  a divisi). Both are singable and there is no source PDF for movement 02, so
+  guessing would be exactly the thing this file warns against.
+
+### Verification
+
+- Note counts per staff: every chorus voice **+12** (4 notes × 3 bars), nothing
+  else changed; measure count still 1807.
+- Read back off the rendered `stemma-basso-1.pdf` page 4, which now shows
+  `Di-es i-rae.` six times, at 177, 191, 213, 229, 231 and 233.
+- The raw source is untouched and a test asserts it stays that way.
+- 73 tests.
 
 ## The choir's own MuseScore practice files
 

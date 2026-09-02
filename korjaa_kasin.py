@@ -27,8 +27,10 @@ ja perustele se kommentissa lähdesivun numerolla. Uuden osan lisääminen: uusi
 tiedostoon. Menetelmä eli miten korjaus todennetaan ennen kirjaamista on
 `CLAUDE.md`:ssä, luku *Recipe: a singer reports a wrong syllable by ear*.
 """
+import copy
 import sys
 import xml.etree.ElementTree as ET
+from collections import OrderedDict
 from dataclasses import dataclass
 
 from korjaa_sanat import find_part, load, save
@@ -51,7 +53,10 @@ class Osa:
 #   ("lisaa", syllabic, teksti)         lisää tavu nuotille jolla ei ole
 #   ("aseta", vanha, syllabic, teksti)  korvaa tavu toisella
 #   ("poista_nuotti", kuvaus)           poista nuotti tai tauko
-# Nuotti on indeksi tahdin <note>-alkioissa, tauot mukaan luettuina.
+#   ("kopioi_tahti", lähdetahti)        korvaa tauolla oleva tahti toisen
+#                                       tahdin sisällöllä, sanat mukaan lukien
+# Nuotti on indeksi tahdin <note>-alkioissa, tauot mukaan luettuina, tai None
+# kun toimenpide koskee koko tahtia.
 
 OSA_I = Osa(
     mxl="01-Verdi_Requiem-OMR-korjattu.mxl",
@@ -96,10 +101,35 @@ OSA_I = Osa(
     ),
 )
 
+# Liber scriptus, paikalliset tahdit 68, 70 ja 72 (juoksevat 229, 231 ja 233):
+# kuoron lyhyt "Di-es i-rae." -välihuudahdus puuttui kokonaan kaikilta
+# neljältä ääneltä. Lähdetiedostossa on kolme näistä kuudesta (paikalliset
+# 16, 30 ja 52) ja loput kolme olivat pelkkää taukoa.
+#
+# Puuttuvat kohdat paikannettiin kuoron omasta tiedostosta
+# (musescore/02_dies_irae): sen basso laulaa kuusi kertaa yksittäisen tahdin
+# mittaisen kuvion, ja sen mezzostemma osuu meidän mezzoomme 42 tahtia
+# putkeen (kuorotiedoston 136-177 = paikalliset 64-105), joten kuorotiedoston
+# tahdit 140, 142 ja 144 ovat yksikäsitteisesti paikalliset 68, 70 ja 72.
+# Kaikki kuusi esiintymää ovat molemmissa tiedostoissa nuotilleen samat
+# (S ja A D4:llä, T ja B D3:lla), joten korjaus on olemassa olevan tahdin
+# kopio eikä mitään tarvitse keksiä.
+LIBER_SCRIPTUS_MALLI = "52"
+LIBER_SCRIPTUS_PUUTTUVAT = ("68", "70", "72")
+OSAT_II4 = [
+    Osa(mxl="05-Verdi-Liber_scriptus.mxl",
+        out="05-Verdi-Liber_scriptus-kasin.mxl",
+        osasto=pid, nimi=nimi, yksi_sanarivi=False,
+        korjaukset=tuple((tahti, None, "kopioi_tahti", LIBER_SCRIPTUS_MALLI)
+                         for tahti in LIBER_SCRIPTUS_PUUTTUVAT))
+    for pid, nimi in (("P2", "Kuoro S"), ("P3", "Kuoro A"),
+                      ("P4", "Kuoro T"), ("P5", "Kuoro B"))
+]
+
 # Osien 11 (Lacrymosa) ja 14 (Agnus Dei) vastaavat korjaukset on aikanaan
 # tehty suoraan lähdetiedostoon, joten niillä ei ole omaa Osa-riviä. Jos ne
 # joskus puretaan tänne, ks. CLAUDE.md, *Recipe*-luvun viimeinen kappale.
-OSAT = [OSA_I]
+OSAT = [OSA_I] + OSAT_II4
 
 
 def lyriikat(note):
@@ -135,8 +165,11 @@ def sovella(part, osa):
         measure = tahdit.get(tahti)
         assert measure is not None, f"tahtia {tahti} ei ole"
         notes = measure.findall("note")
-        assert i < len(notes), f"t.{tahti}: nuottia {i} ei ole ({len(notes)})"
-        note = notes[i]
+        if i is None:
+            note = None
+        else:
+            assert i < len(notes), f"t.{tahti}: nuottia {i} ei ole ({len(notes)})"
+            note = notes[i]
 
         if laji == "poista":
             (odotettu,) = args
@@ -163,6 +196,23 @@ def sovella(part, osa):
             ly[0].find("syllabic").text = syllabic
             ly[0].find("text").text = text
             selosteet.append(f"t.{tahti}: {odotettu!r} -> {text!r}")
+
+        elif laji == "kopioi_tahti":
+            (lahde,) = args
+            malli = tahdit.get(lahde)
+            assert malli is not None, f"lähdetahtia {lahde} ei ole"
+            # Kohteen pitää olla pelkkää taukoa. Jos siellä on nuotteja,
+            # ollaan väärässä tahdissa eikä täytetä aukkoa vaan tuhotaan
+            # musiikkia — silloin on parempi kaatua.
+            assert notes and all(n.find("rest") is not None for n in notes), (
+                f"t.{tahti}: ei ole pelkkä tauko, ei täytetä")
+            kohta = list(measure).index(notes[0])
+            for n in notes:
+                measure.remove(n)
+            for offset, n in enumerate(malli.findall("note")):
+                measure.insert(kohta + offset, copy.deepcopy(n))
+            selosteet.append(f"t.{tahti}: kopioitu tahdista {lahde} "
+                             f"({len(malli.findall('note'))} nuottia)")
 
         elif laji == "poista_nuotti":
             (odotettu,) = args
@@ -208,17 +258,25 @@ def yksi_sanarivi(part):
 
 def main(argv):
     dry = "--kuiva" in argv
+    # Sama tiedosto voi saada korjauksia useaan osastoon; luetaan ja
+    # kirjoitetaan se kerran.
+    tiedostoittain = OrderedDict()
     for osa in OSAT:
-        root = load(osa.mxl)
-        selosteet = sovella(find_part(root, osa.osasto), osa)
-        print(f"{osa.mxl} -> {osa.out}, {osa.osasto} ({osa.nimi})")
-        for s in selosteet:
-            print("  " + s)
+        tiedostoittain.setdefault((osa.mxl, osa.out), []).append(osa)
+
+    for (mxl, out), osat in tiedostoittain.items():
+        root = load(mxl)
+        print(f"{mxl} -> {out}")
+        for osa in osat:
+            selosteet = sovella(find_part(root, osa.osasto), osa)
+            print(f"  {osa.osasto} ({osa.nimi})")
+            for s in selosteet:
+                print("    " + s)
         if dry:
             print("  (kuiva ajo, mitään ei kirjoitettu)")
         else:
-            save(root, osa.mxl, osa.out)
-            print(f"  kirjoitettu {osa.out}")
+            save(root, mxl, out)
+            print(f"  kirjoitettu {out}")
 
 
 if __name__ == "__main__":
