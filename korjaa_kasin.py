@@ -126,10 +126,126 @@ OSAT_II4 = [
                       ("P4", "Kuoro T"), ("P5", "Kuoro B"))
 ]
 
-# Osien 11 (Lacrymosa) ja 14 (Agnus Dei) vastaavat korjaukset on aikanaan
-# tehty suoraan lähdetiedostoon, joten niillä ei ole omaa Osa-riviä. Jos ne
-# joskus puretaan tänne, ks. CLAUDE.md, *Recipe*-luvun viimeinen kappale.
-OSAT = [OSA_I] + OSAT_II4
+# Lacrymosa (II·10). Sanakerros on CPDL:n lähteessä väärä kahdessa äänessä,
+# ja kyse ei ole konelukemasta: tämä tiedosto tulee Finale + Dolet -erästä,
+# jota pidettiin luotettavana.
+#
+# 1. Kuorobasso P8, tahdit 54-75. Tiedostossa lukee siellä osan OMAN aiemman
+#    kohdan teksti ("La-cry-mo-sa di-es il-la ... hu-ic er-go par-ce") niiden
+#    tahtien päällä, jotka oikeasti laulavat "do-na e-is re-qui-em ... A-men."
+#    Nuotit ovat alla oikein; vain tavut ovat väärät.
+#
+# 2. Divisin ylä-ääni P9, tahdit 54-56. Sama vika, ja se jäi aiemmin
+#    korjaamatta, koska lähde-PDF:n oikeaa sanariviä ei tunnistettu: sivulla 11
+#    kuorobasson viivastolla on kaksi ääntä ja kaksi sanariviä, ja ylä-äänen
+#    sanat ("Pi-e Je-su Do-mi-ne,") on painettu viivaston YLÄPUOLELLE, mistä
+#    ne on helppo lukea tenorin riviksi. Ala-äänen "Pi-e Je-su" on alapuolella.
+#
+# Kaikki 50 tavua on todennettu lähde-PDF:ää (Verdi_Lacymosa.pdf) vasten tavu
+# tavulta eikä vain tekstijonona. PDF:n sanat ovat oikeaa tekstiä, joten
+# jokaisen tavun x on mitattavissa; muiden äänten sanarivit toimivat
+# viivaimena, jolla kuorobasson tavun paikka ennustetaan nuotin default-x:stä.
+# Jokainen tavu osuu lähimmin juuri sille nuotille jolle se on merkitty.
+# Menetelmä: CLAUDE.md, *Lacrymosa: koko kuorobasso todennettu lähdesivuja
+# vasten*.
+#
+# Tahtinumerot ovat tiedoston omia (lokaaleja). Kommenttien t.NNN on kuoron
+# nuottikirjan juokseva numero, eli lokaali + 623.
+OSA_II10_KUORO_B = Osa(
+    mxl="11-Verdi_Lacrymosa.mxl",
+    out="11-Verdi_Lacrymosa-kasin.mxl",
+    osasto="P8",
+    nimi="Kuoro B",
+    yksi_sanarivi=False,
+    korjaukset=(
+        # --- lähde-PDF:n sivu 11 ---
+        ("54", 0, "aseta", "par", "begin", "Pi"),      # t.677
+        ("54", 1, "aseta", "ce", "end", "e"),          # t.677
+        ("55", 0, "aseta", "De", "begin", "Je"),       # t.678
+        ("56", 0, "aseta", "us", "end", "su"),         # t.679
+
+        # --- sivu 12 ---
+        ("58", 1, "aseta", "La", "begin", "Do"),       # t.681
+        ("58", 3, "aseta", "cry", "middle", "na"),     # t.681
+        ("58", 4, "aseta", "mo", "middle", "e"),       # t.681
+        ("58", 5, "aseta", "sa", "end", "is"),         # t.681
+        ("58", 6, "aseta", "di", "begin", "re"),       # t.681
+        ("58", 7, "aseta", "es", "end", "qui"),        # t.681
+        ("59", 0, "aseta", "il", "begin", "em,"),      # t.682
+        ("59", 2, "aseta", "la,", "end", "do"),        # t.682
+        ("59", 3, "aseta", "qua", "single", "na"),     # t.682
+        ("59", 4, "aseta", "re", "begin", "e"),        # t.682
+        ("60", 0, "aseta", "sur", "middle", "is,"),    # t.683
+        ("60", 2, "aseta", "get", "end", "pi"),        # t.683
+        ("60", 3, "aseta", "ex", "single", "e"),       # t.683
+
+        # --- sivu 13 ---
+        ("61", 0, "aseta", "fa", "begin", "Je"),       # t.684
+        ("61", 1, "aseta", "vil", "middle", "su"),     # t.684
+        ("61", 2, "aseta", "la,", "end", "Do"),        # t.684
+        ("61", 4, "aseta", "ju", "begin", "mi"),       # t.684
+        ("62", 0, "aseta", "di", "middle", "ne,"),     # t.685
+        ("62", 2, "aseta", "can", "middle", "do"),     # t.685
+        # "na" on tahdin 62 palkitun kahdeksasosaparin ENSIMMÄISELLÄ
+        # nuotilla ja jatkoviiva juoksee toisen yli — niin sivu 13 sen
+        # painaa. Tämä on koko osan ainoa tavu, jonka x jää lähemmäs
+        # naapurinuottia kuin omaansa, joten se katsottiin kuvasta.
+        ("62", 3, "aseta", "dus", "end", "na"),        # t.685
+        ("63", 0, "aseta", "ho", "begin", "e"),        # t.686
+        ("63", 1, "aseta", "mo", "end", "is"),         # t.686
+        ("63", 4, "aseta", "us,", "end", "qui"),       # t.686
+        ("64", 0, "aseta", "ju", "begin", "em,"),      # t.687
+
+        # --- sivu 14: tahdissa 65 kaksi nuottia oli kokonaan ilman tavua ---
+        ("65", 1, "lisaa", "single", "re"),            # t.688
+        ("65", 2, "lisaa", "single", "qui"),           # t.688
+        ("66", 0, "aseta", "di", "middle", "em,"),     # t.689
+        ("67", 1, "aseta", "can", "middle", "re"),     # t.690
+        ("67", 2, "aseta", "dus", "end", "qui"),       # t.690
+        ("68", 0, "aseta", "ho", "begin", "em,"),      # t.691
+
+        # --- sivu 15 ---
+        ("70", 1, "aseta", "mo", "end", "do"),         # t.693
+        ("70", 2, "aseta", "re", "begin", "na"),       # t.693
+        ("71", 0, "aseta", "us,", "end", "e"),         # t.694
+        ("71", 1, "aseta", "hu", "begin", "is"),       # t.694
+        ("71", 2, "aseta", "ic", "end", "re"),         # t.694
+        ("71", 3, "aseta", "er", "begin", "qui"),      # t.694
+        ("72", 0, "aseta", "go", "end", "em."),        # t.695
+
+        # --- sivu 16: kaikki kahdeksan ääntä laulavat "A - men." ---
+        ("74", 0, "aseta", "par", "single", "A"),      # t.697
+        ("75", 0, "aseta", "ce", "end", "men."),       # t.698
+    ),
+)
+
+OSA_II10_DIVISI = Osa(
+    mxl="11-Verdi_Lacrymosa.mxl",
+    out="11-Verdi_Lacrymosa-kasin.mxl",
+    osasto="P9",
+    nimi="Kuoro B (divisin ylä-ääni)",
+    # Sanarivi 2 on tässä aito: viivastolla on kaksi ääntä eri rytmeissä,
+    # joten tavut eivät mahdu samalle riville. Siksi ei yksi_sanarivi.
+    yksi_sanarivi=False,
+    korjaukset=(
+        # Sivu 11, sanat viivaston yläpuolella. Nuotit ovat oikein — ne
+        # täsmäävät kuoron oman tiedoston (musescore/04_dies_irae_2) toiseen
+        # bassoääneen — ja tavut osuvat 1:1 samoille nuoteille kuin väärä
+        # teksti, mikä tarkistettiin PDF:n x-koordinaateista.
+        ("54", 0, "aseta", "La", "begin", "Pi"),       # t.677
+        ("54", 1, "aseta", "cry", "end", "e"),         # t.677
+        ("54", 3, "aseta", "mo", "begin", "Je"),       # t.677
+        ("55", 0, "aseta", "sa", "end", "su"),         # t.678
+        ("55", 2, "aseta", "di", "begin", "Do"),       # t.678
+        ("55", 3, "aseta", "es", "middle", "mi"),      # t.678
+        ("56", 0, "aseta", "il", "end", "ne,"),        # t.679
+    ),
+)
+
+# Osan 14 (Agnus Dei) korjaukset on aikanaan tehty suoraan lähdetiedostoon,
+# joten sillä ei ole omaa Osa-riviä. Jos se joskus puretaan tänne, ks.
+# CLAUDE.md, *Recipe*-luvun viimeinen kappale.
+OSAT = [OSA_I] + OSAT_II4 + [OSA_II10_KUORO_B, OSA_II10_DIVISI]
 
 
 def lyriikat(note):

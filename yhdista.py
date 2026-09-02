@@ -49,7 +49,7 @@ MOVEMENTS = [
     ("09-Verdi_Ingemisco.mxl",                      "II·8",  "Ingemisco"),
     ("10-Verdi_Confutatis.mxl",                     "II·9",  "Confutatis"),
     ("10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl",  "II·9b", "Dies irae (kertaus)"),
-    ("11-Verdi_Lacrymosa.mxl",                      "II·10", "Lacrymosa"),
+    ("11-Verdi_Lacrymosa-kasin.mxl",                "II·10", "Lacrymosa"),
     ("12-Verdi_Offertorio.mxl",                     "III",   "Offertorio"),
     ("13-Verdi-Sanctus.mxl",                        "IV",    "Sanctus"),
     ("14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl", "V",     "Agnus Dei"),
@@ -118,7 +118,7 @@ MAPPING = {
         "Kuoro S": ["P1"], "Kuoro A": ["P2"], "Kuoro T": ["P3"], "Kuoro B": ["P4"],
         "Piano": ["P5"],
     },
-    "11-Verdi_Lacrymosa.mxl": {
+    "11-Verdi_Lacrymosa-kasin.mxl": {
         "Solisti S": ["P1"], "Solisti M-S": ["P2"], "Solisti T": ["P3"], "Solisti B": ["P4"],
         "Kuoro S": ["P5"], "Kuoro A": ["P6"], "Kuoro T": ["P7"],
         # P9 on kuorobasson divisi tahdeissa 54-56, samalle riville.
@@ -179,10 +179,27 @@ SINGER_PARTS = {
     "Basso II":       ("Kuoro B", "Kuoro B II"),
 }
 
-# Kunkin Dies iraen alaosan ensimmäisen tahdin numero **kuoron painetussa
-# nuottikirjassa**. Nämä eivät ole laskettuja vaan kirjasta luettuja: laulaja
-# tarkisti ne harjoituksissa 2026-09-02, ja niiden mukaan numerointi täsmää
-# kirjan kanssa alaosan sisällä alusta loppuun.
+# Numero, jonka kunkin Dies iraen alaosan **lähdetiedoston ensimmäinen tahti**
+# saa kuoron nuottikirjan numeroinnissa. Nämä eivät ole laskettuja vaan
+# kirjasta luettuja: laulaja tarkisti ne harjoituksissa 2026-09-02, ja niiden
+# mukaan numerointi täsmää kirjan kanssa alaosan sisällä alusta loppuun.
+#
+# HUOM tarkka merkitys: tämä ei ole "kirjan osion otsikon tahti" vaan
+# "tiedoston ensimmäisen tahdin numero". Kymmenessä yhdestätoista ne ovat sama
+# asia. Lacrymosassa eivät: kirjan Lacrymosa-otsikko on tahdissa 621, mutta
+# CPDL:n Lacrymosa-tiedosto alkaa kolme tahtia myöhemmin — kirjan 621-623 ovat
+# 10b-tiedoston kolme viimeistä tahtia. Siksi tässä on 624 eikä 621.
+# Todisteet (2026-09-03): kumpikin lähde-PDF painaa omat tahtinumeronsa ja ne
+# jatkuvat aukottomasti (10b 573-623, Lacrymosa 624-701), ja laulajan kaksi
+# omaa lukemaa Lacrymosan sisältä osuvat vain arvolla 624 — kuorobasso aloittaa
+# tahdissa 645 (tiedoston 22) ja "A-men"-sanan "men" on tahdissa 698
+# (tiedoston 75). Arvolla 621 kaikki Lacrymosan tahdit olivat kolme pielessä.
+#
+# Sama voi hyvin koskea niitä neljää muuta saumaa, jotka `saumat()` raportoi
+# päällekkäisiksi: päällekkäisyys katoaa jos seuraava tiedosto alkaakin vasta
+# kirjan otsikon jälkeen, kuten Lacrymosassa. Sitä ei voi ratkaista ilman
+# kirjaa tai kyseisen osan PDF:ää — tarvitaan tahtinumero alaosan SISÄLTÄ,
+# ei sen otsikosta. Ks. CLAUDE.md, *Lacrymosa: kolmen tahdin siirtymä*.
 #
 # Aiemmin nämä laskettiin lähdetiedostojen omista tahtimääristä (alut 1, 92,
 # 141, 163, 271, 324, 386, 450, 507, 578, 629), mikä oli kuudessa kohdassa
@@ -202,7 +219,8 @@ DIES_IRAE_ALUT = {
     "08-Verdi_Recordare.mxl": 386, "09-Verdi_Ingemisco.mxl": 450,
     "10-Verdi_Confutatis.mxl": 507,
     "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": 573,
-    "11-Verdi_Lacrymosa.mxl": 621,
+    # 624, ei kirjan otsikon 621 — ks. selitys yllä.
+    "11-Verdi_Lacrymosa-kasin.mxl": 624,
 }
 DIES_IRAE_SIIRTYMAT = {f: alku - 1 for f, alku in DIES_IRAE_ALUT.items()}
 

@@ -122,10 +122,28 @@ class DiesIraenNumerointi(unittest.TestCase):
              "08-Verdi_Recordare.mxl": 386, "09-Verdi_Ingemisco.mxl": 450,
              "10-Verdi_Confutatis.mxl": 507,
              "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": 573,
-             "11-Verdi_Lacrymosa.mxl": 621}
+             "11-Verdi_Lacrymosa-kasin.mxl": 624}
 
     def test_alut_ovat_kirjan_mukaiset(self):
         self.assertEqual(DIES_IRAE_ALUT, self.KIRJA)
+
+    def test_lacrymosan_tiedosto_alkaa_kolme_tahtia_otsikon_jalkeen(self):
+        """Kirjan Lacrymosa-otsikko on 621, mutta tiedoston tahti 1 on 624.
+
+        Kirjan 621-623 ovat 10b-tiedoston kolme viimeistä tahtia. Molempien
+        lähde-PDF:ien omat painetut numerot jatkuvat aukottomasti (10b
+        573-623, Lacrymosa 624-701), ja laulajan lukemat osuvat vain tällä
+        arvolla: kuorobasso aloittaa 645 ja "men" on 698. Tämä testi on
+        tässä siksi, että 621 näyttää oikealta ja on ollut kertaalleen
+        tiedostossa väärin.
+        """
+        alku = DIES_IRAE_ALUT["11-Verdi_Lacrymosa-kasin.mxl"]
+        loppu10b = (DIES_IRAE_ALUT["10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl"]
+                    + 51 - 1)
+        self.assertEqual(loppu10b, 623)
+        self.assertEqual(alku, loppu10b + 1)
+        self.assertEqual(alku + 22 - 1, 645, "kuorobasson aloitus")
+        self.assertEqual(alku + 75 - 1, 698, '"men"')
 
     def test_siirtyma_on_alkunumero_miinus_yksi(self):
         for tiedosto, alku in DIES_IRAE_ALUT.items():

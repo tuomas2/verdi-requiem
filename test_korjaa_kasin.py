@@ -7,8 +7,8 @@ jokaisen toimenpiteen pitää kaatua kun lähtötilanne ei ole odotettu.
 import unittest
 import xml.etree.ElementTree as ET
 
-from korjaa_kasin import (OSAT_II4, OSA_I, Osa, load, find_part, sovella,
-                          yksi_sanarivi)
+from korjaa_kasin import (OSA_I, OSA_II10_DIVISI, OSA_II10_KUORO_B, OSAT_II4,
+                          Osa, find_part, load, sovella, yksi_sanarivi)
 
 
 def osa(korjaukset, yksi_rivi=False):
@@ -246,6 +246,65 @@ class LiberScriptusKokonaisuutena(unittest.TestCase):
         for numero in ("68", "70", "72"):
             notes = tahdit[numero].findall("note")
             self.assertTrue(all(n.find("rest") is not None for n in notes))
+
+
+class LacrymosaKokonaisuutena(unittest.TestCase):
+    """Väärä sanakerros CPDL:n lähteessä, oikeaa lähdetiedostoa vasten.
+
+    Tahtinumerot ovat tiedoston omia; juokseva numero on lokaali + 623.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        root = load(OSA_II10_KUORO_B.mxl)
+        cls.b = find_part(root, "P8")
+        cls.div = find_part(root, "P9")
+        sovella(cls.b, OSA_II10_KUORO_B)
+        sovella(cls.div, OSA_II10_DIVISI)
+
+    @staticmethod
+    def tavut(part, tahti):
+        m = next(m for m in part.findall("measure") if m.get("number") == tahti)
+        return [(ly.get("number"), ly.findtext("syllabic"), ly.findtext("text"))
+                for n in m.findall("note") for ly in n.findall("lyric")
+                if ly.findtext("text")]
+
+    def test_loppuu_amen_eika_parce(self):
+        # Laulajan alkuperäinen havainto: stemma päättyi "par-ce".
+        self.assertEqual(self.tavut(self.b, "74"), [("1", "single", "A")])
+        self.assertEqual(self.tavut(self.b, "75"), [("1", "end", "men.")])
+
+    def test_dona_eis_requiem_tahdeissa_58_59(self):
+        self.assertEqual([t for _, _, t in self.tavut(self.b, "58")],
+                         ["Do", "na", "e", "is", "re", "qui"])
+        self.assertEqual([t for _, _, t in self.tavut(self.b, "59")],
+                         ["em,", "do", "na", "e"])
+
+    def test_tahdin_65_kaksi_tavutonta_nuottia_saivat_tavun(self):
+        self.assertEqual([t for _, _, t in self.tavut(self.b, "65")],
+                         ["re", "qui"])
+
+    def test_divisin_ylaaani_laulaa_pie_jesu_domine(self):
+        # Lähde-PDF:n sivu 11: ylä-äänen sanat viivaston yläpuolella.
+        self.assertEqual(
+            [t for _, _, t in self.tavut(self.div, "54")], ["Pi", "e", "Je"])
+        self.assertEqual(
+            [t for _, _, t in self.tavut(self.div, "55")], ["su", "Do", "mi"])
+        self.assertEqual(self.tavut(self.div, "56"), [("2", "end", "ne,")])
+
+    def test_divisin_tavut_pysyvat_sanarivilla_kaksi(self):
+        # Viivastolla on kaksi ääntä eri rytmeissä: rivit erottavat ne.
+        rivit = {ly.get("number") for m in self.div.findall("measure")
+                 for n in m.findall("note") for ly in n.findall("lyric")}
+        self.assertEqual(rivit, {"2"})
+
+    def test_lahdetiedostoa_ei_muuteta(self):
+        # Lähde on CPDL:n koskematon vienti ja siinä on edelleen väärä teksti.
+        root = load(OSA_II10_KUORO_B.mxl)
+        self.assertEqual(self.tavut(find_part(root, "P8"), "75"),
+                         [("1", "end", "ce")])
+        self.assertEqual([t for _, _, t in self.tavut(find_part(root, "P9"), "54")],
+                         ["La", "cry", "mo"])
 
 
 if __name__ == "__main__":
