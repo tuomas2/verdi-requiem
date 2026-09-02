@@ -8,7 +8,7 @@
 | `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, kaikki ajan tasalla (II·9b mukana, tahtinumerointi juoksee Dies iraen läpi) |
 | `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa, ajan tasalla |
 | `sisallys.py` | Rakentaa tuon luettelon uudelleen valmiista stemma-PDF:istä |
-| `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys ja tahtinumero joka tahtiin |
+| `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys, tahtinumero joka tahtiin, väljyys rivien välissä |
 | `harjoitus-*.mscz` | Harjoittelutiedosto: oma ääni trumpettina, muut piilossa |
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
@@ -101,6 +101,13 @@ yläpuolelle, ei vain rivin ensimmäiseen, ja tiivistetyn taukopalkin alle sen
 tahtivälin (`[79-93]`). Harjoituksissa etsitään yksittäistä tahtia, ja rivin
 alusta laskeminen on hidasta ja menee helposti yhden pieleen. Hinta on yksi
 sivu lisää kussakin kahdeksassa stemmassa (esim. B I 13 -> 14 sivua).
+
+Kolmas asetus on **rivinväli**: `minSystemSpread` 11,5 antaa nuottirivien
+väliksi 29,3 mm oletuksen 25,1 mm sijaan, eli noin puoli senttiä lisää tilaa
+käsimerkinnöille. Arvo on portaittainen — se ratkaisee montako riviä sivulle
+mahtuu (9 oletuksen 10 sijaan) ja loppu jaetaan tasan, joten väliarvot eivät
+tuota väliarvoja. Seuraava porras on 13,0 eli 33,7 mm ja 8 riviä sivulle.
+Hinta 11,5:stä on 1-2 sivua stemmaa kohti; B I on nyt 16 sivua.
 
 Sama tyyli käyttöliittymässä: Format -> Style -> Load Style -> `tiivistys.mss`.
 Jätä tyyli pois koko partituurin PDF:stä; tiivistys on tarkoitettu yhden

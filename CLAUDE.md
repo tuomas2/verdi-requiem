@@ -91,7 +91,7 @@ Open, roughly in the order a singer would feel them:
 | `harjoitus-*.mscz` | The result, one per singer |
 | `test_*.py` | Tests; all of them: `python3 -m unittest discover -p 'test_*.py'` (68) |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
-| `tiivistys.mss` | MuseScore style: multimeasure rests |
+| `tiivistys.mss` | MuseScore style for the reading parts: multimeasure rests, a bar number on every bar, extra air between systems |
 | `musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files* |
 
 **The hyphen/underscore in source names encodes provenance, so do not
@@ -907,7 +907,7 @@ prints the span under a compressed rest (`[79–93]`), which is redundant with t
 per-bar numbers but free and reassuring.
 
 Cost: **exactly one page per part** (B I 13 → 14, and +1 for each of the other
-seven). It is not the range line and it is not the font size — rendering with
+seven; the 2026-09-03 spacing change added more on top). It is not the range line and it is not the font size — rendering with
 `mmRestShowMeasureNumberRange` off, and again with `measureNumberFontSize` 6,
 both still gave 14 pages. It is the vertical space the number row itself takes
 above each system.
@@ -1242,6 +1242,38 @@ scriptus bar 240" is 239, and "Rex 369–371" is 367–369.
 - All eight parts re-rendered; page counts unchanged except T I (15 → 14).
 - `test_yhdista.py` pins the book numbers so nobody recomputes them
   "correctly" again, and pins the seam report. 68 tests.
+
+## 2026-09-03: air between systems, for pencil marks
+
+The singer wanted roughly half a centimetre more between staff systems, to
+write in during rehearsal. Measured before and after rather than eyeballed
+(`mutool draw` at 200 dpi, then finding the rows of the image that are mostly
+dark — that is where the staff lines are):
+
+| | system pitch | systems/page | B I pages |
+|---|---|---|---|
+| before | 25.1 mm | 10 | 14 |
+| **now** (`minSystemSpread` 11.5) | **29.3 mm** | 9 | 16 |
+| next step up (13.0) | 33.7 mm | 8 | 18 |
+
+The staff itself is 7.0 mm tall (spatium 1.75 mm, MuseScore's default), so the
+writable band between systems went from 18 mm to 22 mm.
+
+Two things worth knowing before touching this again:
+
+- **`minSystemDistance` does nothing here.** The obvious-looking key was tried
+  first and changed neither the spacing nor the page count. With vertical
+  justification on, `minSystemSpread` is what decides how many systems are
+  packed onto a page; the leftover height is then divided evenly. Only that
+  one key is in the style file.
+- **The value is a threshold, not a distance.** Because the page is justified,
+  anything between about 11 and 12.9 gives the same 29.3 mm — you are choosing
+  9 systems per page, not a millimetre figure. That is why the request for
+  "+5 mm" landed on +4.2 mm: there is no setting between 29.3 and 33.7.
+
+Page margins were left at 15 mm deliberately. Trimming them would buy back
+about a third of a system per page, but the margin is itself annotation space,
+which is the whole point of the change.
 
 ## The choir's own MuseScore practice files
 
