@@ -52,6 +52,7 @@ class Osa:
 #   ("poista", teksti)                  poista tavu, jonka teksti on tämä
 #   ("lisaa", syllabic, teksti)         lisää tavu nuotille jolla ei ole
 #   ("aseta", vanha, syllabic, teksti)  korvaa tavu toisella
+#   ("jatka",)                          lisää tavuun melisman jatkoviiva
 #   ("poista_nuotti", kuvaus)           poista nuotti tai tauko
 #   ("kopioi_tahti", lähdetahti)        korvaa tauolla oleva tahti toisen
 #                                       tahdin sisällöllä, sanat mukaan lukien
@@ -158,6 +159,57 @@ OSA_II10_KUORO_B = Osa(
     nimi="Kuoro B",
     yksi_sanarivi=False,
     korjaukset=(
+        # --- lähde-PDF:n sivut 7-9: kolme kertaa "huic ergo parce Deus" ---
+        #
+        # Laulaja raportoi 2026-09-03, että tahdista 657 alkaen kuorobasso
+        # laulaa "hu-ic er-go par-ce De-us" kolme kertaa (657-658, 660-663,
+        # 663-665), ei "La-cry-mo-sa ... di-es il-la". Lähde-PDF painaa tähän
+        # "La-cry-mo-sa,", eli **lähde-editio itse on väärässä**, ei vain
+        # .mxl-tiedosto. Siksi tämä ei ole yhden laulajan muistikuvaa vasten
+        # yhden lähteen sanaa, ja se tarkistettiin nuoteista:
+        #
+        # Kohta on limittäinen kuoron tulo samalle kuviolle: neljäsosa, kaksi
+        # sidottua kahdeksasosaa, kaksi kahdeksasosaa. Kuorobasson t.658
+        # (F3 Bes3 C4 Des4 Bes3) on sävel sävelestä sama kuvio kuin kuoron
+        # tenorin t.657 (F4 Bes4 C5 Des5 Bes4), ja t.657 sama kuvio C3:lta.
+        # Sama kuvio esiintyy myös altolla t.658 ja sopraanolla t.659 — ja
+        # kaikilla kolmella sen sanat ovat "hu-ic er-go". Sama kuvio samassa
+        # limityksessä kantaa samat sanat, joten bassonkin sanat ovat ne.
+        # Lisäksi S/A/T laulavat "huic ergo parce Deus" koko jakson 656-668
+        # läpi, ja basson oma jatko t.664-665 on jo "er-go par-ce De-us,":
+        # korjauksen jälkeen kaikki neljä ääntä ovat samassa tekstissä.
+        #
+        # Kyse on samasta virhelajista kuin osan jo dokumentoidussa viassa
+        # (osan oma aiempi "Lacrymosa dies illa" -teksti myöhempien tahtien
+        # päällä) — vain kauempana alussa ja myös painetussa nuotissa.
+        # Tavujen PAIKAT ovat lähdesivun mukaiset ja tarkistetut; vain sanat
+        # vaihtuvat. Jos kuoron nuottikirja joskus osoittaa toisin, nämä 18
+        # riviä palauttavat vanhan tekstin päinvastaisina.
+        ("34", 0, "aseta", "La", "begin", "hu"),       # t.657
+        ("34", 1, "aseta", "cry", "end", "ic"),        # t.657
+        ("34", 1, "jatka"),                            # melisma Ges3:n yli
+        ("34", 3, "aseta", "mo", "begin", "er"),       # t.657
+        ("34", 4, "aseta", "sa,", "end", "go"),        # t.657
+        ("35", 0, "aseta", "la", "begin", "par"),      # t.658
+        ("35", 1, "aseta", "cry", "end", "ce"),        # t.658
+        ("35", 1, "jatka"),                            # melisma C4:n yli
+        ("35", 3, "aseta", "mo", "begin", "De"),       # t.658
+        ("35", 4, "aseta", "sa", "end", "us,"),        # t.658
+        ("37", 0, "aseta", "di", "begin", "hu"),       # t.660
+        ("37", 2, "aseta", "es", "end", "ic"),         # t.660
+        ("38", 0, "aseta", "il", "begin", "er"),       # t.661
+        ("38", 2, "aseta", "la,", "end", "go"),        # t.661
+        ("39", 0, "aseta", "di", "begin", "par"),      # t.662
+        ("39", 1, "aseta", "es", "end", "ce"),         # t.662
+        ("40", 0, "aseta", "il", "begin", "De"),       # t.663
+        ("40", 1, "aseta", "la.", "end", "us,"),       # t.663
+        # Kolmas tulo alkaa kesken tahtia 663, eikä enää virkkeen alusta:
+        # iso alkukirjain pois.
+        ("40", 2, "aseta", "Hu", "begin", "hu"),       # t.663
+        # Jakson viimeinen tavu: piste, kuten kuoron tenorilla samassa
+        # tahdissa. Pitkä taukojakso 666-676 seuraa.
+        ("42", 0, "aseta", "us,", "end", "us."),       # t.665
+
         # --- lähde-PDF:n sivu 11 ---
         ("54", 0, "aseta", "par", "begin", "Pi"),      # t.677
         ("54", 1, "aseta", "ce", "end", "e"),          # t.677
@@ -312,6 +364,21 @@ def sovella(part, osa):
             ly[0].find("syllabic").text = syllabic
             ly[0].find("text").text = text
             selosteet.append(f"t.{tahti}: {odotettu!r} -> {text!r}")
+
+        elif laji == "jatka":
+            # Melisma: tavu jatkuu seuraavalle nuotille, ja <extend/> piirtää
+            # sen jatkoviivan. Ilman tätä sanan viimeinen tavu (syllabic
+            # "end") jää roikkumaan ilman merkkiä siitä että sitä lauletaan
+            # yhä. Tavuviivaa se ei korvaa — se syntyy syllabicista.
+            ly = lyriikat(note)
+            assert len(ly) == 1, (
+                f"t.{tahti} nuotti {i}: odotettiin yhtä tavua, "
+                f"on {len(ly)}")
+            assert ly[0].find("extend") is None, (
+                f"t.{tahti} nuotti {i}: jatkoviiva on jo")
+            ET.SubElement(ly[0], "extend")
+            selosteet.append(f"t.{tahti}: jatkoviiva tavulle "
+                             f"{teksti(ly[0])!r}")
 
         elif laji == "kopioi_tahti":
             (lahde,) = args

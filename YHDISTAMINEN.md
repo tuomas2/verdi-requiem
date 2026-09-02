@@ -13,12 +13,12 @@
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
 | `korjaa_sanat.py` | Korjaa osien 01, 14 ja II·9b:n kuorosanat lähde-PDF:ää vasten |
-| `korjaa_kasin.py` | Käsin todennetut korjaukset (osa I, Liber scriptus), taulukkona |
+| `korjaa_kasin.py` | Käsin todennetut korjaukset (osa I, Liber scriptus, Lacrymosa), taulukkona |
 | `nayta.py` | Näyttää viivaston nuotit, äänet ja sanarivit tahdeittain |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
 | `Verdi_10bDies_irae.pdf` | II·9b:n lähde-PDF (käyttäjän löytämä) |
 | `10b-Verdi_Dies_irae_paluu-OMR*.mxl` | II·9b, konelukemisen tulos ja sanakorjattu versio |
-| `*-kasin.mxl` | **Skriptin tuottamia**, ei käsin muokattuja: `korjaa_kasin.py`:n tulos, ja juuri nämä `yhdista.py` lukee osista I ja II·4 |
+| `*-kasin.mxl` | **Skriptin tuottamia**, ei käsin muokattuja: `korjaa_kasin.py`:n tulos, ja juuri nämä `yhdista.py` lukee osista I, II·4 ja II·10 |
 
 ## Työnkulku
 
@@ -159,8 +159,10 @@ kopioida valmiin tahdin toisaalta samasta stemmasta (`kopioi_tahti`) — niin
 korjattiin Liber scriptuksen puuttuneet "Di-es i-rae." -välihuudahdukset
 tahdeissa 229, 231 ja 233.
 
-Osien 11 (Lacrymosa) ja 14 (Agnus Dei) korjaukset on aikanaan tehty suoraan
-lähdetiedostoon, joten niillä ei vielä ole vastaavaa taulukkoa.
+Osan 14 (Agnus Dei) korjaukset on aikanaan tehty suoraan lähdetiedostoon,
+joten sillä ei vielä ole vastaavaa taulukkoa. Osa 11 (Lacrymosa) purettiin
+taulukoksi 2026-09-03: sen lähde on jälleen CPDL:n koskematon vienti ja
+korjaukset — 50 tavua — ovat `korjaa_kasin.py`:ssä rivi riviltä.
 
 ## Tarkistettavaa harjoituksissa
 
@@ -174,11 +176,22 @@ muutos `korjaa_kasin.py`:ssä.
 | II·1, t. 28 | "Da-vid cum Sy-bil-la," viimeinen tavu `la,` on **A3** | Kuoron omassa MuseScore-tiedostossa se on oktaavia alempi **A2**. Osalle 02 ei ole lähde-PDF:ää, joten kumpikaan ei ole varmistettavissa täältä käsin. |
 | II·4, t. 247-254 | Altto, tenori ja basso laulavat "Solvet saeclum in favilla" kahdesti | Sopraanolla on samassa kohdassa sen sijaan ylimääräiset "Dies irae, dies illa" -toistot. Nuotit on tarkistettu oikeiksi kaikilla äänillä; kyse on vain siitä, kumpi teksti on oikea. |
 
+Neljäs kohta on kokonaisen alaosan numerointi, ja siihen auttaisi eniten yksi
+tieto kirjasta. Lacrymosassa paljastui 2026-09-03, että kirjan osio-otsikon
+tahtinumero ei kertonut mistä tahdista **tiedosto** alkaa — ero oli kolme
+tahtia, ja koko osan numerointi oli sen verran pielessä. Sama voi koskea
+Tuba mirumia, Liber scriptusta, Rex tremendaeta, Quid sum miseriä ja
+Recordarea, joiden saumoista `yhdista.py` raportoi päällekkäisiä numeroita.
+
+Sen ratkaisee **tahtinumero alaosan sisältä**, ei sen otsikosta: esimerkiksi
+mistä tahdista kuorobasso aloittaa Rex tremendaessa, tai minkä tahdin
+kohdalla jokin selvä sana on. Yksi numero alaosaa kohti riittää.
+
 ## Tahtinumerointi
 
 Numerointi alkaa joka pääosassa (I, III, IV, V, VI, VII) ykkösestä. Poikkeus
 on osa II, Dies irae: sen kymmenen alaosaa ja II·9b juoksevat yhtenäisesti
-1:stä 698:aan, koska kuoron nuottikirja numeroi Dies iraen niin. MuseScore
+1:stä 701:een, koska kuoron nuottikirja numeroi Dies iraen niin. MuseScore
 kunnioittaa MusicXML:n tahtinumeroita, joten osiorajoja ei tarvita kummassakaan
 tapauksessa.
 
@@ -186,27 +199,46 @@ Toteutus on `yhdista.py`:n `DIES_IRAE_ALUT`-taulukko ja kytkin
 
     NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False
 
-Taulukossa on **kunkin alaosan ensimmäisen tahdin numero kuoron
-nuottikirjassa**, kirjasta luettuna (2026-09-02), ei laskettuna:
+Taulukossa on **kunkin alaosan lähdetiedoston ensimmäisen tahdin numero**
+kuoron nuottikirjan numeroinnissa, kirjasta luettuna (2026-09-02), ei
+laskettuna:
 
     II·1 Dies irae 1, II·2 Tuba mirum 91, II·3 Mors stupebit 143,
     II·4 Liber scriptus 162, II·5 Quid sum miser 271, II·6 Rex tremendae 322,
     II·7 Recordare 386, II·8 Ingemisco 450, II·9 Confutatis 507,
-    II·9b Dies irae (kertaus) 573, II·10 Lacrymosa 621
+    II·9b Dies irae (kertaus) 573, II·10 Lacrymosa 624
+
+**Lacrymosan 624 ei ole kirjan osio-otsikon tahti.** Kirjassa Lacrymosa-otsikko
+on tahdissa 621, mutta CPDL:n Lacrymosa-tiedosto alkaa kolme tahtia sen
+jälkeen: kirjan tahdit 621–623 ovat 10b-tiedoston kolme viimeistä tahtia.
+Taulukkoon kuuluu tiedoston ensimmäisen tahdin numero, siis 624. Tämä oli
+kertaalleen väärin, ja se näkyi siten että koko Lacrymosan numerointi oli
+kolme tahtia liian pieni. Nyt kuorobasso aloittaa tahdista 645 ja "A-men"-sanan
+"men" on tahdissa 698, kuten kirjassa.
+
+Käytännön seuraus: stemmassa **II·10-otsikko on tahdissa 624**, vaikka kirjassa
+se on 621. Tahtinumerot täsmäävät kirjaan, otsikon paikka poikkeaa kolme
+tahtia. Se ei haittaa laulaessa, koska kuoro on tahdeissa 621–623 taukona ja
+ne katoavat II·9b:n taukopalkkiin.
 
 Aiemmin nämä laskettiin lähdetiedostojen omista tahtimääristä, ja kuusi
 yhdestätoista oli väärin — Lacrymosassa jo kahdeksan tahtia. CPDL:n
 osakohtaiset tiedostot eivät katkea samoista kohdista kuin kirja, joten
 numerointi ei jatku saumojen yli aukottomasti: viidessä saumassa muutama
 numero toistuu ja kolmessa muutama puuttuu lähteistä. `yhdista.py` tulostaa
-nämä joka ajolla. Lukustemmoissa se ei näy, koska kaikki toistuvat tahdit
+nämä joka ajolla. Lacrymosan sauma oli aiemmin näiden joukossa ja on nyt
+jatkuva (623 → 624); on hyvin mahdollista että loput neljä päällekkäisyyttä
+ovat samaa vikaa, mutta se ratkeaa vain tahtinumerolla alaosan **sisältä**
+— osio-otsikon numero ei riitä. Lukustemmoissa se ei näy, koska kaikki toistuvat tahdit
 ovat kuorolle taukoa ja katoavat taukopalkkeihin. Ks. `CLAUDE.md`:
 **2026-09-02 (later): the book's own bar numbers for Dies irae**.
 
 Huom: jos vanhoissa muistiinpanoissa on Dies iraen tahtinumeroita ennen
 2026-09-02, ne ovat vanhassa numeroinnissa — Lacrymosasta vähennetään 8,
 II·9b:stä 5, Rex tremendaesta 2, Tuba mirumista ja Liber scriptuksesta 1,
-ja Mors stupebitiin lisätään 2.
+ja Mors stupebitiin lisätään 2. Lacrymosan osalta on lisäksi 2026-09-02 ja
+2026-09-03 välillä kirjattuja numeroita, jotka ovat kolme liian pieniä:
+niihin **lisätään 3**.
 
 ## Oletukset jotka voi joutua korjaamaan
 
@@ -232,7 +264,7 @@ Basso II tahdissa 4, molemmat sävelellä C3 sanalla "San-ctus".
 | VII | Libera me | 421 |
 | | **Yhteensä** | **1807** |
 
-Sarakkeessa on tahtien määrä. Dies iraen numerointi juoksee 1:stä 698:aan
+Sarakkeessa on tahtien määrä. Dies iraen numerointi juoksee 1:stä 701:een
 eikä 706:aan, koska alaosien saumoissa muutama numero toistuu ja muutama
 puuttuu — ks. **Tahtinumerointi** yllä.
 
@@ -273,14 +305,39 @@ tahdista 72. Tekninen tausta: `CLAUDE.md` -> **2026-08-31 (later): Agnus Dei's
 chorus bass, whole movement verified**.
 
 **Poikkeus edelliseen: Lacrymosan (11) kuorobassolla oli aito virhe, ei
-OMR:stä johtuva.** Rivin loppupuolella (n. 30 tahtia) oli joko tyhjää tai
-väärää tekstiä — sanat vaikuttivat kopioituneen väärään kohtaan alkuperäisen
-tiedoston teossa. Löytyi ja korjattiin 2026-08-28 vertaamalla toiseen,
-käyttäjän löytämään Lacrymosa-PDF:ään. Tekninen tausta: `CLAUDE.md` ->
-**Lacrymosa's chorus bass: wrong text, not missing measures**. Muiden äänten
-(Sopraano/Altto/Tenori, solistit) samaa tiedostoa ei ole tarkistettu yhtä
-tarkasti — sama virhetyyppi voisi periaatteessa olla muuallakin näissä 14
-"luotettavassa" osassa.
+OMR:stä johtuva.** Rivin loppupuolella (n. 30 tahtia) oli väärää tekstiä —
+osan oma aiempi sanoitus oli kopioitunut väärään kohtaan alkuperäisen
+tiedoston teossa. Löytyi 2026-08-28 vertaamalla toiseen, käyttäjän löytämään
+Lacrymosa-PDF:ään.
+
+**Lacrymosan kuorobasso on nyt tarkistettu kokonaan** (2026-09-03), koska
+pyysit sitä: nuotit kuoron omaa MuseScore-tiedostoa vasten kaikki 48
+laulettua tahtia, ja sanat lähde-PDF:ää vasten sivu sivulta niin, että
+jokaisen tavun paikka tarkistettiin nuotti nuotilta PDF:n
+x-koordinaateista. Nuottieroja oli kaksi ja molemmat ratkesivat lähde-PDF:n
+hyväksi (tahdissa 653 on G3, tahdissa 689 puolinuotti), eli tiedosto oli
+oikeassa ja kuoron oma tiedosto poikkeaa.
+
+Kaksi aitoa virhettä löytyi ja korjattiin:
+
+- **Divisin ylä-ääni tahdeissa 677–679** lauloi "La-cry-mo-sa di-es il-" kun
+  oikea teksti on "Pi-e Je-su Do-mi-ne,". Lähde-PDF painaa sen ylä-äänen
+  sanat viivaston yläpuolelle, mistä ne oli aiemmin luettu tenorin riviksi.
+- **Tahdit 657–665**, sinun raporttisi mukaan: kuorobasso laulaa
+  "hu-ic er-go par-ce De-us" kolme kertaa, ei "La-cry-mo-sa … di-es il-la".
+  Tässä **lähde-PDF itse on väärässä** — se painaa "La-cry-mo-sa," — joten
+  sivuja vasten vertaaminen ei olisi ikinä löytänyt tätä. Varmistus tuli
+  nuoteista: kohta on limittäinen tulo samalle kuviolle, ja tenorilla,
+  altolla ja sopraanolla sen sanat ovat "hu-ic er-go". Basson oma jatko
+  tahdeissa 664–665 oli jo "er-go par-ce De-us,", eli korjauksen jälkeen
+  kaikki neljä ääntä ovat samassa tekstissä.
+
+Tekninen tausta: `CLAUDE.md` -> **Lacrymosa's chorus bass** ja
+**2026-09-03 (c)**.
+
+Muiden äänten (Sopraano/Altto/Tenori, solistit) samaa tiedostoa ei ole
+tarkistettu yhtä tarkasti — sama virhetyyppi voisi periaatteessa olla
+muuallakin näissä 14 "luotettavassa" osassa.
 
 **MuseScore ilmoitti aiemmin tiedoston korruptoituneeksi.** Se on korjattu.
 Syy oli lähteissä 05 ja 16: niiden pianostemmassa on nuotteja, joissa on
@@ -334,8 +391,11 @@ partituurin nimilaput; nimeämättömät "Voice"-osastot ovat kuoro.
 -alku) ja tahdista 14 alkaen pianon kaksi viivastoa. Kartoitus jakaa ne tahtien
 mukaan.
 
-**Osa II·10 Lacrymosa**: P9 on kuorobasson divisi tahdeissa 54–56, ja se
-yhdistetään kuorobassoriville omaksi äänekseen.
+**Osa II·10 Lacrymosa**: P9 on kuorobasson divisi tahdeissa 54–56 (juoksevat
+677–679), ja se yhdistetään kuorobassoriville omaksi äänekseen. Stemmassa
+siinä on siksi kaksi sanariviä: ylä-äänen "Pi-e Je-su Do-mi-ne," ja
+ala-äänen "Pi-e Je-su". Niin lähde-PDF:kin sen painaa — ylä-äänen sanat
+viivaston yläpuolelle.
 
 ## Sanojen korjaus
 

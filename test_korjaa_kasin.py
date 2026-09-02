@@ -92,6 +92,12 @@ class Toimenpiteet(unittest.TestCase):
         with self.assertRaises(AssertionError):
             sovella(p, osa([("1", None, "kopioi_tahti", "9")]))
 
+    def test_jatka_lisaa_melisman_jatkoviivan(self):
+        p = part([("C3", [("1", "end", "ic")])])
+        sovella(p, osa([("1", 0, "jatka")]))
+        ly = p.find("measure/note/lyric")
+        self.assertIsNotNone(ly.find("extend"))
+
     def test_tavun_siirto_on_poisto_ja_lisays(self):
         p = part([("C3", [("1", "end", "nis")])], [("D3", [])])
         sovella(p, osa([("1", 0, "poista", "nis"),
@@ -126,6 +132,17 @@ class Vartijat(unittest.TestCase):
         p = part([("C3", [("1", "end", "muu")])])
         with self.assertRaises(AssertionError):
             sovella(p, osa([("1", 0, "aseta", "i", "end", "son,")]))
+
+    def test_jatka_kaataa_jos_tavua_ei_ole(self):
+        p = part([("C3", [])])
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", 0, "jatka")]))
+
+    def test_jatka_kaataa_jos_jatkoviiva_on_jo(self):
+        p = part([("C3", [("1", "end", "ic")])])
+        sovella(p, osa([("1", 0, "jatka")]))
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", 0, "jatka")]))
 
     def test_nuotin_poisto_kaataa_jos_kohde_ei_ole_tauko(self):
         p = part([("C3", []), ("D3", [])])
@@ -273,6 +290,32 @@ class LacrymosaKokonaisuutena(unittest.TestCase):
         # Laulajan alkuperäinen havainto: stemma päättyi "par-ce".
         self.assertEqual(self.tavut(self.b, "74"), [("1", "single", "A")])
         self.assertEqual(self.tavut(self.b, "75"), [("1", "end", "men.")])
+
+    def test_huic_ergo_parce_deus_kolme_kertaa(self):
+        """Tahdit 34-42 (juoksevat 657-665): sama teksti kolmesti.
+
+        Lähde-editio painaa tähän "La-cry-mo-sa ... di-es il-la", mutta se on
+        editiovirhe: kohta on limittäinen tulo samalle kuviolle, ja
+        tenori/altto/sopraano laulavat siinä "hu-ic er-go". Laulaja raportoi
+        saman kuoron nuottikirjasta.
+        """
+        self.assertEqual([t for _, _, t in self.tavut(self.b, "34")],
+                         ["hu", "ic", "er", "go"])
+        self.assertEqual([t for _, _, t in self.tavut(self.b, "35")],
+                         ["par", "ce", "De", "us,"])
+        loput = [t for tahti in ("37", "38", "39", "40", "41", "42")
+                 for _, _, t in self.tavut(self.b, tahti)]
+        self.assertEqual(loput, ["hu", "ic", "er", "go", "par", "ce",
+                                 "De", "us,", "hu", "ic", "er", "go",
+                                 "par", "ce", "De", "us."])
+
+    def test_melismojen_jatkoviivat_tahdeissa_34_ja_35(self):
+        for tahti in ("34", "35"):
+            m = next(x for x in self.b.findall("measure")
+                     if x.get("number") == tahti)
+            ly = m.findall("note")[1].find("lyric")
+            with self.subTest(tahti=tahti):
+                self.assertIsNotNone(ly.find("extend"))
 
     def test_dona_eis_requiem_tahdeissa_58_59(self):
         self.assertEqual([t for _, _, t in self.tavut(self.b, "58")],
