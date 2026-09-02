@@ -31,7 +31,7 @@ original CPDL source, undetected until now — found and fixed; see
 *Lacrymosa's chorus bass: wrong text, not missing measures*. Also new: three
 more chorus-bass spots the user flagged by ear, cross-checked against the
 choir's own MuseScore files and (where available) source PDFs — two fixed
-(Lacrymosa bar 666's "eis requiem" was the soloists' line copied into the
+(Lacrymosa bar 669's "eis requiem" was the soloists' line copied into the
 chorus stave by mistake; Agnus Dei bar 27's wrong clef/register was OMR
 reading the wrong staff after the chorus drops out for a solo passage), one
 left open pending the physical score; see *2026-08-31: three more chorus-bass
@@ -648,9 +648,9 @@ MuseScore-comparison work, then, where a source PDF exists, confirm visually
 by rendering pages (`mutool draw -r 250`) rather than trusting pitch-matching
 alone — same discipline as the Lacrymosa fix above.
 
-### Fixed: Lacrymosa bar 666, "eis requiem" was the soloists' line, not the chorus's
+### Fixed: Lacrymosa bar 669, "eis requiem" was the soloists' line, not the chorus's
 
-`11-Verdi_Lacrymosa.mxl`, `Kuoro B` (`P8`), continuous bars 666–671 (local
+`11-Verdi_Lacrymosa.mxl`, `Kuoro B` (`P8`), continuous bars 669–674 (local
 46–51) — exactly the six bars the original Lacrymosa fix (above) had
 *added* from OMR to replace bare rests. Turned out that addition was wrong:
 those six bars' notes and lyrics ("e-is re-qui-em, pi-e Je-su Do-mi-ne,")
@@ -662,8 +662,8 @@ counterpart — a pure insertion with nothing to match), and
 `Verdi_Lacymosa.pdf` pages 9–10 show, rendered, that only the vocal-quartet
 soloists sing "eis requiem, pie Jesu Domine, dona eis, dona" here — the
 chorus staves are tacet and re-enter only on "Pi-e Je-su Do-mi-ne" a few
-bars later (already correct in our file, ~bar 674, matching the user's own
-"from 674 on it looks right"; they said 682, in the old numbering).
+bars later (already correct in our file, ~bar 677, matching the user's own
+"from 677 on it looks right"; they said 682, in the numbering of the day).
 **Fixed**: bars 46–51 replaced with plain
 whole-bar rests, matching what was there before the original fix. Verified:
 file converts and exports MIDI cleanly; merged score's `Kuoro B` count drops
@@ -902,7 +902,7 @@ file.
   count fell from 26 to 21 — exactly the five measures that got real content
   (59, 60, 69, 72, 74).
 - All eight reading parts and the practice `.mscz` were re-rendered (seven of
-  the eight had been stale since the *Lacrymosa bar 666* fix). `stemmat-
+  the eight had been stale since the *Lacrymosa bar 669* fix). `stemmat-
   sisallys.txt` was regenerated; `B I`/`B II` are now 13 pages, not 14.
 - 32 tests pass.
 - The result was read back off `stemma-basso-1.pdf` page 9 as a rendered
@@ -1283,19 +1283,21 @@ old number turns up in a commit message, a comment or the user's memory:
 | Mors stupebit | **add** 2 |
 | all others | unchanged |
 
-So the old "Lacrymosa bar 674" is now 666, "682–684" is 674–676, "Liber
+So the old "Lacrymosa bar 674" is now 669, "682–684" is 677–679, "Liber
 scriptus bar 240" is 239, and "Rex 369–371" is 367–369.
 
 **A second renumbering hit Lacrymosa on 2026-09-03**: every Lacrymosa number
 written between 2026-09-02 and then is three too low, so **add 3**. Combining
 both passes, an original pre-2026-09-02 Lacrymosa number changes by −5, not −8.
-Numbers quoted in this file have been renumbered in place; "666" is now 669,
-"674–676" is 677–679.
+Numbers quoted in this file have been renumbered in place; the two that moved
+twice are "666", now 669, and "674–676", now 677–679.
 
 ### Verification
 
-- All eleven sub-movements start on the book's number, read back out of the
-  merged score's own `<measure number>` values, not from the table that set them.
+- All eleven sub-movements start on the number the table gives them, read back
+  out of the merged score's own `<measure number>` values, not from the table
+  that set them. *(Ten of those are the book's section start; Lacrymosa's is
+  three bars later — the 2026-09-03 correction above.)*
 - Dies irae now spans 1–698 (was 1–706). *(1–701 after the 2026-09-03
   Lacrymosa correction.)*
 - Note counts per staff unchanged — only numbering moved. Measure count 1807.
