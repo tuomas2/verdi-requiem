@@ -13,6 +13,8 @@
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
 | `korjaa_sanat.py` | Korjaa osien 01, 14 ja II·9b:n kuorosanat lähde-PDF:ää vasten |
+| `korjaa_kasin.py` | Käsin todennetut korjaukset osan I kuorobassoon, taulukkona |
+| `nayta.py` | Näyttää viivaston nuotit, äänet ja sanarivit tahdeittain |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
 | `Verdi_10bDies_irae.pdf` | II·9b:n lähde-PDF (käyttäjän löytämä) |
 | `10b-Verdi_Dies_irae_paluu-OMR*.mxl` | II·9b, konelukemisen tulos ja sanakorjattu versio |
@@ -64,13 +66,14 @@ Jos lähdeaineisto muuttuu, aja koko ketju **tässä järjestyksessä** —
 `harjoitus.py` lukee yhdistettyä partituuria:
 
     python3 korjaa_sanat.py                       # 1. sanat PDF:stä
-    python3 yhdista.py Verdi-Requiem-koko.mxl     # 2. partituuri
-    python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"   # 3. stemmat
+    python3 korjaa_kasin.py                       # 2. todennetut korjaukset
+    python3 yhdista.py Verdi-Requiem-koko.mxl     # 3. partituuri
+    python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"   # 4. stemmat
     "/Applications/MuseScore 4.app/Contents/MacOS/mscore" \
         -S tiivistys.mss -o stemma-basso-1.pdf stemma-basso-1.mxl
-    python3 harjoitus.py --stemma "Basso I"       # 4. harjoittelutiedosto
+    python3 harjoitus.py --stemma "Basso I"       # 5. harjoittelutiedosto
 
-Vaiheet 3 ja 4 toistetaan kullekin tarvittavalle äänelle. Yksittäiset
+Vaiheet 4 ja 5 toistetaan kullekin tarvittavalle äänelle. Yksittäiset
 komennot ovat alla.
 
     # koko partituuri, 15 viivastoa
@@ -123,6 +126,27 @@ D-trumpetti, Trombone, Piano (2 viivastoa).
 
 Kuoro B on se rivi jota luetaan. Kuoro S II – B II esiintyvät vain Sanctuksessa
 (kaksoiskuoro) ja vasket vain Tuba mirumissa, jossa ei ole pianoa lainkaan.
+
+## Jos kuulet stemmassa väärän tavun
+
+Kerro tahtinumero ja mitä siinä pitäisi lukea — numerot ovat nyt jokaisen
+tahdin päällä, joten niitä ei tarvitse laskea rivin alusta. Korjaus tehdään
+näin:
+
+    python3 nayta.py stemma-basso-1.mxl 126 130
+
+näyttää mitä datassa oikeasti on (myös sanarivin numeron, jota ei näe
+nuottikuvasta), ja korjaus kirjataan `korjaa_kasin.py`:n taulukkoon riviksi,
+ei suoraan tiedostoon. Sen jälkeen `python3 korjaa_kasin.py` ja normaali
+uudelleenluonti. Jokainen korjaus tarkistaa lähtötilanteen ja kaatuu, jos
+lähde on muuttunut, joten korjaus ei voi hiljaa osua väärään tahtiin.
+
+Tarkempi menetelmä — miten kohta todennetaan lähde-PDF:stä ennen kirjaamista
+ja mistä tietää onko vika datassa vai skriptissä — on `CLAUDE.md`:n luvussa
+*Recipe: a singer reports a wrong syllable by ear*.
+
+Osien 11 (Lacrymosa) ja 14 (Agnus Dei) korjaukset on aikanaan tehty suoraan
+lähdetiedostoon, joten niillä ei vielä ole vastaavaa taulukkoa.
 
 ## Tahtinumerointi
 
