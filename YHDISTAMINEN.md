@@ -18,6 +18,7 @@
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
 | `Verdi_10bDies_irae.pdf` | II·9b:n lähde-PDF (käyttäjän löytämä) |
 | `10b-Verdi_Dies_irae_paluu-OMR*.mxl` | II·9b, konelukemisen tulos ja sanakorjattu versio |
+| `*-kasin.mxl` | **Skriptin tuottamia**, ei käsin muokattuja: `korjaa_kasin.py`:n tulos, ja juuri nämä `yhdista.py` lukee osista I ja II·4 |
 
 ## Työnkulku
 
@@ -100,7 +101,8 @@ Sama tiedosto kytkee myös **tahtinumeron jokaiseen tahtiin** viivaston
 yläpuolelle, ei vain rivin ensimmäiseen, ja tiivistetyn taukopalkin alle sen
 tahtivälin (`[79-93]`). Harjoituksissa etsitään yksittäistä tahtia, ja rivin
 alusta laskeminen on hidasta ja menee helposti yhden pieleen. Hinta on yksi
-sivu lisää kussakin kahdeksassa stemmassa (esim. B I 13 -> 14 sivua).
+sivu lisää kussakin kahdeksassa stemmassa (B I 13 -> 14 sivua; alla oleva
+rivinvälin väljennys nosti sen edelleen 16:een).
 
 Kolmas asetus on **rivinväli**: `minSystemSpread` 11,5 antaa nuottirivien
 väliksi 29,3 mm oletuksen 25,1 mm sijaan, eli noin puoli senttiä lisää tilaa
@@ -160,6 +162,18 @@ tahdeissa 229, 231 ja 233.
 Osien 11 (Lacrymosa) ja 14 (Agnus Dei) korjaukset on aikanaan tehty suoraan
 lähdetiedostoon, joten niillä ei vielä ole vastaavaa taulukkoa.
 
+## Tarkistettavaa harjoituksissa
+
+Kolme kohtaa on jätetty tietoisesti auki: ne ratkeavat kuoron nuottikirjasta
+tai kapellimestarilta, eivät tiedostoja tutkimalla. Jokainen on yhden rivin
+muutos `korjaa_kasin.py`:ssä.
+
+| Kohta | Mitä stemmassa nyt lukee | Mitä pitää tarkistaa |
+|---|---|---|
+| I, t. 51-52 | `om – – nis`, eli melisma tavulla "om" ja "nis" tahdin 52 viimeisellä nuotilla — pyyntösi mukaan | Lähde-PDF merkitsee toisin päin: "nis" tahdin 51 kolmannelle iskulle ja melisma sen jälkeen. Kumpaa kuoro laulaa? |
+| II·1, t. 28 | "Da-vid cum Sy-bil-la," viimeinen tavu `la,` on **A3** | Kuoron omassa MuseScore-tiedostossa se on oktaavia alempi **A2**. Osalle 02 ei ole lähde-PDF:ää, joten kumpikaan ei ole varmistettavissa täältä käsin. |
+| II·4, t. 247-254 | Altto, tenori ja basso laulavat "Solvet saeclum in favilla" kahdesti | Sopraanolla on samassa kohdassa sen sijaan ylimääräiset "Dies irae, dies illa" -toistot. Nuotit on tarkistettu oikeiksi kaikilla äänillä; kyse on vain siitä, kumpi teksti on oikea. |
+
 ## Tahtinumerointi
 
 Numerointi alkaa joka pääosassa (I, III, IV, V, VI, VII) ykkösestä. Poikkeus
@@ -210,13 +224,17 @@ Basso II tahdissa 4, molemmat sävelellä C3 sanalla "San-ctus".
 | Numero | Osa | Tahteja |
 |---|---|---:|
 | I | Requiem & Kyrie | 140 |
-| II | Dies irae (10 alaosaa + II·9b) | 698 |
+| II | Dies irae (10 alaosaa + II·9b) | 706 |
 | III | Offertorio | 222 |
 | IV | Sanctus | 139 |
 | V | Agnus Dei | 74 |
 | VI | Lux aeterna | 105 |
 | VII | Libera me | 421 |
 | | **Yhteensä** | **1807** |
+
+Sarakkeessa on tahtien määrä. Dies iraen numerointi juoksee 1:stä 698:aan
+eikä 706:aan, koska alaosien saumoissa muutama numero toistuu ja muutama
+puuttuu — ks. **Tahtinumerointi** yllä.
 
 Kuorobasso vaikenee kokonaan osissa II·3 Mors stupebit, II·5 Quid sum miser,
 II·7 Recordare, II·8 Ingemisco, II·9 Confutatis, III Offertorio ja VI Lux
