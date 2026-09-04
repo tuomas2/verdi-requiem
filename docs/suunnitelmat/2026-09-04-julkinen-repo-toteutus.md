@@ -274,7 +274,7 @@ if __name__ == "__main__":
 > pysyä ennallaan koko tämän työn ajan; ne ovat ketjun syöte, eivät tulos.
 
 ```bash
-cd /Users/tuomasairaksinen/verdi-requiem
+cd verdi-requiem
 python3 korjaa_sanat.py --kuiva > /dev/null && echo "korjaa_sanat toimii"
 python3 korjaa_kasin.py
 python3 yhdista.py Verdi-Requiem-koko.mxl
@@ -1677,7 +1677,7 @@ Tämä on tehtävistä ainoa peruuttamaton. **Varmuuskopio ensin.**
 - [ ] **Askel 1: Ota täysi varmuuskopio**
 
 ```bash
-cd /Users/tuomasairaksinen
+cd ..
 cp -a verdi-requiem "$SCRATCH/verdi-requiem-varmuuskopio"
 du -sh "$SCRATCH/verdi-requiem-varmuuskopio"
 ```
@@ -1687,7 +1687,7 @@ Odotus: noin 160 MB. **Älä jatka ennen kuin tämä on onnistunut.**
 
 ```bash
 brew install git-filter-repo
-cd /Users/tuomasairaksinen/verdi-requiem
+cd verdi-requiem
 du -sh .git
 git rev-list --count HEAD
 ```
