@@ -2,9 +2,8 @@
 """Rakenna verkkosivusto stemmoista, teksteistä ja luotettavuustaulukosta.
 
 Sivuston tiedot luetaan samoista vakioista, jotka ohjaavat stemmojen
-tuotantoa (yhdista.MOVEMENTS, luotettavuus.POIKKEUKSET) ja valmiista
-tuotoksista (stemmat-sisallys.txt, yhdistetty partituuri), joten sisällys ei
-voi ajautua stemmoista erilleen.
+tuotantoa (yhdista.MOVEMENTS, luotettavuus.POIKKEUKSET), joten sivu ei voi
+väittää aineistosta muuta kuin mitä siitä tiedetään.
 
 Käyttö:  python3 sivusto.py [_sivusto]
 
@@ -14,11 +13,8 @@ komennolla. Näin sivusto ei voi vanhentua huomaamatta.
 
 import html as _html
 import os
-import re
 import shutil
 import sys
-import zipfile
-import xml.etree.ElementTree as ET
 
 import luotettavuus
 import polut
@@ -194,74 +190,8 @@ miten: <a href="{GITHUB}/blob/main/luotettavuus.py">luotettavuus.py</a>.</p>
 
 # --------------------------------------------------------------- stemmat
 
-def lue_sisallys():
-    """(osanumero, otsikko, [8 sivunumeroa]) stemmat-sisallys.txt:stä.
-
-    Tiedosto on sarakemuotoinen ja osanumero voi olla kiinni otsikossa
-    ("II·9bDies irae (kertaus)", koska numerolle on varattu tasan viisi
-    merkkiä), joten rivi puretaan tunnettuja osia vasten eikä välilyönneillä.
-    """
-    with open(polut.polku("stemmat-sisallys.txt"), encoding="utf-8") as f:
-        teksti = f.read()
-    rivit = []
-    for _tiedosto, numero, otsikko in yhdista.MOVEMENTS:
-        kuvio = re.compile(r"^\s*%s\s*%s\s+((?:\d+\s+){7}\d+)\s*$"
-                           % (re.escape(numero), re.escape(otsikko)),
-                           re.MULTILINE)
-        osuma = kuvio.search(teksti)
-        if not osuma:
-            raise SystemExit(
-                f"stemmat-sisallys.txt: riviä osalle {numero} {otsikko} ei "
-                f"löydy — aja python3 sisallys.py uudelleen")
-        rivit.append((numero, otsikko,
-                      [int(x) for x in osuma.group(1).split()]))
-    return rivit
-
-
-def tahtivalit():
-    """Osanumero -> (ensimmäinen, viimeinen) tahtinumero.
-
-    Luetaan yhdistetyn partituurin omista <measure number> -arvoista eikä
-    siitä taulukosta joka ne asetti — sama tarkistustapa kuin muualla
-    projektissa. Osanvaihdos tunnistetaan osaotsikosta, joka on kirjoitettu
-    osan ensimmäisen tahdin päälle.
-    """
-    with zipfile.ZipFile(polut.polku("Verdi-Requiem-koko.mxl")) as z:
-        nimi = next(n for n in z.namelist()
-                    if not n.startswith("META-INF")
-                    and n.lower().endswith(".xml"))
-        juuri = ET.fromstring(z.read(nimi))
-
-    otsikosta_numeroon = {yhdista.osaotsikko(numero, otsikko): numero
-                          for _t, numero, otsikko in yhdista.MOVEMENTS}
-    valit = {}
-    for osa in juuri.findall("part"):
-        nykyinen = None
-        for tahti in osa.findall("measure"):
-            for sanat in tahti.iter("words"):
-                teksti = (sanat.text or "").strip()
-                if teksti in otsikosta_numeroon:
-                    nykyinen = otsikosta_numeroon[teksti]
-            if nykyinen is None:
-                continue
-            try:
-                numero = int(tahti.get("number"))
-            except (TypeError, ValueError):
-                continue
-            alku, loppu = valit.get(nykyinen, (numero, numero))
-            valit[nykyinen] = (min(alku, numero), max(loppu, numero))
-    return valit
-
-
 def stemmasivu():
-    """Stemmat, lataukset ja sisällys — sivuston pääsivu.
-
-    Sivunumerot ovat stemmaa kohti (S I, S II, ...), mutta koko teoksessa on
-    tasan yksi kohta jossa saman äänen kaksi stemmaa ovat eri sivuilla, joten
-    ne mahtuvat neljään sarakkeeseen kahdeksan sijaan.
-    """
-    sisallys = lue_sisallys()
-    valit = tahtivalit()
+    """Stemmat ja lataukset — sivuston pääsivu."""
     pikkukuvat = os.path.isdir(os.path.join(POHJA, "pikkukuvat"))
 
     def lataus(nimi, pdf):
@@ -273,21 +203,6 @@ def stemmasivu():
                 % (pdf, kuva, e(nimi), pdf, pdf[:-4] + ".mxl"))
 
     linkit = "".join(lataus(nimi, pdf) for nimi, pdf in STEMMAT)
-    otsikot = "".join('<th class="aani">%s</th>' % e(a.replace("Kuoro ", ""))
-                      for a in luotettavuus.AANET)
-
-    rivit = []
-    for numero, otsikko, sivut in sisallys:
-        alku_t, loppu_t = valit.get(numero, ("", ""))
-        solut = []
-        for i in range(len(luotettavuus.AANET)):
-            ensimmainen, toinen = sivut[2 * i], sivut[2 * i + 1]
-            solut.append('<td class="aani">%s</td>'
-                         % e(ensimmainen if ensimmainen == toinen
-                             else "%d/%d" % (ensimmainen, toinen)))
-        rivit.append(
-            '<tr><td><strong>%s</strong> %s</td><td class="luku">%s–%s</td>%s</tr>'
-            % (e(numero), e(otsikko), e(alku_t), e(loppu_t), "".join(solut)))
 
     koko = "Verdi-Requiem-koko.mxl"
     sisalto = f"""
@@ -309,16 +224,6 @@ kuoronjohtajan huudosta. <strong>Tahtinumerot täsmäävät
 <p>Kaikki viisitoista viivastoa yhtenä tiedostona, 1807 tahtia:
 <a href="{koko}">{koko}</a> (MusicXML, avautuu esimerkiksi MuseScorella).</p>
 
-<h2>Mistä osa alkaa</h2>
-<p>Dies irae eli osa II numeroituu yhtenäisesti läpi kaikkien alaosiensa; muut
-osat alkavat ykkösestä. Sarakkeissa on sivunumero kunkin äänen stemmassa;
-kaksi lukua tarkoittaa, että I- ja II-stemma ovat eri sivuilla.</p>
-<div class="vieritin">
-<table class="sisallys">
-<thead><tr><th>Osa</th><th class="luku">Tahdit</th>{otsikot}</tr></thead>
-<tbody>{''.join(rivit)}</tbody>
-</table>
-</div>
 {alaviite()}
 """
     return sivu("Stemmat", sisalto, "index.html")

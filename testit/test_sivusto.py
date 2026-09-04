@@ -78,13 +78,6 @@ class Luotettavuus(unittest.TestCase):
     """Luotettavuustieto on osa stemmasivua, ei omaa sivuaan: se on juuri se
     mitä stemman lataajan pitää tietää ennen latausta."""
 
-    def test_jokainen_osa_on_taulukossa(self):
-        html = sivusto.stemmasivu()
-        for _t, _numero, otsikko in yhdista.MOVEMENTS:
-            with self.subTest(osa=otsikko):
-                # & on pakattu HTML:ssä.
-                self.assertIn(otsikko.replace("&", "&amp;"), html)
-
     def test_kertoo_etta_vain_basso_on_varmistettu(self):
         self.assertIn("kuorobasso", sivusto.stemmasivu().lower())
 
@@ -186,34 +179,20 @@ class Rakennus(unittest.TestCase):
 
 
 class Stemmasivu(unittest.TestCase):
-    def test_sisallys_luetaan_tiedostosta(self):
-        rivit = sivusto.lue_sisallys()
-        self.assertIn("Agnus Dei", " ".join(r[1] for r in rivit))
-        for _numero, _otsikko, sivut in rivit:
-            self.assertEqual(len(sivut), 8)
-
-    def test_sisallys_kattaa_kaikki_osat(self):
-        self.assertEqual(len(sivusto.lue_sisallys()), len(yhdista.MOVEMENTS))
-
-    def test_tahtivalit_luetaan_partituurista(self):
-        valit = sivusto.tahtivalit()
-        # Dies irae numeroituu jatkuvasti; Lacrymosa on sen viimeinen alaosa.
-        self.assertEqual(valit["II·10"], (624, 701))
-        # Muut osat alkavat ykkösestä.
-        self.assertEqual(valit["IV"][0], 1)
-        self.assertEqual(valit["I"][0], 1)
-
-    def test_tahtivalit_kattaa_kaikki_osat(self):
-        valit = sivusto.tahtivalit()
-        for _t, numero, _o in yhdista.MOVEMENTS:
-            with self.subTest(osa=numero):
-                self.assertIn(numero, valit)
-
     def test_sivulla_on_latauslinkki_jokaiselle_stemmalle(self):
         html = sivusto.stemmasivu()
         for _nimi, pdf in sivusto.STEMMAT:
             with self.subTest(pdf=pdf):
                 self.assertIn(pdf, html)
+                self.assertIn(pdf[:-4] + ".mxl", html)
+
+    def test_ei_sisallystaulukkoa(self):
+        """Taulukko oli kohinaa: sivunumerot ovat stemman omassa PDF:ssä ja
+        osan nimi on joka sivun yläreunassa. Tahtinumeroinnin tarkistus
+        elää test_yhdista.py:ssä."""
+        html = sivusto.stemmasivu()
+        self.assertNotIn("Mistä osa alkaa", html)
+        self.assertNotIn("<table", html)
 
 
 class Tekstisivu(unittest.TestCase):

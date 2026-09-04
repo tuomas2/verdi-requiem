@@ -4,6 +4,8 @@ Sanarivin numero (`<lyric number>`) ratkaisee, monennelle tekstiriville tavu
 piirtyy. OMR ja lähdetiedostot merkitsevät sen epäluotettavasti, ja yhden
 fraasin hajoaminen kahdelle riville tekee stemmasta lukukelvottoman.
 """
+import os
+import zipfile
 import unittest
 import xml.etree.ElementTree as ET
 
@@ -238,3 +240,66 @@ class Saumaraportti(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TahtinumerotValmiissaPartituurissa(unittest.TestCase):
+    """Numerointi luetaan takaisin yhdistetyn partituurin omista
+    <measure number> -arvoista, ei siitä taulukosta joka ne asetti.
+
+    Tämä oli aiemmin sivustogeneraattorin osa, jossa se tuli ajetuksi
+    sivujen mukana; sivulta poistettiin sisällystaulukko, mutta tarkistus
+    on liian arvokas hukattavaksi. Vaatii että johdetut/-partituuri on
+    rakennettu.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        polku = os.path.join("johdetut", "Verdi-Requiem-koko.mxl")
+        if not os.path.exists(polku):
+            raise unittest.SkipTest("yhdistettyä partituuria ei ole rakennettu")
+        with zipfile.ZipFile(polku) as z:
+            nimi = next(n for n in z.namelist()
+                        if not n.startswith("META-INF")
+                        and n.lower().endswith(".xml"))
+            juuri = ET.fromstring(z.read(nimi))
+
+        otsikosta = {osaotsikko(numero, otsikko): numero
+                     for _t, numero, otsikko in MOVEMENTS}
+        cls.valit = {}
+        for osa in juuri.findall("part"):
+            nykyinen = None
+            for tahti in osa.findall("measure"):
+                for sanat in tahti.iter("words"):
+                    teksti = (sanat.text or "").strip()
+                    if teksti in otsikosta:
+                        nykyinen = otsikosta[teksti]
+                if nykyinen is None:
+                    continue
+                try:
+                    numero = int(tahti.get("number"))
+                except (TypeError, ValueError):
+                    continue
+                alku, loppu = cls.valit.get(nykyinen, (numero, numero))
+                cls.valit[nykyinen] = (min(alku, numero), max(loppu, numero))
+
+    def test_jokaisella_osalla_on_tahtivali(self):
+        for _t, numero, _o in MOVEMENTS:
+            with self.subTest(osa=numero):
+                self.assertIn(numero, self.valit)
+
+    def test_dies_irae_numeroituu_yhtenaisesti(self):
+        """Alaosat eivät ala ykkösestä vaan jatkavat edellisestä."""
+        self.assertEqual(self.valit["II·1"][0], 1)
+        self.assertEqual(self.valit["II·10"], (624, 701))
+
+    def test_muut_osat_alkavat_ykkosesta(self):
+        for numero in ("I", "III", "IV", "V", "VI", "VII"):
+            with self.subTest(osa=numero):
+                self.assertEqual(self.valit[numero][0], 1)
+
+    def test_alut_vastaavat_kirjan_numeroita(self):
+        """Sama tieto kuin DIES_IRAE_ALUTissa, mutta luettuna tuloksesta."""
+        for tiedosto, alku in DIES_IRAE_ALUT.items():
+            numero = next(n for t, n, _o in MOVEMENTS if t == tiedosto)
+            with self.subTest(osa=numero):
+                self.assertEqual(self.valit[numero][0], alku)

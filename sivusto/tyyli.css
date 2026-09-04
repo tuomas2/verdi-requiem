@@ -47,23 +47,6 @@ a{color:var(--rubric)}
 .johdanto{font-family:var(--serif);font-size:1.1rem;max-width:52ch;
           margin:1.8rem 0 0;color:var(--ink-soft)}
 
-/* ---------- taulukot ---------- */
-.vieritin{overflow-x:auto}
-table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.9rem}
-th,td{
-  text-align:left;padding:.45rem .6rem;
-  border-bottom:1px solid var(--rule);vertical-align:top;
-}
-th{
-  font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--ink-soft);font-weight:600;white-space:nowrap;
-}
-td.luku,th.luku{text-align:right;font-variant-numeric:tabular-nums}
-.merkki{font-size:1.05rem;text-align:center;width:2.6rem}
-.perustelu{font-size:.82rem;color:var(--ink-soft);max-width:none}
-tr.selite td{border-bottom:1px solid var(--rule);padding-top:0}
-.selitteet{font-size:.78rem;color:var(--ink-soft);margin-top:1.5rem}
-
 /* ---------- luotettavuusvaroitus ---------- */
 .varoitus{
   border-left:3px solid var(--rubric);
