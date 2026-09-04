@@ -43,36 +43,6 @@ NAVI = [("index.html", "Stemmat", "kahdeksan ääntä, PDF ja MusicXML"),
         ("teksti.html", "Teksti", "mitä olet laulamassa, suomeksi"),
         (GITHUB, "GitHub", "lähteet ja nuottien parantaminen")]
 
-# Valikon tyyli on tässä eikä tyyli.css:ssä, koska sama valikko upotetaan myös
-# requiem.html:ään, joka ei lataa jaettua tyyliä — se on itsenäinen sivu omine
-# tyyleineen. Yksi lähde takaa että valikko on molemmilla sivuilla sama.
-NAVI_TYYLI = """<style>
-.bar{position:sticky;top:0;z-index:20;background:var(--paper,#ecebe4);
-     border-bottom:1px solid var(--rule,rgba(25,21,18,.16))}
-.bar-inner{max-width:1100px;margin:0 auto;padding:.55rem 1.25rem;
-           display:flex;gap:1.6rem;flex-wrap:wrap;align-items:flex-start}
-.bar a{text-decoration:none;display:block;padding:.15rem 0;
-       font-family:var(--sans,system-ui,sans-serif)}
-.bar a b{display:block;font-size:.72rem;font-weight:600;letter-spacing:.09em;
-         text-transform:uppercase;color:var(--ink-soft,rgba(25,21,18,.62))}
-.bar a i{display:block;font-style:normal;font-size:.68rem;line-height:1.3;
-         color:var(--ink-soft,rgba(25,21,18,.62));opacity:.75;margin-top:.1rem}
-.bar a:hover b,.bar a:hover i{color:var(--rubric,#9d1b18)}
-.bar a[aria-current="page"] b{color:var(--rubric,#9d1b18)}
-.bar a[aria-current="page"] i{opacity:.9}
-@media (max-width:560px){.bar-inner{gap:1rem}.bar a i{display:none}}
-</style>"""
-
-
-def navigaatio(aktiivinen):
-    """Sama valikko molemmilla sivuilla, selitteineen."""
-    linkit = "".join(
-        '<a href="%s"%s><b>%s</b><i>%s</i></a>'
-        % (kohde, ' aria-current="page"' if kohde == aktiivinen else "",
-           e(nimi), e(selite))
-        for kohde, nimi, selite in NAVI)
-    return '<nav class="bar"><div class="bar-inner">%s</div></nav>' % linkit
-
 STEMMAT = [("S I", "stemma-sopraano-1.pdf"), ("S II", "stemma-sopraano-2.pdf"),
            ("A I", "stemma-altto-1.pdf"), ("A II", "stemma-altto-2.pdf"),
            ("T I", "stemma-tenori-1.pdf"), ("T II", "stemma-tenori-2.pdf"),
@@ -89,6 +59,54 @@ def e(teksti):
     return _html.escape(str(teksti))
 
 
+# Valikon tyyli on tässä eikä tyyli.css:ssä, koska sama valikko upotetaan myös
+# requiem.html:ään, joka ei lataa jaettua tyyliä — se on itsenäinen sivu omine
+# tyyleineen. Yksi lähde takaa että valikko on molemmilla sivuilla sama.
+#
+# Luokka on `valikko` eikä `bar`, ja se on tärkeää: requiem.html:llä on omat
+# .bar- ja .bar-inner-sääntönsä, ja niistä vuoti aiemmin justify-content
+# injektoituun valikkoon. Tekstisivun valikko levisi koko leveydelle ja
+# stemmasivun ei. Oma luokkanimi sulkee vuodon kokonaan.
+VALIKKO_TYYLI = """<style>
+.valikko{position:sticky;top:0;z-index:20;background:var(--paper,#ecebe4);
+         border-bottom:1px solid var(--rule,rgba(25,21,18,.16))}
+.valikko-sisus{max-width:1100px;margin:0 auto;padding:.55rem 1.25rem;
+               display:flex;flex-wrap:wrap;gap:.75rem 1.25rem;
+               align-items:flex-start;justify-content:space-between}
+.valikko a{text-decoration:none;display:block;padding:.15rem 0;
+           font-family:var(--sans,system-ui,sans-serif)}
+.valikko a b{display:block;font-size:.72rem;font-weight:600;
+             letter-spacing:.09em;text-transform:uppercase;
+             color:var(--ink-soft,rgba(25,21,18,.62))}
+.valikko a i{display:block;font-style:normal;font-size:.68rem;line-height:1.3;
+             color:var(--ink-soft,rgba(25,21,18,.62));opacity:.75;
+             margin-top:.1rem}
+.valikko a:hover b,.valikko a:hover i{color:var(--rubric,#9d1b18)}
+.valikko a[aria-current="page"] b{color:var(--rubric,#9d1b18)}
+.valikko a[aria-current="page"] i{opacity:.9}
+@media (max-width:560px){
+  .valikko-sisus{gap:.6rem 1rem;justify-content:flex-start}
+  .valikko a i{display:none}
+}
+</style>"""
+
+# Tekstisivulla on jo oma tarttuva palkkinsa, joten kaksi päällekkäin
+# tarttuvaa peittäisi sisältöä. Tämä on ainoa ero sivujen valikoissa.
+VALIKKO_TYYLI_STAATTINEN = VALIKKO_TYYLI.replace(
+    ".valikko{position:sticky;top:0;z-index:20;", ".valikko{position:static;")
+
+
+def navigaatio(aktiivinen):
+    """Sama valikko molemmilla sivuilla, selitteineen."""
+    linkit = "".join(
+        '<a href="%s"%s><b>%s</b><i>%s</i></a>'
+        % (kohde, ' aria-current="page"' if kohde == aktiivinen else "",
+           e(nimi), e(selite))
+        for kohde, nimi, selite in NAVI)
+    return ('<nav class="valikko"><div class="valikko-sisus">%s</div></nav>'
+            % linkit)
+
+
 def sivu(otsikko, sisalto, aktiivinen):
     """Kokonainen HTML-sivu yhteisellä navigaatiolla."""
     return f"""<!DOCTYPE html>
@@ -99,7 +117,7 @@ def sivu(otsikko, sisalto, aktiivinen):
 <title>{e(otsikko)} — Verdi: Messa da Requiem</title>
 {FONTIT}
 <link rel="stylesheet" href="tyyli.css">
-{NAVI_TYYLI}
+{VALIKKO_TYYLI}
 </head>
 <body>
 {navigaatio(aktiivinen)}
@@ -319,15 +337,8 @@ def tekstisivu():
         html = f.read()
     if "<body>" not in html:
         raise SystemExit("sivusto/requiem.html: <body>-tagia ei löydy")
-    # Sivulla on jo oma sticky-palkkinsa; yhteinen valikko tulee sen yläpuolelle
-    # eikä jää siihen kiinni.
-    tyyli = NAVI_TYYLI.replace(".bar{position:sticky;top:0;z-index:20;",
-                               ".bar.yhteinen{position:static;")
-    tyyli = tyyli.replace(".bar-inner{", ".bar.yhteinen .bar-inner{")
-    tyyli = tyyli.replace(".bar a", ".bar.yhteinen a")
-    navi = navigaatio("teksti.html").replace('<nav class="bar">',
-                                             '<nav class="bar yhteinen">')
-    return html.replace("<body>", "<body>\n" + tyyli + "\n" + navi, 1)
+    lisays = VALIKKO_TYYLI_STAATTINEN + "\n" + navigaatio("teksti.html")
+    return html.replace("<body>", "<body>\n" + lisays, 1)
 
 
 # -------------------------------------------------------------- rakennus

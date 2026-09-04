@@ -33,6 +33,23 @@ class Runko(unittest.TestCase):
                          ["Stemmat", "Teksti", "GitHub"])
         self.assertIn(sivusto.GITHUB, [k for k, _n, _s in sivusto.NAVI])
 
+    def test_valikon_luokka_ei_tormaa_tekstisivun_omiin_tyyleihin(self):
+        """requiem.html:llä on omat .bar- ja .bar-inner-sääntönsä. Kun
+        valikolla oli sama luokkanimi, niistä vuoti justify-content ja
+        valikko renderöityi eri levyisenä eri sivuilla."""
+        oma = open("sivusto/requiem.html", encoding="utf-8").read()
+        for luokka in ("valikko", "valikko-sisus"):
+            with self.subTest(luokka=luokka):
+                self.assertNotIn("." + luokka, oma)
+
+    def test_valikon_ainoa_ero_sivujen_valilla_on_asemointi(self):
+        """Tekstisivulla on jo oma tarttuva palkkinsa, joten kaksi
+        päällekkäin tarttuvaa peittäisi sisältöä. Muuta eroa ei saa olla."""
+        a = sivusto.VALIKKO_TYYLI
+        b = sivusto.VALIKKO_TYYLI_STAATTINEN
+        self.assertEqual(a.replace(".valikko{position:sticky;top:0;z-index:20;",
+                                   ".valikko{position:static;"), b)
+
     def test_jokaisella_valikkokohdalla_on_selite(self):
         for _kohde, nimi, selite in sivusto.NAVI:
             with self.subTest(nimi=nimi):
@@ -43,7 +60,8 @@ class Runko(unittest.TestCase):
         jäädä jälkeen muista."""
         import re
         def kohteet(html):
-            navi = html[html.index('<nav class="bar'):html.index("</nav>")]
+            navi = html[html.index('<nav class="valikko'):
+                        html.index("</nav>")]
             return re.findall(r'<a href="([^"]*)"[^>]*><b>([^<]*)</b>'
                               r'<i>([^<]*)</i>', navi)
         self.assertEqual(kohteet(sivusto.stemmasivu()),
