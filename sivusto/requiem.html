@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verdi: Messa da Requiem — latina ja suomi rinnakkain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Archivo:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#ecebe4;
+  --paper-2:#e2e0d6;
+  --ink:#191512;
+  --ink-soft:rgba(25,21,18,.62);
+  --rubric:#9d1b18;
+  --slate:#3d4d59;
+  --rule:rgba(25,21,18,.16);
+  --serif:"EB Garamond","Hoefler Text",Palatino,"Palatino Linotype",Georgia,serif;
+  --sans:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.5;
+}
+
+/* ---------- top bar ---------- */
+.bar{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb,var(--paper) 92%,transparent);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--rule);
+}
+.bar-inner{
+  max-width:1100px;margin:0 auto;padding:.5rem 1.25rem;
+  display:flex;flex-wrap:wrap;gap:.75rem 1.25rem;align-items:center;justify-content:space-between;
+}
+.jump{display:flex;gap:.15rem;flex-wrap:wrap}
+.jump a{
+  font-family:var(--sans);font-size:.68rem;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;text-decoration:none;color:var(--ink-soft);
+  padding:.3rem .45rem;border-radius:2px;
+}
+.jump a:hover,.jump a:focus-visible{color:var(--rubric);background:var(--paper-2)}
+.controls{display:flex;gap:.4rem;flex-wrap:wrap}
+button{
+  font-family:var(--sans);font-size:.68rem;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;
+  background:transparent;color:var(--ink-soft);
+  border:1px solid var(--rule);border-radius:2px;
+  padding:.34rem .6rem;cursor:pointer;
+}
+button:hover{border-color:var(--rubric);color:var(--rubric)}
+button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+:focus-visible{outline:2px solid var(--rubric);outline-offset:2px}
+
+/* ---------- page frame ---------- */
+.wrap{max-width:1100px;margin:0 auto;padding:0 1.25rem 6rem}
+
+header.masthead{padding:4.5rem 0 3rem;border-bottom:2px solid var(--ink)}
+.eyebrow{
+  font-size:.7rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--rubric);margin:0 0 1.4rem;
+}
+h1{
+  font-family:var(--serif);font-weight:500;font-size:clamp(2.6rem,7vw,5rem);
+  line-height:.98;letter-spacing:-.015em;margin:0;
+}
+h1 em{font-style:italic;display:block;color:var(--ink-soft);font-size:.5em;letter-spacing:0;margin-top:.5rem}
+.standfirst{
+  font-family:var(--serif);font-size:1.1rem;max-width:46ch;margin:1.8rem 0 0;
+  color:var(--ink-soft);
+}
+
+/* ---------- movements ---------- */
+section.mvt{padding:3.2rem 0 1rem;border-bottom:1px solid var(--rule)}
+.mvt-head{display:flex;gap:1.1rem;align-items:baseline;margin-bottom:.4rem}
+.numeral{
+  font-family:var(--serif);font-size:2rem;line-height:1;color:var(--rubric);
+  font-variant-numeric:normal;min-width:2.2ch;
+}
+h2{font-family:var(--serif);font-weight:500;font-size:clamp(1.5rem,3.2vw,2rem);line-height:1.1;margin:0}
+h2 span{display:block;font-family:var(--sans);font-size:.72rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-soft);margin-top:.5rem}
+
+/* subsection (numero within a movement) */
+.part{margin:2.4rem 0 0}
+.part-label{
+  font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--rubric);margin:0 0 .1rem;
+}
+.voices{
+  font-size:.7rem;letter-spacing:.05em;color:var(--ink-soft);margin:0 0 1rem;font-style:normal;
+}
+
+/* the parallel grid */
+.text{margin:0}
+.line{
+  display:grid;grid-template-columns:1fr 1fr;gap:0 2.5rem;
+  padding:.22rem 0;border-bottom:1px solid transparent;
+}
+.line:hover{background:var(--paper-2);border-radius:2px}
+.la{
+  font-family:var(--serif);font-size:1.24rem;line-height:1.42;
+}
+.fi{
+  font-family:var(--sans);font-size:.94rem;line-height:1.55;color:var(--slate);
+  align-self:center;
+}
+.gap{height:.9rem}
+.line.repeat .la,.line.repeat .fi{opacity:.62}
+.repeat-note{
+  font-family:var(--serif);font-style:italic;font-size:1rem;color:var(--ink-soft);
+  margin:.6rem 0 0;
+}
+
+/* grammar marginalia */
+.note{
+  margin:1.1rem 0 0;padding:.7rem 0 .7rem 1rem;
+  border-left:2px solid var(--rubric);
+  max-width:62ch;
+}
+.note b{
+  display:block;font-size:.66rem;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--rubric);margin-bottom:.35rem;
+}
+.note p{margin:0 0 .5rem;font-size:.88rem;line-height:1.55;color:var(--ink)}
+.note p:last-child{margin-bottom:0}
+.note i{font-family:var(--serif);font-style:italic;font-size:1.05em}
+.note .g{font-family:var(--serif);font-size:1.05em}
+
+/* display modes */
+body.only-la .fi{display:none}
+body.only-la .line{grid-template-columns:1fr}
+body.only-fi .la{display:none}
+body.only-fi .line{grid-template-columns:1fr}
+body.only-fi .fi{font-size:1.05rem}
+body.no-notes .note{display:none}
+
+footer{padding:3.5rem 0 0;font-size:.85rem;color:var(--ink-soft);max-width:60ch}
+footer p{margin:0 0 .8rem}
+
+@media (max-width:720px){
+  .line{grid-template-columns:1fr;gap:0;padding:.45rem 0}
+  .la{font-size:1.18rem}
+  .fi{padding-left:1rem;border-left:1px solid var(--rule);margin-top:.15rem}
+  body.only-fi .fi{padding-left:0;border-left:0}
+  .mvt-head{gap:.8rem}
+  header.masthead{padding:2.5rem 0 2rem}
+}
+@media (prefers-reduced-motion:no-preference){
+  section.mvt{animation:rise .5s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-inner">
+    <nav class="jump" aria-label="Osat">
+      <a href="#i">I Requiem</a>
+      <a href="#ii">II Dies irae</a>
+      <a href="#iii">III Offertorio</a>
+      <a href="#iv">IV Sanctus</a>
+      <a href="#v">V Agnus Dei</a>
+      <a href="#vi">VI Lux aeterna</a>
+      <a href="#vii">VII Libera me</a>
+    </nav>
+    <div class="controls">
+      <button id="b-both" aria-pressed="true">Rinnakkain</button>
+      <button id="b-la" aria-pressed="false">Vain latina</button>
+      <button id="b-fi" aria-pressed="false">Vain suomi</button>
+      <button id="b-notes" aria-pressed="true">Kielioppi</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Giuseppe Verdi · 1874 · Messa da Requiem</p>
+  <h1>Requiem<em>latina ja suomi rinnakkain, laulu laululta</em></h1>
+  <p class="standfirst">Suomennos on tarkoituksella sanatarkka, ei runollinen: se seuraa latinan sanajärjestystä ja rakenteita niin pitkälle kuin suomi antaa myöten. Punaisella merkityt huomiot selittävät ne muodot, jotka messuteksteissä toistuvat kerta toisensa jälkeen.</p>
+</header>
+
+<!-- ============ I ============ -->
+<section class="mvt" id="i">
+  <div class="mvt-head">
+    <div class="numeral" aria-hidden="true">I</div>
+    <h2>Requiem &amp; Kyrie<span>Kuoro ja neljä solistia</span></h2>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Introitus</p>
+    <p class="voices">Kuoro, sitten kvartetti</p>
+    <div class="text">
+      <div class="line"><div class="la">Requiem aeternam dona eis, Domine,</div><div class="fi">Ikuinen lepo anna heille, Herra,</div></div>
+      <div class="line"><div class="la">et lux perpetua luceat eis.</div><div class="fi">ja ainainen valo loistakoon heille.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Te decet hymnus, Deus, in Sion,</div><div class="fi">Sinulle sopii ylistysvirsi, Jumala, Siionissa,</div></div>
+      <div class="line"><div class="la">et tibi reddetur votum in Jerusalem.</div><div class="fi">ja sinulle maksetaan lupaus Jerusalemissa.</div></div>
+      <div class="line"><div class="la">Exaudi orationem meam,</div><div class="fi">Kuule rukoukseni,</div></div>
+      <div class="line"><div class="la">ad te omnis caro veniet.</div><div class="fi">sinun tykösi tulee kaikki liha.</div></div>
+      <div class="gap"></div>
+      <div class="line repeat"><div class="la">Requiem aeternam dona eis, Domine,</div><div class="fi">Ikuinen lepo anna heille, Herra,</div></div>
+      <div class="line repeat"><div class="la">et lux perpetua luceat eis.</div><div class="fi">ja ainainen valo loistakoon heille.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>dona</i> on imperatiivi (<span class="g">donare</span> = antaa, lahjoittaa) ja <i>luceat</i> konjunktiivi, joka tässä toimii toiveena: »loistakoon». Tämä pari — käsky + toivomus — kantaa läpi koko teoksen.</p>
+      <p><i>eis</i> = »heille» (datiivi monikko, <span class="g">is, ea, id</span>). Huomaa että vainajat ovat kolmannessa persoonassa: rukoillaan toisten puolesta.</p>
+      <p><i>requiem</i> on akkusatiivi (perusmuoto <span class="g">requies</span>, lepo) — siis lauseen objekti, ei nominatiivi, vaikka teoksen nimenä se on jäänyt tähän muotoon.</p>
+      <p><i>omnis caro</i> = »kaikki liha», hepreankielisen ilmauksen suora käännös: kaikki elävät.</p>
+    </div>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Kyrie</p>
+    <p class="voices">Kvartetti ja kuoro</p>
+    <div class="text">
+      <div class="line"><div class="la">Kyrie eleison.</div><div class="fi">Herra, armahda.</div></div>
+      <div class="line"><div class="la">Christe eleison.</div><div class="fi">Kristus, armahda.</div></div>
+      <div class="line"><div class="la">Kyrie eleison.</div><div class="fi">Herra, armahda.</div></div>
+    </div>
+    <div class="note">
+      <b>Huomio</b>
+      <p>Nämä sanat eivät ole latinaa vaan kreikkaa (Κύριε ἐλέησον) — vanhin kerrostuma messussa, joka jäi kääntämättä. <i>Kyrie</i> on vokatiivi eli puhuttelumuoto, <i>eleison</i> imperatiivi.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ II ============ -->
+<section class="mvt" id="ii">
+  <div class="mvt-head">
+    <div class="numeral" aria-hidden="true">II</div>
+    <h2>Dies irae<span>Sekvenssi, yhdeksän jaksoa · Vihan päivä</span></h2>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Dies irae</p>
+    <p class="voices">Kuoro</p>
+    <div class="text">
+      <div class="line"><div class="la">Dies irae, dies illa</div><div class="fi">Vihan päivä, se päivä</div></div>
+      <div class="line"><div class="la">solvet saeclum in favilla,</div><div class="fi">hajottaa maailman tuhkaan,</div></div>
+      <div class="line"><div class="la">teste David cum Sibylla.</div><div class="fi">todistajana Daavid Sibyllan kanssa.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Quantus tremor est futurus,</div><div class="fi">Kuinka suuri vapina on oleva,</div></div>
+      <div class="line"><div class="la">quando judex est venturus,</div><div class="fi">kun tuomari on tuleva,</div></div>
+      <div class="line"><div class="la">cuncta stricte discussurus!</div><div class="fi">kaiken tarkoin tutkiva!</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>teste David</i> on <b style="display:inline;letter-spacing:0;text-transform:none;font-size:1em">ablativus absolutus</b>: irrallinen ablatiivirakenne, joka kääntyy sivulauseeksi tai statuslauseeksi — »kun Daavid on todistajana». Tämä rakenne palaa myöhemmin (<i>confutatis maledictis</i>).</p>
+      <p><i>futurus, venturus, discussurus</i> ovat futuurin partisiippeja (<span class="g">-turus, -sura, -surum</span>). Yhdessä <i>est</i>-verbin kanssa ne muodostavat »on tekevä, on tuleva» -rakenteen. Näitä on Dies iraessa poikkeuksellisen paljon, koska koko teksti kuvaa tulevaa.</p>
+      <p><i>saeclum</i> = <span class="g">saeculum</span> lyhentyneenä (runomitta!). Merkitys tässä: maailmanaika, maailma.</p>
+    </div>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Tuba mirum</p>
+    <p class="voices">Kuoro ja basso · etäältä soivat trumpetit</p>
+    <div class="text">
+      <div class="line"><div class="la">Tuba mirum spargens sonum</div><div class="fi">Torvi, joka levittää ihmeellistä ääntä</div></div>
+      <div class="line"><div class="la">per sepulcra regionum,</div><div class="fi">maiden hautojen halki,</div></div>
+      <div class="line"><div class="la">coget omnes ante thronum.</div><div class="fi">ajaa kaikki valtaistuimen eteen.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Mors stupebit et natura,</div><div class="fi">Kuolema hämmästyy ja luonto,</div></div>
+      <div class="line"><div class="la">cum resurget creatura,</div><div class="fi">kun luotu nousee ylös</div></div>
+      <div class="line"><div class="la">judicanti responsura.</div><div class="fi">vastaamaan tuomitsevalle.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>spargens</i> on preesensin partisiippi: »levittävä, levittäessään». <i>mirum … sonum</i> kuuluvat yhteen (akkusatiivi), vaikka <i>spargens</i> onkin niiden välissä — latinan sanajärjestys hajottaa yhteen kuuluvat sanat vapaasti.</p>
+      <p><i>judicanti</i> on saman partisiipin datiivi: »tuomitsevalle». <i>responsura</i> taas futuurin partisiippi feminiinissä, joka viittaa <i>creatura</i>-sanaan.</p>
+      <p><i>coget</i> tulee verbistä <span class="g">cogere</span> (ajaa yhteen, pakottaa) — ei siis <span class="g">cognoscere</span>.</p>
+    </div>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Liber scriptus</p>
+    <p class="voices">Mezzosopraano ja kuoro</p>
+    <div class="text">
+      <div class="line"><div class="la">Liber scriptus proferetur,</div><div class="fi">Kirjoitettu kirja tuodaan esiin,</div></div>
+      <div class="line"><div class="la">in quo totum continetur,</div><div class="fi">johon kaikki on sisällytetty,</div></div>
+      <div class="line"><div class="la">unde mundus judicetur.</div><div class="fi">jonka mukaan maailma tuomitaan.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Judex ergo cum sedebit,</div><div class="fi">Kun tuomari siis istuutuu,</div></div>
+      <div class="line"><div class="la">quidquid latet apparebit,</div><div class="fi">kaikki mikä on kätkössä tulee ilmi,</div></div>
+      <div class="line"><div class="la">nil inultum remanebit.</div><div class="fi">mikään ei jää kostamatta.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>proferetur, continetur, remanebit</i> — passiivin päätteet <span class="g">-tur</span> ja <span class="g">-ntur</span> ovat messuteksteissä hyvin yleisiä. Vertaa I osan <i>reddetur</i>.</p>
+      <p><i>unde</i> on kirjaimellisesti »mistä, mistä käsin»; tässä »minkä perusteella».</p>
+      <p><i>nil inultum</i> = »ei mitään kostamatonta». <i>in-</i> kieltää adjektiivin samaan tapaan kuin suomen <i>-tOn</i>: <span class="g">ultus</span> kostettu → <span class="g">inultus</span> kostamaton.</p>
+    </div>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Quid sum miser</p>
+    <p class="voices">Sopraano, mezzosopraano ja tenori</p>
+    <div class="text">
+      <div class="line"><div class="la">Quid sum miser tunc dicturus?</div><div class="fi">Mitä minä kurja olen silloin sanova?</div></div>
+      <div class="line"><div class="la">Quem patronum rogaturus,</div><div class="fi">Ketä puolustajaa olen pyytävä,</div></div>
+      <div class="line"><div class="la">cum vix justus sit securus?</div><div class="fi">kun tuskin vanhurskas on turvassa?</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p>Jälleen futuurin partisiipit <i>dicturus</i> ja <i>rogaturus</i>. Toisesta rivistä <i>sum</i> on jätetty pois, mutta se ymmärretään edellisestä — hyvin tavallista latinassa.</p>
+      <p><i>cum … sit</i>: <i>cum</i> + konjunktiivi tarkoittaa yleensä »kun, koska, vaikka». Tässä myönnyttävä sävy: »kun kerran tuskin edes vanhurskas…».</p>
+    </div>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Rex tremendae</p>
+    <p class="voices">Solistit ja kuoro</p>
+    <div class="text">
+      <div class="line"><div class="la">Rex tremendae majestatis,</div><div class="fi">Kauhistuttavan majesteetin kuningas,</div></div>
+      <div class="line"><div class="la">qui salvandos salvas gratis,</div><div class="fi">joka pelastat lahjaksi ne, jotka on pelastettava,</div></div>
+      <div class="line"><div class="la">salva me, fons pietatis.</div><div class="fi">pelasta minut, laupeuden lähde.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>salvandos</i> on gerundiivi eli passiivin futuurin partisiippi: »pelastettavat, ne joita on pelastettava». Sama muoto tulee vastaan Lacrymosassa (<i>judicandus</i>) ja Libera me:ssä (<i>movendi sunt</i>).</p>
+      <p><i>gratis</i> on kutistunut sanoista <span class="g">gratiis</span> = »armoista, suosiosta» → ilmaiseksi, vastikkeetta. Sama sana kuin nykykielten <i>gratis</i>.</p>
+      <p><i>tremendae majestatis</i> on genetiivi, joka määrittää kuningasta: latina käyttää genetiiviä siinä missä suomi usein yhdyssanaa tai adjektiivia.</p>
+    </div>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Recordare</p>
+    <p class="voices">Sopraano ja mezzosopraano</p>
+    <div class="text">
+      <div class="line"><div class="la">Recordare, Jesu pie,</div><div class="fi">Muista, hurskas Jeesus,</div></div>
+      <div class="line"><div class="la">quod sum causa tuae viae,</div><div class="fi">että minä olen sinun tiesi syy:</div></div>
+      <div class="line"><div class="la">ne me perdas illa die.</div><div class="fi">älä hukuta minua sinä päivänä.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Quaerens me, sedisti lassus,</div><div class="fi">Minua etsien istuit uupuneena,</div></div>
+      <div class="line"><div class="la">redemisti crucem passus;</div><div class="fi">lunastit ristin kärsittyäsi;</div></div>
+      <div class="line"><div class="la">tantus labor non sit cassus.</div><div class="fi">niin suuri vaiva älköön olkoon turha.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Juste judex ultionis,</div><div class="fi">Koston vanhurskas tuomari,</div></div>
+      <div class="line"><div class="la">donum fac remissionis</div><div class="fi">tee anteeksiannon lahja</div></div>
+      <div class="line"><div class="la">ante diem rationis.</div><div class="fi">ennen tilinteon päivää.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>recordare</i> näyttää passiiviselta mutta on imperatiivi: <span class="g">recordari</span> on deponenttiverbi, jonka muodot ovat passiivisia mutta merkitys aktiivinen.</p>
+      <p><i>ne … perdas</i> on kielto: <i>ne</i> + konjunktiivi = »ettei» tai kieltävä käsky »älä». Vertaa <i>ne cadant</i> (III osa) ja <i>ne cremer</i> (Ingemisco).</p>
+      <p><i>Jesu pie</i> ja <i>juste judex</i> ovat vokatiiveja eli puhuttelumuotoja. <span class="g">Jesus</span> saa vokatiivissa muodon <i>Jesu</i>.</p>
+      <p><i>passus</i> on perfektin partisiippi deponenttiverbistä <span class="g">pati</span> (kärsiä) — merkitys aktiivinen: »kärsittyäsi».</p>
+    </div>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Ingemisco</p>
+    <p class="voices">Tenori</p>
+    <div class="text">
+      <div class="line"><div class="la">Ingemisco tamquam reus,</div><div class="fi">Huokaan kuin syyllinen,</div></div>
+      <div class="line"><div class="la">culpa rubet vultus meus;</div><div class="fi">syyllisyydestä punoittavat kasvoni;</div></div>
+      <div class="line"><div class="la">supplicanti parce, Deus.</div><div class="fi">säästä rukoilevaa, Jumala.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Qui Mariam absolvisti,</div><div class="fi">Sinä joka vapautit Marian synneistä</div></div>
+      <div class="line"><div class="la">et latronem exaudisti,</div><div class="fi">ja kuulit ryövärin,</div></div>
+      <div class="line"><div class="la">mihi quoque spem dedisti.</div><div class="fi">annoit toivon myös minulle.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Preces meae non sunt dignae,</div><div class="fi">Rukoukseni eivät ole arvollisia,</div></div>
+      <div class="line"><div class="la">sed tu bonus fac benigne,</div><div class="fi">mutta sinä hyvä, tee armollisesti,</div></div>
+      <div class="line"><div class="la">ne perenni cremer igne.</div><div class="fi">ettei minua poltettaisi ikuisessa tulessa.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Inter oves locum praesta,</div><div class="fi">Suo minulle paikka lampaiden joukossa</div></div>
+      <div class="line"><div class="la">et ab haedis me sequestra,</div><div class="fi">ja erota minut vuohista</div></div>
+      <div class="line"><div class="la">statuens in parte dextra.</div><div class="fi">asettaen minut oikealle puolelle.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>culpa</i> on ablatiivi ilman prepositiota: syyn tai välineen ablatiivi, »syyllisyyden vuoksi». Latina käyttää tätä paljon siinä missä suomi käyttää sijamuotoa tai <i>-n vuoksi</i>.</p>
+      <p><i>cremer</i> on passiivin konjunktiivi (»minua poltettaisiin») — huomaa passiivin 1. persoonan pääte <span class="g">-r</span>. <i>perenni … igne</i> on ablatiivi (välineen), joka on jaettu lauseen molempiin päihin.</p>
+      <p><i>supplicanti</i>, <i>statuens</i>: taas partisiippeja, datiivi ja nominatiivi. Kannattaa opetella tunnistamaan <span class="g">-ns / -ntis</span> heti.</p>
+      <p>Maria tarkoittaa tässä perinteisesti Maria Magdalenaa ja <i>latro</i> ristillä ollutta ryöväriä.</p>
+    </div>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Confutatis</p>
+    <p class="voices">Basso ja kuoro</p>
+    <div class="text">
+      <div class="line"><div class="la">Confutatis maledictis,</div><div class="fi">Kun kirotut on tuomittu vaikenemaan,</div></div>
+      <div class="line"><div class="la">flammis acribus addictis,</div><div class="fi">ankariin liekkeihin määrätyt,</div></div>
+      <div class="line"><div class="la">voca me cum benedictis.</div><div class="fi">kutsu minut siunattujen kanssa.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Oro supplex et acclinis,</div><div class="fi">Rukoilen nöyränä ja kumartuneena,</div></div>
+      <div class="line"><div class="la">cor contritum quasi cinis,</div><div class="fi">sydän murtuneena kuin tuhka:</div></div>
+      <div class="line"><div class="la">gere curam mei finis.</div><div class="fi">pidä huolta lopustani.</div></div>
+    </div>
+    <p class="repeat-note">Verdi palaa tähän väliin vielä kertaalleen Dies irae -kuoroon ennen Lacrymosaa.</p>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>confutatis maledictis</i> ja <i>flammis acribus addictis</i> ovat molemmat ablativus absolutus -rakenteita: kaksi substantiivia tai partisiippia ablatiivissa, jotka muodostavat oman pikku lauseen. Tunnista ne <span class="g">-is</span>-päätteistä.</p>
+      <p><i>maledictis</i> ja <i>benedictis</i> ovat toistensa vastaparit: <span class="g">male</span> (pahasti) ja <span class="g">bene</span> (hyvin) + <span class="g">dicere</span> (sanoa) → kirottu ja siunattu, kirjaimellisesti »pahoin sanottu» ja »hyvin sanottu».</p>
+      <p><i>mei finis</i> = »minun loppuni» (genetiivi). <i>gere curam</i> on kiinteä ilmaus: »kanna huolta».</p>
+    </div>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Lacrymosa</p>
+    <p class="voices">Solistit ja kuoro</p>
+    <div class="text">
+      <div class="line"><div class="la">Lacrymosa dies illa,</div><div class="fi">Kyynelinen on se päivä,</div></div>
+      <div class="line"><div class="la">qua resurget ex favilla</div><div class="fi">jona nousee tuhkasta</div></div>
+      <div class="line"><div class="la">judicandus homo reus.</div><div class="fi">syyllinen ihminen tuomittavaksi.</div></div>
+      <div class="line"><div class="la">Huic ergo parce, Deus.</div><div class="fi">Säästä siis häntä, Jumala.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Pie Jesu Domine,</div><div class="fi">Hurskas Herra Jeesus,</div></div>
+      <div class="line"><div class="la">dona eis requiem. Amen.</div><div class="fi">anna heille lepo. Amen.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>qua</i> on relatiivipronominin ablatiivi: »jona (päivänä)». Ajan ilmaisu tulee latinassa ablatiivilla ilman prepositiota.</p>
+      <p><i>judicandus</i> on jälleen gerundiivi (vrt. <i>salvandos</i>): »se, joka on tuomittava».</p>
+      <p><i>huic</i> = »tälle, häntä» (datiivi, <span class="g">hic, haec, hoc</span>). Verbi <span class="g">parcere</span> saa objektikseen datiivin, ei akkusatiivia — siksi <i>huic</i> eikä <i>hunc</i>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ III ============ -->
+<section class="mvt" id="iii">
+  <div class="mvt-head">
+    <div class="numeral" aria-hidden="true">III</div>
+    <h2>Offertorio<span>Solistikvartetti · Uhrilahjojen rukous</span></h2>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Domine Jesu Christe</p>
+    <div class="text">
+      <div class="line"><div class="la">Domine Jesu Christe, Rex gloriae,</div><div class="fi">Herra Jeesus Kristus, kunnian kuningas,</div></div>
+      <div class="line"><div class="la">libera animas omnium fidelium defunctorum</div><div class="fi">vapauta kaikkien uskovien vainajien sielut</div></div>
+      <div class="line"><div class="la">de poenis inferni et de profundo lacu.</div><div class="fi">helvetin vaivoista ja syvästä kuilusta.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Libera eas de ore leonis,</div><div class="fi">Vapauta ne leijonan suusta,</div></div>
+      <div class="line"><div class="la">ne absorbeat eas tartarus,</div><div class="fi">ettei manala niitä nielaisisi,</div></div>
+      <div class="line"><div class="la">ne cadant in obscurum;</div><div class="fi">etteivät ne putoaisi pimeyteen;</div></div>
+      <div class="line"><div class="la">sed signifer sanctus Michael</div><div class="fi">vaan lipunkantaja pyhä Mikael</div></div>
+      <div class="line"><div class="la">repraesentet eas in lucem sanctam,</div><div class="fi">johdattakoon ne pyhään valoon,</div></div>
+      <div class="line"><div class="la">quam olim Abrahae promisisti</div><div class="fi">jonka aikoinaan lupasit Abrahamille</div></div>
+      <div class="line"><div class="la">et semini ejus.</div><div class="fi">ja hänen jälkeläisilleen.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>animas … omnium fidelium defunctorum</i>: akkusatiivi + kolme genetiiviä peräkkäin. <span class="g">Defunctus</span> on kirjaimellisesti »loppuun suorittanut» (<span class="g">defungi</span>), siis vainaja.</p>
+      <p><i>absorbeat, repraesentet</i> ovat konjunktiiveja: ensimmäinen kiellon jälkeen (<i>ne</i>), toinen toivomuksena »johdattakoon».</p>
+      <p><i>semini</i> on datiivi sanasta <span class="g">semen</span> (siemen) — Raamatun kielessä »jälkeläiset». Tässä kohdassa suomennos on väljempi kuin muualla, koska kirjaimellinen »siemenelleen» olisi harhaanjohtava.</p>
+    </div>
+  </div>
+
+  <div class="part">
+    <p class="part-label">Hostias</p>
+    <div class="text">
+      <div class="line"><div class="la">Hostias et preces tibi, Domine,</div><div class="fi">Uhreja ja rukouksia me kannamme sinulle, Herra,</div></div>
+      <div class="line"><div class="la">laudis offerimus.</div><div class="fi">ylistyksen uhreja.</div></div>
+      <div class="line"><div class="la">Tu suscipe pro animabus illis,</div><div class="fi">Ota sinä ne vastaan niiden sielujen puolesta,</div></div>
+      <div class="line"><div class="la">quarum hodie memoriam facimus.</div><div class="fi">joita tänään muistamme.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Fac eas, Domine, de morte transire ad vitam,</div><div class="fi">Anna niiden, Herra, siirtyä kuolemasta elämään,</div></div>
+      <div class="line repeat"><div class="la">quam olim Abrahae promisisti et semini ejus.</div><div class="fi">jonka aikoinaan lupasit Abrahamille ja hänen jälkeläisilleen.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>laudis</i> on genetiivi, joka kuuluu sanaan <i>hostias</i>: »ylistyksen uhreja». Se on siirretty lauseen loppuun, mikä on latinassa tavallista mutta suomeksi mahdotonta — siksi rivit on tässä käännetty ristiin.</p>
+      <p><i>quarum</i> = »joiden» (relatiivipronominin feminiinin genetiivi monikossa), viittaa sanaan <i>animabus</i>. Kirjaimellisesti: »joiden muistoa me tänään teemme».</p>
+      <p><i>fac … transire</i>: <span class="g">facere</span> + infinitiivi = »saada tekemään, panna siirtymään».</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ IV ============ -->
+<section class="mvt" id="iv">
+  <div class="mvt-head">
+    <div class="numeral" aria-hidden="true">IV</div>
+    <h2>Sanctus<span>Kaksoiskuoro ja fuuga</span></h2>
+  </div>
+  <div class="part">
+    <div class="text">
+      <div class="line"><div class="la">Sanctus, Sanctus, Sanctus,</div><div class="fi">Pyhä, pyhä, pyhä,</div></div>
+      <div class="line"><div class="la">Dominus Deus Sabaoth.</div><div class="fi">Herra Jumala Sebaot.</div></div>
+      <div class="line"><div class="la">Pleni sunt coeli et terra gloria tua.</div><div class="fi">Täynnä ovat taivaat ja maa sinun kunniaasi.</div></div>
+      <div class="line"><div class="la">Hosanna in excelsis.</div><div class="fi">Hoosianna korkeuksissa.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Benedictus qui venit in nomine Domini.</div><div class="fi">Siunattu olkoon hän, joka tulee Herran nimessä.</div></div>
+      <div class="line"><div class="la">Hosanna in excelsis.</div><div class="fi">Hoosianna korkeuksissa.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>gloria tua</i> on ablatiivi: täyteyttä ilmaistaan latinassa ablatiivilla, suomessa partitiivilla (»kunniaasi»).</p>
+      <p><i>Sabaoth</i> on hepreaa (<i>tsevaot</i>, sotajoukot) eikä taivu latinassa lainkaan. <i>Hosanna</i> on samoin heprealainen huudahdus: »pelasta nyt».</p>
+      <p><i>in excelsis</i> = »korkeimmissa» — adjektiivin superlatiivi substantiivina, ablatiivi monikossa.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ V ============ -->
+<section class="mvt" id="v">
+  <div class="mvt-head">
+    <div class="numeral" aria-hidden="true">V</div>
+    <h2>Agnus Dei<span>Sopraano ja mezzosopraano oktaaveissa, kuoro</span></h2>
+  </div>
+  <div class="part">
+    <div class="text">
+      <div class="line"><div class="la">Agnus Dei, qui tollis peccata mundi,</div><div class="fi">Jumalan Karitsa, joka otat pois maailman synnit,</div></div>
+      <div class="line"><div class="la">dona eis requiem.</div><div class="fi">anna heille lepo.</div></div>
+      <div class="gap"></div>
+      <div class="line repeat"><div class="la">Agnus Dei, qui tollis peccata mundi,</div><div class="fi">Jumalan Karitsa, joka otat pois maailman synnit,</div></div>
+      <div class="line"><div class="la">dona eis requiem sempiternam.</div><div class="fi">anna heille iankaikkinen lepo.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>qui tollis</i>: relatiivipronomini + verbi 2. persoonassa, koska puhutellaan Karitsaa suoraan. Suomi tekee saman: »joka otat».</p>
+      <p><span class="g">Tollere</span> tarkoittaa sekä »nostaa» että »poistaa» — tästä kaksoismerkityksestä on kirkkohistoriassa keskusteltu paljon.</p>
+      <p><i>sempiternam</i> ja <i>aeternam</i> ovat lähes synonyymejä; edellinen korostaa katkeamatonta kestoa (<span class="g">semper</span> = aina).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VI ============ -->
+<section class="mvt" id="vi">
+  <div class="mvt-head">
+    <div class="numeral" aria-hidden="true">VI</div>
+    <h2>Lux aeterna<span>Mezzosopraano, tenori ja basso</span></h2>
+  </div>
+  <div class="part">
+    <div class="text">
+      <div class="line"><div class="la">Lux aeterna luceat eis, Domine,</div><div class="fi">Ikuinen valo loistakoon heille, Herra,</div></div>
+      <div class="line"><div class="la">cum sanctis tuis in aeternum,</div><div class="fi">pyhiesi kanssa iankaikkisesti,</div></div>
+      <div class="line"><div class="la">quia pius es.</div><div class="fi">sillä sinä olet laupias.</div></div>
+      <div class="gap"></div>
+      <div class="line repeat"><div class="la">Requiem aeternam dona eis, Domine,</div><div class="fi">Ikuinen lepo anna heille, Herra,</div></div>
+      <div class="line repeat"><div class="la">et lux perpetua luceat eis.</div><div class="fi">ja ainainen valo loistakoon heille.</div></div>
+      <div class="line repeat"><div class="la">Cum sanctis tuis in aeternum,</div><div class="fi">Pyhiesi kanssa iankaikkisesti,</div></div>
+      <div class="line repeat"><div class="la">quia pius es.</div><div class="fi">sillä sinä olet laupias.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>in aeternum</i> on akkusatiivi: suunta tai kesto, »ikuisuuteen asti». Vertaa <i>lux aeterna</i>, jossa sama adjektiivi on nominatiivissa.</p>
+      <p><i>quia</i> = »koska, sillä» — yksinkertainen syytä ilmaiseva konjunktio, joka ottaa indikatiivin (<i>es</i>).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VII ============ -->
+<section class="mvt" id="vii">
+  <div class="mvt-head">
+    <div class="numeral" aria-hidden="true">VII</div>
+    <h2>Libera me<span>Sopraano ja kuoro · päättyy kaksoisfuugaan</span></h2>
+  </div>
+  <div class="part">
+    <div class="text">
+      <div class="line"><div class="la">Libera me, Domine, de morte aeterna,</div><div class="fi">Vapauta minut, Herra, iankaikkisesta kuolemasta</div></div>
+      <div class="line"><div class="la">in die illa tremenda,</div><div class="fi">sinä kauhistuttavana päivänä,</div></div>
+      <div class="line"><div class="la">quando coeli movendi sunt et terra,</div><div class="fi">kun taivaat ja maa on määrä liikuttaa,</div></div>
+      <div class="line"><div class="la">dum veneris judicare saeculum per ignem.</div><div class="fi">kun tulet tuomitsemaan maailman tulella.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Tremens factus sum ego et timeo,</div><div class="fi">Minä olen tullut vapisevaksi ja pelkään,</div></div>
+      <div class="line"><div class="la">dum discussio venerit atque ventura ira.</div><div class="fi">kun tutkinta on tuleva ja viha, joka on tuleva.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Dies illa, dies irae,</div><div class="fi">Se päivä, vihan päivä,</div></div>
+      <div class="line"><div class="la">calamitatis et miseriae,</div><div class="fi">onnettomuuden ja kurjuuden päivä,</div></div>
+      <div class="line"><div class="la">dies magna et amara valde.</div><div class="fi">päivä suuri ja sangen katkera.</div></div>
+      <div class="gap"></div>
+      <div class="line repeat"><div class="la">Requiem aeternam dona eis, Domine,</div><div class="fi">Ikuinen lepo anna heille, Herra,</div></div>
+      <div class="line repeat"><div class="la">et lux perpetua luceat eis.</div><div class="fi">ja ainainen valo loistakoon heille.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Libera me, Domine, de morte aeterna,</div><div class="fi">Vapauta minut, Herra, iankaikkisesta kuolemasta</div></div>
+      <div class="line"><div class="la">in die illa tremenda,</div><div class="fi">sinä kauhistuttavana päivänä,</div></div>
+      <div class="line"><div class="la">quando coeli movendi sunt et terra,</div><div class="fi">kun taivaat ja maa on määrä liikuttaa,</div></div>
+      <div class="line"><div class="la">dum veneris judicare saeculum per ignem.</div><div class="fi">kun tulet tuomitsemaan maailman tulella.</div></div>
+      <div class="gap"></div>
+      <div class="line"><div class="la">Libera me, Domine.</div><div class="fi">Vapauta minut, Herra.</div></div>
+    </div>
+    <div class="note">
+      <b>Kielioppi</b>
+      <p><i>movendi sunt</i> on gerundiivi + <span class="g">esse</span>: pakkoa ilmaiseva rakenne, »on liikutettava, täytyy liikuttaa». Sama muoto kuin <i>salvandos</i> ja <i>judicandus</i>, mutta nyt kokonaisena predikaattina.</p>
+      <p><i>dum veneris</i>: <i>dum</i> + futuurin perfekti = »sillä hetkellä kun olet tullut». Latina merkitsee tulevan tapahtuman päättyneeksi tarkemmin kuin suomi.</p>
+      <p><i>tremens factus sum</i> — kirjaimellisesti »minusta on tehty vapiseva». Rakenne on painavampi kuin pelkkä <i>tremo</i>, »vapisen».</p>
+      <p><i>valde</i> on adverbi: »kovin, sangen». Se on jätetty lauseen loppuun tehostamaan sanaa <i>amara</i>.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><b style="letter-spacing:.14em;text-transform:uppercase;font-size:.66rem;color:var(--rubric);display:block;margin-bottom:.4rem">Suomennoksesta</b>
+  Käännös on tehty tätä sivua varten ja se pyrkii sanatarkkuuteen: latinan sanajärjestys, partisiipit ja sijamuodot näkyvät suomessa niin pitkälle kuin mahdollista, vaikka lopputulos ei aina ole sujuvinta suomea. Kirkolliset vakiintuneet suomennokset ovat vapaampia — jos vertaat niihin, erot ovat tarkoituksellisia.</p>
+  <p>Verdi käyttää keskiaikaista kuolinmessun tekstiä mutta lyhentää sekvenssiä ja toistaa Dies irae -kuoron useaan kertaan. Vaaleammalla merkityt rivit ovat kertauksia, jotka olet jo nähnyt aiemmin.</p>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var body=document.body;
+  var modes={ "b-both":"", "b-la":"only-la", "b-fi":"only-fi" };
+  Object.keys(modes).forEach(function(id){
+    document.getElementById(id).addEventListener("click",function(){
+      body.classList.remove("only-la","only-fi");
+      if(modes[id]) body.classList.add(modes[id]);
+      Object.keys(modes).forEach(function(other){
+        document.getElementById(other).setAttribute("aria-pressed", String(other===id));
+      });
+    });
+  });
+  var nb=document.getElementById("b-notes");
+  nb.addEventListener("click",function(){
+    var hidden=body.classList.toggle("no-notes");
+    nb.setAttribute("aria-pressed", String(!hidden));
+  });
+})();
+</script>
+</body>
+</html>
