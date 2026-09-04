@@ -25,18 +25,22 @@ kuoron oman nuottikirjan kanssa**, ja stemman on oltava tiivis.
 
 ## Luotettavuus — lue tämä ennen kuin luotat nuottiin
 
-**Vain kuorobasso on käyty järjestelmällisesti läpi.** Sopraano, altto ja
-tenori ovat pääosin tarkistamatta, ja kahdessa osassa niissä on tiedettyjä
-virheitä.
+**Kuorobasso on käyty läpi, muut äänet eivät.** Basso on käyty läpi käsin
+**Edition Petersin** painosta vasten ja laulettu läpi harjoituksissa, ja
+kahdessa osassa lisäksi vertailtu nuotti nuotilta riippumattomaan lähteeseen.
+Sopraano, altto ja tenori ovat pääosin tarkistamatta, ja kahdessa osassa
+niissä on tiedettyjä virheitä.
 
-Syy on yksinkertainen: tekijä laulaa bassoa, ja käytännössä jokainen virhe on
-löytynyt joko laulamalla mukana harjoituksissa tai vertaamalla juuri sitä
-riviä riippumattomaan lähteeseen.
+Syy on yksinkertainen: tekijä laulaa bassoa.
+
+**Tahtinumerot täsmäävät Edition Petersin painoksen kanssa.** Dies irae
+numeroituu yhtenäisesti läpi kaikkien alaosiensa; muut osat alkavat
+ykkösestä.
 
 | Tila | Merkitys |
 |---|---|
-| ✔ varmistettu | Vertailtu riippumattomaan lähteeseen nuotti nuotilta tai tavu tavulta |
-| ◑ osittain | Esimerkiksi sanat tarkistettu, nuotit eivät |
+| ✔ varmistettu | Koko osa vertailtu riippumattomaan lähteeseen nuotti nuotilta ja tavu tavulta |
+| ◑ käyty läpi | Käyty läpi käsin painettua editiota vasten ja laulettu harjoituksissa, mutta ei järjestelmällisesti nuotti nuotilta |
 | ○ tarkistamatta | Ei tunnettuja virheitä, mutta ei myöskään tarkistettu |
 | ⚠ puutteita | Tiedetään virheellistä sisältöä |
 

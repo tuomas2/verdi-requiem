@@ -59,6 +59,30 @@ class Kattavuus(unittest.TestCase):
                                 f"{osa}/{aani}: poikkeus mutta ei kuoroa")
 
 
+class Kuorobasso(unittest.TestCase):
+    """Basso on ainoa ääni, jolla on oletuksena jokin muu tila kuin
+    tarkistamatta: se on käyty läpi Edition Petersin painosta vasten."""
+
+    def test_bassolla_ei_ole_tarkistamattomia_osia(self):
+        for _t, numero, _o in yhdista.MOVEMENTS:
+            t = luotettavuus.tila(numero, "Kuoro B")
+            with self.subTest(osa=numero):
+                self.assertNotEqual(t.nimi, "tarkistamatta")
+
+    def test_muilla_aanilla_on(self):
+        tilat = {luotettavuus.tila(n, a).nimi
+                 for _t, n, _o in yhdista.MOVEMENTS
+                 for a in ("Kuoro S", "Kuoro A", "Kuoro T")}
+        self.assertIn("tarkistamatta", tilat)
+
+    def test_referenssiedition_nimi_on_yhdessa_paikassa(self):
+        """Sivusto ja README nimeävät saman edition; jos se muuttuu, se
+        muuttuu täältä."""
+        self.assertEqual(luotettavuus.REFERENSSI, "Edition Peters")
+        self.assertIn(luotettavuus.REFERENSSI,
+                      luotettavuus.KUORO_B_OLETUS.perustelu)
+
+
 class Perustelut(unittest.TestCase):
     def test_kuorobasso_on_ainoa_jolla_on_varmistettuja_osia(self):
         """README ja sivusto väittävät tätä; testi pitää väitteen totena."""

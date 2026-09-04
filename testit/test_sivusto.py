@@ -23,8 +23,14 @@ class Runko(unittest.TestCase):
         self.assertIn("<p>sisältö</p>", html)
 
     def test_aktiivinen_sivu_merkitaan(self):
-        html = sivusto.sivu("Koe", "", "luotettavuus.html")
-        self.assertIn('href="luotettavuus.html" aria-current="page"', html)
+        html = sivusto.sivu("Koe", "", "index.html")
+        self.assertIn('href="index.html" aria-current="page"', html)
+
+    def test_navigaatiossa_on_kaksi_sivua(self):
+        """Erillinen etusivu olisi väliporras, joka pitää klikata pois
+        tieltä ennen kuin pääsee siihen mitä sivustolta haetaan."""
+        self.assertEqual([nimi for _t, nimi in sivusto.NAVI],
+                         ["Stemmat", "Teksti"])
 
     def test_otsikko_siistitaan(self):
         """Osien nimissä on &-merkki (Requiem & Kyrie), joka on pakattava."""
@@ -33,31 +39,53 @@ class Runko(unittest.TestCase):
         self.assertNotIn("Requiem & Kyrie", html)
 
 
-class Luotettavuussivu(unittest.TestCase):
+class Luotettavuus(unittest.TestCase):
+    """Luotettavuustieto on osa stemmasivua, ei omaa sivuaan: se on juuri se
+    mitä stemman lataajan pitää tietää ennen latausta."""
+
     def test_jokainen_osa_on_taulukossa(self):
-        html = sivusto.luotettavuussivu()
+        html = sivusto.stemmasivu()
         for _t, _numero, otsikko in yhdista.MOVEMENTS:
             with self.subTest(osa=otsikko):
                 # & on pakattu HTML:ssä.
                 self.assertIn(otsikko.replace("&", "&amp;"), html)
 
     def test_kertoo_etta_vain_basso_on_varmistettu(self):
-        html = sivusto.luotettavuussivu()
-        self.assertIn("kuorobasso", html.lower())
+        self.assertIn("kuorobasso", sivusto.stemmasivu().lower())
 
     def test_selittaa_merkit(self):
-        html = sivusto.luotettavuussivu()
+        html = sivusto.stemmasivu()
         for merkki in ["✔", "◑", "○", "⚠"]:
             with self.subTest(merkki=merkki):
                 self.assertIn(merkki, html)
+
+    def test_jokaisen_aanen_tila_nakyy_taulukossa(self):
+        """Merkin pitää olla samassa solussa sivunumeron kanssa, ei erillään:
+        muuten sivun ja luotettavuuden yhdistäminen jäi tekemättä."""
+        html = sivusto.stemmasivu()
+        # Agnus Dei: basso varmistettu sivulla 10, ylemmät äänet puutteelliset.
+        self.assertIn('<span class="sivu">10</span>'
+                      '<span class="merkki" title="varmistettu">✔</span>', html)
+        self.assertIn('<span class="sivu">10</span>'
+                      '<span class="merkki" title="puutteita">⚠</span>', html)
+
+    def test_referenssiedition_nimi_nakyy(self):
+        """Käytännössä tärkein yksittäinen tieto laulajalle: täsmäävätkö
+        tahtinumerot siihen nuottiin joka hänellä on kädessä."""
+        html = sivusto.stemmasivu()
+        self.assertIn("Edition Peters", html)
+
+    def test_perustelut_ovat_mukana(self):
+        html = sivusto.stemmasivu()
+        self.assertIn("Lacrymosa", html)
+        self.assertIn("oktaavivirhe", html)
 
 
 class Rakennus(unittest.TestCase):
     def test_kaikki_sivut_syntyvat(self):
         with tempfile.TemporaryDirectory() as d:
             sivusto.rakenna(d)
-            for nimi in ["index.html", "luotettavuus.html", "stemmat.html",
-                         "teksti.html", "tyyli.css"]:
+            for nimi in ["index.html", "teksti.html", "tyyli.css"]:
                 with self.subTest(nimi=nimi):
                     self.assertTrue(os.path.exists(os.path.join(d, nimi)))
 
@@ -68,6 +96,12 @@ class Rakennus(unittest.TestCase):
             sivusto.rakenna(d)
             with open(os.path.join(d, "CNAME"), encoding="utf-8") as f:
                 self.assertEqual(f.read().strip(), sivusto.VERKKOTUNNUS)
+
+    def test_etusivu_on_stemmasivu(self):
+        with tempfile.TemporaryDirectory() as d:
+            sivusto.rakenna(d)
+            with open(os.path.join(d, "index.html"), encoding="utf-8") as f:
+                self.assertIn("stemma-basso-1.pdf", f.read())
 
     def test_stemmojen_pdf_t_kopioidaan(self):
         with tempfile.TemporaryDirectory() as d:
@@ -111,7 +145,14 @@ class Stemmasivu(unittest.TestCase):
 
 class Tekstisivu(unittest.TestCase):
     def test_navigaatio_on_lisatty(self):
-        self.assertIn('href="stemmat.html"', sivusto.tekstisivu())
+        self.assertIn('href="index.html"', sivusto.tekstisivu())
+
+    def test_ei_jaanyt_linkkeja_poistettuihin_sivuihin(self):
+        """Luotettavuus ja etusivu sulautuivat stemmasivuun; rikkinäinen
+        linkki jäisi muuten huomaamatta, koska sivut kyllä rakentuvat."""
+        for html in [sivusto.stemmasivu(), sivusto.tekstisivu()]:
+            self.assertNotIn("luotettavuus.html", html)
+            self.assertNotIn("stemmat.html", html)
 
     def test_alkuperainen_sisalto_sailyy(self):
         html = sivusto.tekstisivu()

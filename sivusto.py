@@ -32,10 +32,9 @@ POHJA = "sivusto"
 # osoittaa tuomas2.github.io:hon.
 VERKKOTUNNUS = "requiem.tuomasairaksinen.fi"
 
-NAVI = [("index.html", "Etusivu"),
-        ("teksti.html", "Teksti"),
-        ("stemmat.html", "Stemmat"),
-        ("luotettavuus.html", "Luotettavuus")]
+# Kaksi sivua riittää, ja stemmat on niistä se jota luetaan: se on etusivu.
+NAVI = [("index.html", "Stemmat"),
+        ("teksti.html", "Teksti")]
 
 STEMMAT = [("S I", "stemma-sopraano-1.pdf"), ("S II", "stemma-sopraano-2.pdf"),
            ("A I", "stemma-altto-1.pdf"), ("A II", "stemma-altto-2.pdf"),
@@ -79,108 +78,67 @@ def sivu(otsikko, sisalto, aktiivinen):
 """
 
 
-# ------------------------------------------------------------------ etusivu
+# ------------------------------------------------------------------ alaviite
 
-def etusivu():
-    sisalto = """
-<h1>Messa da Requiem</h1>
-<p class="johdanto">Verdin <em>Messa da Requiem</em>: kuusitoista erillistä
-osatiedostoa yhdistettynä yhdeksi partituuriksi, ja siitä tuotetut kahdeksan
-kuorostemmaa harjoittelua varten.</p>
+def alaviite():
+    """Teoksen ja aineiston tausta sivun lopussa.
 
+    Oma etusivunsa tälle olisi väliporras, joka pitää klikata pois tieltä
+    ennen kuin pääsee siihen mitä sivustolta haetaan.
+    """
+    return """
+<h2>Mistä tämä on peräisin</h2>
+<p>Sävellys on public domainissa; Verdi kuoli 1901. Nuottiaineisto on CPDL:n
+(Choral Public Domain Library) editioita, jotka saa vapaasti levittää ja
+esittää. Kuusitoista erillistä osatiedostoa on yhdistetty yhdeksi
+partituuriksi, ja stemmat on tuotettu siitä. Tahtinumerointi on sovitettu
+Edition Petersin painokseen, jota vasten kuorobasso on myös käyty läpi.</p>
 <p>Lähtökohta on kuorolaisen käytännön tarve: lukea omaa stemmaa niin että muu
 kuoro ja pianosäestys kuuluvat, kantaa stemma mukana lukulaitteella, ja löytää
-yksittäinen tahti kun kuoronjohtaja huutaa numeron. Siitä seuraa kaksi
-vaatimusta: tahtinumeroiden on täsmättävä kuoron oman nuottikirjan kanssa, ja
-stemman on oltava tiivis.</p>
-
-<h2>Mistä aloittaa</h2>
-<ul>
-<li><a href="stemmat.html">Stemmat</a> — kahdeksan ääntä ladattavina, ja
-mistä sivulta mikin osa alkaa</li>
-<li><a href="teksti.html">Teksti</a> — koko messun latinankielinen teksti ja
-suomennos rinnakkain</li>
-<li><a href="luotettavuus.html">Luotettavuus</a> — mikä on tarkistettu ja
-mikä ei. <strong>Lue tämä ennen kuin luotat nuottiin</strong></li>
-</ul>
-
-<h2>Aineiston alkuperä</h2>
-<p>Sävellys on public domainissa; Verdi kuoli 1901. Nuottiaineisto on
-CPDL:n (Choral Public Domain Library) editioita, jotka saa vapaasti levittää
-ja esittää. Skriptit ja dokumentaatio ovat GPL-3.0-lisenssin alaisia.</p>
+yksittäinen tahti kun kuoronjohtaja huutaa numeron.</p>
 <p>Lähdekoodi, koko työn dokumentaatio ja ohjeet aineiston uudelleenluontiin:
-<a href="https://github.com/tuomas2/verdi-requiem">github.com/tuomas2/verdi-requiem</a>.</p>
+<a href="https://github.com/tuomas2/verdi-requiem">github.com/tuomas2/verdi-requiem</a>.
+Skriptit ja dokumentaatio ovat GPL-3.0-lisenssin alaisia.</p>
 """
-    return sivu("Etusivu", sisalto, "index.html")
 
 
 # ----------------------------------------------------------- luotettavuus
 
-def luotettavuussivu():
-    rivit = []
-    for numero, otsikko, tilat in luotettavuus.taulukko():
-        solut = "".join('<td class="merkki" title="%s">%s</td>'
-                        % (e(t.nimi), t.merkki) for t in tilat)
-        rivit.append("<tr><td><strong>%s</strong> %s</td>%s</tr>"
-                     % (e(numero), e(otsikko), solut))
-        # Perustelut vain siellä missä on jotain kerrottavaa: oletustila ja
-        # solistiosat eivät ansaitse omaa riviään.
-        huomiot = []
-        for aani, t in zip(luotettavuus.AANET, tilat):
-            if t.nimi in ("tarkistamatta", "ei kuoroa") and t.perustelu in (
-                    luotettavuus.TARKISTAMATTA.perustelu,
-                    luotettavuus.EI_KUOROA.perustelu):
-                continue
-            lyhenne = aani.replace("Kuoro ", "")
-            if (lyhenne, t.perustelu) not in [(l, p) for l, p in huomiot]:
-                huomiot.append((lyhenne, t.perustelu))
-        # Sama perustelu usealla äänellä kootaan yhdeksi maininnaksi.
-        koottu = []
-        for lyhenne, perustelu in huomiot:
-            if koottu and koottu[-1][1] == perustelu:
-                koottu[-1][0].append(lyhenne)
-            else:
-                koottu.append(([lyhenne], perustelu))
-        if koottu:
-            teksti = " ".join("<strong>%s:</strong> %s"
-                              % (e("/".join(lyhenteet)), e(perustelu))
-                              for lyhenteet, perustelu in koottu)
-            rivit.append('<tr class="selite"><td colspan="5" '
-                         'class="perustelu">%s</td></tr>' % teksti)
-
-    otsikot = "".join('<th class="merkki">%s</th>' % e(a.replace("Kuoro ", ""))
-                      for a in luotettavuus.AANET)
-    sisalto = f"""
-<h1>Luotettavuus</h1>
-<p class="johdanto">Vain <strong>kuorobasso</strong> on käyty
-järjestelmällisesti läpi. Sopraano, altto ja tenori ovat pääosin
-tarkistamatta, ja kahdessa osassa niissä on tiedettyjä virheitä.</p>
-
-<p>Syy on yksinkertainen: tekijä laulaa bassoa, ja käytännössä jokainen virhe
-on löytynyt joko laulamalla mukana harjoituksissa tai vertaamalla juuri sitä
-riviä riippumattomaan lähteeseen.</p>
-
-<p>Kaksi asiaa toistui tarkistustyössä. <strong>Painettu nuotti ei ratkaise
-kaikkea:</strong> Lacrymosan tahdeissa 657–665 painettu CPDL-editio antaa
-kuorobassolle väärän tekstin ja tahdissa 653 väärän sävelen, ja kumpikin
-paljastui vasta siitä mitä muut äänet ja pianosäestys tekevät samalla
-iskulla. <strong>Konelukemisen tulos on eri luokkaa kuin muu aineisto:</strong>
-osat I ja V sekä II·9b on luettu koneellisesti PDF:stä, ja niiden nuotit ovat
-pääosin tarkistamatta.</p>
-
-<div class="vieritin">
-<table>
-<thead><tr><th>Osa</th>{otsikot}</tr></thead>
-<tbody>{''.join(rivit)}</tbody>
-</table>
+def luotettavuusvaroitus():
+    """Kärkiteksti, joka luetaan ennen kuin stemma ladataan."""
+    return """
+<div class="varoitus">
+<p><strong>Kuorobasso on käyty läpi, muut äänet eivät.</strong> Basso on
+käyty läpi käsin <strong>Edition Petersin</strong> painosta vasten ja
+laulettu läpi harjoituksissa, ja kahdessa osassa lisäksi vertailtu nuotti
+nuotilta riippumattomaan lähteeseen. Sopraano, altto ja tenori ovat pääosin
+tarkistamatta, ja kahdessa osassa niissä on tiedettyjä virheitä. Syy on
+yksinkertainen: tekijä laulaa bassoa. Alla olevasta taulukosta näkee osa
+osalta, mihin kunkin äänen kohdalla voi luottaa.</p>
 </div>
-<p class="selitteet">✔ varmistettu — vertailtu riippumattomaan lähteeseen
-nuotti nuotilta tai tavu tavulta · ◑ osittain — esimerkiksi sanat tarkistettu,
-nuotit eivät · ○ tarkistamatta — ei tunnettuja virheitä, mutta ei myöskään
-tarkistettu · ⚠ puutteita — tiedetään virheellistä sisältöä · – osassa ei ole
-kuoroa</p>
 """
-    return sivu("Luotettavuus", sisalto, "luotettavuus.html")
+
+
+def luotettavuusselitteet():
+    """Merkkien selitykset ja se, mitä tarkistustyö opetti."""
+    return """
+<p class="selitteet">✔ varmistettu — koko osa vertailtu riippumattomaan
+lähteeseen nuotti nuotilta ja tavu tavulta · ◑ käyty läpi — käyty läpi käsin
+painettua editiota vasten ja laulettu harjoituksissa, mutta ei
+järjestelmällisesti nuotti nuotilta · ○ tarkistamatta — ei tunnettuja
+virheitä, mutta ei myöskään tarkistettu · ⚠ puutteita — tiedetään
+virheellistä sisältöä · – osassa ei ole kuoroa</p>
+
+<h2>Mitä tarkistustyö opetti</h2>
+<p><strong>Painettu nuotti ei ratkaise kaikkea.</strong> Lacrymosan tahdeissa
+657–665 painettu CPDL-editio antaa kuorobassolle väärän tekstin ja tahdissa
+653 väärän sävelen. Kumpikin paljastui vasta siitä, mitä muut äänet ja
+pianosäestys tekevät samalla iskulla. Painettu etumerkki kertoo varmasti minkä
+nuotin kaivertaja piirsi — ei mitään siitä, oliko se oikea.</p>
+<p><strong>Konelukemisen tulos on eri luokkaa kuin muu aineisto.</strong> Osat
+I ja V sekä II·9b on luettu koneellisesti PDF:stä, ja niiden nuotit ovat
+pääosin tarkistamatta.</p>
+"""
 
 
 # --------------------------------------------------------------- stemmat
@@ -245,6 +203,13 @@ def tahtivalit():
 
 
 def stemmasivu():
+    """Stemmat, sisällys ja luotettavuus yhtenä sivuna.
+
+    Sivunumerot ovat stemmaa kohti (S I, S II, ...) ja luotettavuus ääntä
+    kohti (S, A, T, B), eli kaksi stemmaa ääntä kohti. Ne yhdistyvät samaan
+    soluun: koko teoksessa on tasan yksi kohta, jossa saman äänen kaksi
+    stemmaa ovat eri sivuilla, joten toinen luku näytetään vain silloin.
+    """
     sisallys = lue_sisallys()
     valit = tahtivalit()
     pikkukuvat = os.path.isdir(os.path.join(POHJA, "pikkukuvat"))
@@ -256,36 +221,72 @@ def stemmasivu():
                 % (pdf, kuva, e(nimi)))
 
     linkit = "".join(lataus(nimi, pdf) for nimi, pdf in STEMMAT)
-    otsikot = "".join('<th class="luku">%s</th>' % e(nimi)
-                      for nimi, _pdf in STEMMAT)
+    otsikot = "".join('<th class="aani">%s</th>' % e(a.replace("Kuoro ", ""))
+                      for a in luotettavuus.AANET)
+
     rivit = []
     for numero, otsikko, sivut in sisallys:
-        alku, loppu = valit.get(numero, ("", ""))
+        alku_t, loppu_t = valit.get(numero, ("", ""))
+        solut = []
+        for i, aani in enumerate(luotettavuus.AANET):
+            ensimmainen, toinen = sivut[2 * i], sivut[2 * i + 1]
+            sivu_teksti = (str(ensimmainen) if ensimmainen == toinen
+                           else "%d/%d" % (ensimmainen, toinen))
+            t = luotettavuus.tila(numero, aani)
+            solut.append('<td class="aani"><span class="sivu">%s</span>'
+                         '<span class="merkki" title="%s">%s</span></td>'
+                         % (e(sivu_teksti), e(t.nimi), t.merkki))
         rivit.append(
             '<tr><td><strong>%s</strong> %s</td><td class="luku">%s–%s</td>%s</tr>'
-            % (e(numero), e(otsikko), e(alku), e(loppu),
-               "".join('<td class="luku">%d</td>' % s for s in sivut)))
+            % (e(numero), e(otsikko), e(alku_t), e(loppu_t), "".join(solut)))
+
+        # Perustelu vain siellä missä on jotain kerrottavaa.
+        huomiot = []
+        for aani in luotettavuus.AANET:
+            t = luotettavuus.tila(numero, aani)
+            if t.perustelu in (luotettavuus.TARKISTAMATTA.perustelu,
+                               luotettavuus.EI_KUOROA.perustelu):
+                continue
+            lyhenne = aani.replace("Kuoro ", "")
+            if huomiot and huomiot[-1][1] == t.perustelu:
+                huomiot[-1][0].append(lyhenne)
+            else:
+                huomiot.append(([lyhenne], t.perustelu))
+        if huomiot:
+            teksti = " ".join("<strong>%s:</strong> %s"
+                              % (e("/".join(lyhenteet)), e(perustelu))
+                              for lyhenteet, perustelu in huomiot)
+            rivit.append('<tr class="selite"><td colspan="6" '
+                         'class="perustelu">%s</td></tr>' % teksti)
 
     sisalto = f"""
-<h1>Stemmat</h1>
-<p class="johdanto">Kahdeksan kuorostemmaa. Jokaisen tahdin päällä on
-tahtinumero ja jokaisen sivun yläreunassa käynnissä olevan osan nimi, jotta
-yksittäisen tahdin löytää kuoronjohtajan huudosta.</p>
+<h1>Messa da Requiem</h1>
+<p class="johdanto">Verdin <em>Messa da Requiem</em>, kahdeksan kuorostemmaa
+harjoittelua varten. Jokaisen tahdin päällä on tahtinumero ja jokaisen sivun
+yläreunassa käynnissä olevan osan nimi, jotta yksittäisen tahdin löytää
+kuoronjohtajan huudosta.</p>
+
+{luotettavuusvaroitus()}
 
 <ul class="lataukset">{linkit}</ul>
 
-<h2>Mistä osa alkaa</h2>
-<p>Tahtinumerot ovat kuoron oman nuottikirjan mukaiset. Dies irae eli osa II
+<h2>Osat, tahdit ja luotettavuus</h2>
+<p><strong>Tahtinumerot täsmäävät Edition Petersin painoksen kanssa.</strong>
+Dies irae eli osa II
 numeroituu yhtenäisesti läpi kaikkien alaosiensa; muut osat alkavat
-ykkösestä. Sivunumerot ovat kunkin stemman omassa PDF:ssä.</p>
+ykkösestä. Kunkin äänen sarakkeessa on <strong>sivunumero</strong> siinä
+stemmassa ja <strong>merkki</strong> siitä, kuinka tarkistettu ääni on. Kaksi
+lukua tarkoittaa, että I- ja II-stemma ovat eri sivuilla.</p>
 <div class="vieritin">
-<table>
+<table class="sisallys">
 <thead><tr><th>Osa</th><th class="luku">Tahdit</th>{otsikot}</tr></thead>
 <tbody>{''.join(rivit)}</tbody>
 </table>
 </div>
+{luotettavuusselitteet()}
+{alaviite()}
 """
-    return sivu("Stemmat", sisalto, "stemmat.html")
+    return sivu("Stemmat", sisalto, "index.html")
 
 
 # ---------------------------------------------------------------- teksti
@@ -319,9 +320,7 @@ def rakenna(ulos="_sivusto"):
     os.makedirs(ulos, exist_ok=True)
     shutil.copy(os.path.join(POHJA, "tyyli.css"), ulos)
 
-    for nimi, teksti in [("index.html", etusivu()),
-                         ("luotettavuus.html", luotettavuussivu()),
-                         ("stemmat.html", stemmasivu()),
+    for nimi, teksti in [("index.html", stemmasivu()),
                          ("teksti.html", tekstisivu())]:
         with open(os.path.join(ulos, nimi), "w", encoding="utf-8") as f:
             f.write(teksti)

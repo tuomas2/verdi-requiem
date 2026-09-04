@@ -71,6 +71,31 @@ td.luku,th.luku{text-align:right;font-variant-numeric:tabular-nums}
 tr.selite td{border-bottom:1px solid var(--rule);padding-top:0}
 .selitteet{font-size:.78rem;color:var(--ink-soft);margin-top:1.5rem}
 
+/* ---------- luotettavuusvaroitus ---------- */
+.varoitus{
+  border-left:3px solid var(--rubric);
+  background:var(--paper-2);
+  padding:.9rem 1.1rem;
+  margin:2rem 0;
+}
+.varoitus p{margin:0;max-width:62ch}
+
+/* ---------- sivu + luotettavuusmerkki samassa solussa ---------- */
+th.aani{text-align:center}
+td.aani{
+  text-align:center;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+td.aani .sivu{color:var(--ink-soft);font-size:.85em}
+td.aani .merkki{
+  display:inline-block;
+  width:auto;
+  margin-left:.35em;
+  font-size:1em;
+}
+table.sisallys td:first-child{min-width:14ch}
+
 /* ---------- latauslista ---------- */
 .lataukset{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:1.2rem}
 .lataukset a{

@@ -27,6 +27,26 @@ TARKISTAMATTA = Tila("○", "tarkistamatta",
                      "Ei tunnettuja virheitä, mutta ei myöskään "
                      "järjestelmällisesti tarkistettu.")
 
+# Painettu vertailunuotti, jota vasten kuorobasso on käyty läpi ja jonka
+# mukaiset tahtinumerot ovat.
+REFERENSSI = "Edition Peters"
+
+# Kuorobasso on se rivi, jota tekijä itse lukee. Se on käyty läpi käsin
+# Edition Petersin painosta vasten ja laulettu läpi harjoituksissa; virheitä
+# on löytynyt kymmeniä ja ne on korjattu.
+#
+# Tämä ei ole sama asia kuin ✔, joka tarkoittaa koko osan järjestelmällistä
+# vertailua nuotti nuotilta ja tavu tavulta. Kumpikin tapa löytää sitä mitä
+# toinen ei: laulaen löytyvät myös editiovirheet, joita painetun sivun
+# tarkistus ei voi löytää, ja järjestelmällisellä vertailulla se mitä korva
+# ei huomaa, kuten yksittäinen puuttuva tavu melisman sisällä.
+KUORO_B_OLETUS = Tila(
+    "◑", "käyty läpi",
+    f"Käyty läpi käsin {REFERENSSI}in painosta vasten, sekä nuotit että "
+    "sanat, ja laulettu läpi harjoituksissa; löytyneet virheet on korjattu. "
+    "Ei kuitenkaan käyty järjestelmällisesti läpi nuotti nuotilta koko osan "
+    "matkalta.")
+
 
 def _varmistettu(perustelu):
     return Tila("✔", "varmistettu", perustelu)
@@ -81,9 +101,10 @@ _POIKKEUKSET = {
         "vain tekstistä. Kumpi on oikea, ei ratkea ilman painettua "
         "nuottikirjaa."),
 
-    ("II·6", ("Kuoro B",)): _tarkistamatta(
-        "Yksi kuulemalla löytynyt sanavirhe korjattu tahdissa 366 "
-        "(\"sal-va le\" → \"sal-va me\"). Muuten tarkistamatta."),
+    ("II·6", ("Kuoro B",)): Tila(
+        "◑", "käyty läpi",
+        "Käyty läpi Edition Petersiä vasten ja laulettu harjoituksissa; yksi kuulemalla löytynyt sanavirhe "
+        "korjattu tahdissa 366 (\"sal-va le\" → \"sal-va me\")."),
 
     ("II·9b", ("Kuoro B",)): _osittain(
         "Sanat tarkistettu lähde-PDF:ää vasten nuotti nuotilta. Nuotit ovat "
@@ -104,9 +125,12 @@ _POIKKEUKSET = {
     ("II·10", ("Kuoro T",)): _puutteita(
         "Tekstiaukko tahdissa 688. Muuten tarkistamatta."),
 
-    ("IV", ("Kuoro B",)): _tarkistamatta(
-        "Puuttunut tavu lisätty tahdeissa 99–100 (\"coe-li\"); sama puute "
-        "korjattiin altolta ja tenorilta. Muuten tarkistamatta."),
+    ("IV", ("Kuoro B",)): Tila(
+        "◑", "käyty läpi",
+        "Käyty läpi Edition Petersiä vasten ja laulettu harjoituksissa; puuttunut tavu lisätty tahdeissa "
+        "99–100 (\"coe-li\"), ja sama puute korjattiin altolta ja "
+        "tenorilta. Huomaa että Sanctuksessa Basso II lukee kaksoiskuoron "
+        "toista riviä (Kuoro B II), jota tämä taulukko ei kata."),
 
     ("V", ("Kuoro B",)): _varmistettu(
         "Vertailtu kuoron omaan tiedostoon nuotti nuotilta koko 74 tahdin "
@@ -145,7 +169,12 @@ def tila(osanumero, aani):
     """Tarkistuksen tila yhdelle osalle ja äänelle."""
     if not on_kuoroa(osanumero, aani):
         return EI_KUOROA
-    return POIKKEUKSET.get((osanumero, aani), TARKISTAMATTA)
+    poikkeus = POIKKEUKSET.get((osanumero, aani))
+    if poikkeus:
+        return poikkeus
+    if aani == "Kuoro B":
+        return KUORO_B_OLETUS
+    return TARKISTAMATTA
 
 
 def taulukko():

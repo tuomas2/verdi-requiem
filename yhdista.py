@@ -184,7 +184,7 @@ SINGER_PARTS = {
 }
 
 # Numero, jonka kunkin Dies iraen alaosan **lähdetiedoston ensimmäinen tahti**
-# saa kuoron nuottikirjan numeroinnissa. Nämä eivät ole laskettuja vaan
+# saa kuoron nuottikirjan (Edition Peters) numeroinnissa. Nämä eivät ole laskettuja vaan
 # kirjasta luettuja: laulaja tarkisti ne harjoituksissa 2026-09-02, ja niiden
 # mukaan numerointi täsmää kirjan kanssa alaosan sisällä alusta loppuun.
 #

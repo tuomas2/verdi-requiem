@@ -2207,6 +2207,27 @@ listed explicitly in every exception.
 `test_luotettavuus.py` pins that `varmistettu` appears **only** for `Kuoro B`
 in movements V and II·10, because the mark is a promise to the reader.
 
+### The reference edition is named at last: Edition Peters
+
+Every earlier section in this file says "the choir's rehearsal book" without
+naming it. It is **Edition Peters**, and that matters in two ways.
+
+It is what `DIES_IRAE_ALUT` was derived from, so **the parts' bar numbers match
+Edition Peters** — which is the single most practical fact for a singer holding
+a score, and it is now stated on the site, in `README.md` and in `yhdista.py`'s
+own comment.
+
+It is also what the chorus bass has been checked against by hand, notes and
+text both, on top of being sung through in rehearsals. That is why
+`luotettavuus.py` gives `Kuoro B` a default of its own (`◑ käyty läpi`) rather
+than `tarkistamatta`: the bass has no unchecked movements. It is deliberately
+**not** promoted to `✔`, which is reserved for a whole movement compared note
+by note and syllable by syllable. The two kinds of evidence find different
+things — singing finds the editorial errors that checking against the printed
+page cannot, and systematic comparison finds what the ear misses, such as one
+absent syllable inside a melisma. `luotettavuus.REFERENSSI` holds the name in
+one place, and a test pins it.
+
 ### The site
 
 `sivusto.py`, standard library only, four pages: front, the Latin/Finnish
