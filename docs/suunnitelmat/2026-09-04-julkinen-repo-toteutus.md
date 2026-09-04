@@ -1730,45 +1730,41 @@ Odotus: työpuu siisti, kaikki testit läpi, hakemistot ennallaan.
 
 ## Tehtävä 13: Julkaisu
 
-- [ ] **Askel 1: Luo repo ja työnnä**
+**Tehty osittain 2026-09-04.** Repo on luotu ja työnnetty **privaattina**
+käyttäjän pyynnöstä; hän tarkistaa sisällön itse ennen julkiseksi
+muuttamista. Tehtynä:
+
+- `gh repo create tuomas2/verdi-requiem --private --source=. --remote=origin`
+- `git push -u origin main` — 94 tiedostoa, sama puu kuin paikallisesti,
+  tarkistettu vertaamalla etäpuun tiedostolistaa `git ls-files`:iin
+- Työnkulku ajettu: `rakenna` onnistui (169 testiä + sivuston rakennus),
+  `julkaise` kaatui koska Pages ei ole päällä. Julkaisuaskel on sen jälkeen
+  ehdollistettu repon näkyvyyteen, joten se ei enää jätä punaista ruksia
+  privaattiin repoon vaan käynnistyy itsestään kun repo muuttuu julkiseksi.
+
+Jäljellä, käyttäjän tehtäväksi:
 
 ```bash
-gh repo create tuomas2/verdi-requiem --public \
-  --description "Verdin Messa da Requiem: kuorostemmat ja yhdistetty partituuri" \
-  --source=. --remote=origin
-git push -u origin main
+gh repo edit tuomas2/verdi-requiem --visibility public --accept-visibility-change-consequences
+gh api -X POST repos/tuomas2/verdi-requiem/pages -f 'build_type=workflow'
 ```
 
-- [ ] **Askel 2: Kytke Pages päälle**
+Toinen rivi vastaa valintaa *Settings → Pages → Source: GitHub Actions*.
+Sen jälkeen mikä tahansa push maniin julkaisee sivuston osoitteeseen
+`tuomas2.github.io/verdi-requiem`; ilman uutta committia julkaisun saa
+liikkeelle komennolla `gh workflow run sivusto.yml`.
+
+Julkaisun jälkeen kannattaa tarkistaa vielä kerran, ettei mitään
+ei-toivottua ole mukana:
 
 ```bash
-gh api -X POST repos/tuomas2/verdi-requiem/pages \
-  -f 'build_type=workflow' || \
-  echo "Kytke käsin: Settings > Pages > Source: GitHub Actions"
-gh run list --limit 3
+gh api "repos/tuomas2/verdi-requiem/git/trees/main?recursive=1" \
+  --jq '.tree[].path' | grep -i "musescore\|autosave\|koko-oma"
 ```
 
-- [ ] **Askel 3: Tarkista julkaistu sivusto**
-
-```bash
-gh run watch
-curl -sI https://tuomas2.github.io/verdi-requiem/ | head -1
-curl -s https://tuomas2.github.io/verdi-requiem/luotettavuus.html | \
-  grep -c "kuorobasso"
-curl -sI https://tuomas2.github.io/verdi-requiem/stemmat/stemma-basso-1.pdf | \
-  head -1
-```
-Odotus: `HTTP/2 200` kaikkiin, ja luotettavuussivulta löytyy maininta.
-
-- [ ] **Askel 4: Tarkista ettei mitään ei-toivottua päätynyt julkiseksi**
-
-```bash
-gh api repos/tuomas2/verdi-requiem/git/trees/main?recursive=1 \
-  --jq '.tree[].path' | grep -i "musescore\|mscz\|Lasse" || \
-  echo "puhdas: ei musescore-jälkiä"
-```
-Odotus: `puhdas: ei musescore-jälkiä`. Poikkeus: `lahteet/`-hakemiston kolme
-CPDL:n `.mscz`-tiedostoa (02, 03, 16) ovat sallittuja ja saavat näkyä.
+Odotus: ei tulostetta. Huomaa lainausmerkit URLin ympärillä — ilman niitä zsh
+tulkitsee `?`-merkin jokerimerkiksi, eikä komento aja mitään mutta näyttää
+siltä kuin se olisi mennyt läpi.
 
 ---
 

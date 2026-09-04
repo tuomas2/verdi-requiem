@@ -42,9 +42,16 @@ jobs:
         with:
           path: _sivusto
 
+  # Julkaisu odottaa siihen asti kunnes repo on julkinen ja Pages on kytketty
+  # päälle (Settings > Pages > Source: GitHub Actions). Privaatissa reposssa
+  # deploy-pages kaatuisi virheeseen "Not Found", eikä pysyvästi punainen CI
+  # kerro mitään hyödyllistä. Ehto katsoo näkyvyyttä, joten mitään ei tarvitse
+  # muistaa kytkeä täältä päälle: julkaisu alkaa toimia itsestään.
   julkaise:
     needs: rakenna
-    if: github.ref == 'refs/heads/main'
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
