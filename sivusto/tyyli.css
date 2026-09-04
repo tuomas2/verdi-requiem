@@ -20,23 +20,8 @@ body{
   line-height:1.5;
 }
 
-/* ---------- navigaatio ---------- */
-.bar{
-  position:sticky;top:0;z-index:20;
-  background:var(--paper);
-  border-bottom:1px solid var(--rule);
-}
-.bar-inner{
-  max-width:1100px;margin:0 auto;padding:.5rem 1.25rem;
-  display:flex;gap:.15rem;flex-wrap:wrap;align-items:center;
-}
-.bar a{
-  font-size:.68rem;font-weight:600;letter-spacing:.09em;
-  text-transform:uppercase;text-decoration:none;color:var(--ink-soft);
-  padding:.3rem .45rem;border-radius:2px;
-}
-.bar a:hover,.bar a:focus-visible{color:var(--rubric);background:var(--paper-2)}
-.bar a[aria-current="page"]{color:var(--rubric)}
+/* Valikon tyyli on sivusto.py:n NAVI_TYYLI-vakiossa, koska sama valikko
+   upotetaan myös requiem.html:ään, joka ei lataa tätä tiedostoa. */
 :focus-visible{outline:2px solid var(--rubric);outline-offset:2px}
 
 /* ---------- sivun runko ---------- */
@@ -80,30 +65,25 @@ tr.selite td{border-bottom:1px solid var(--rule);padding-top:0}
 }
 .varoitus p{margin:0;max-width:62ch}
 
-/* ---------- sivu + luotettavuusmerkki samassa solussa ---------- */
-th.aani{text-align:center}
-td.aani{
-  text-align:center;
-  white-space:nowrap;
-  font-variant-numeric:tabular-nums;
-}
-td.aani .sivu{color:var(--ink-soft);font-size:.85em}
-td.aani .merkki{
-  display:inline-block;
-  width:auto;
-  margin-left:.35em;
-  font-size:1em;
-}
+/* ---------- sisällystaulukko ---------- */
+th.aani,td.aani{text-align:center;font-variant-numeric:tabular-nums}
 table.sisallys td:first-child{min-width:14ch}
 
 /* ---------- latauslista ---------- */
 .lataukset{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:1.2rem}
-.lataukset a{
+.lataukset li{text-align:center}
+.lataukset a.stemma{
   display:block;text-decoration:none;color:var(--ink);
-  font-size:.75rem;text-align:center;font-weight:600;
+  font-size:.75rem;font-weight:600;
   letter-spacing:.06em;text-transform:uppercase;
 }
-.lataukset a:hover{color:var(--rubric)}
+.lataukset a.stemma:hover{color:var(--rubric)}
+.lataukset .muodot{
+  display:block;margin-top:.2rem;
+  font-size:.7rem;color:var(--ink-soft);
+}
+.lataukset .muodot a{color:var(--ink-soft);text-decoration:none}
+.lataukset .muodot a:hover{color:var(--rubric);text-decoration:underline}
 .lataukset img{
   display:block;border:1px solid var(--rule);background:#fff;
   margin-bottom:.4rem;

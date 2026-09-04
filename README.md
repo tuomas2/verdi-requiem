@@ -28,8 +28,8 @@ kuoron oman nuottikirjan kanssa**, ja stemman on oltava tiivis.
 **Kuorobasso on käyty läpi, muut äänet eivät.** Basso on käyty läpi käsin
 **Edition Petersin** painosta vasten ja laulettu läpi harjoituksissa, ja
 kahdessa osassa lisäksi vertailtu nuotti nuotilta riippumattomaan lähteeseen.
-Sopraano, altto ja tenori ovat pääosin tarkistamatta, ja kahdessa osassa
-niissä on tiedettyjä virheitä.
+Sopraano, altto ja tenori ovat pääosin tarkistamatta, ja kolmessa osassa
+niissä on tiedettyjä virheitä: Liber scriptus, Lacrymosa ja Agnus Dei.
 
 Syy on yksinkertainen: tekijä laulaa bassoa.
 
