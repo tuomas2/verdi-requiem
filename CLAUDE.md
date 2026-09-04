@@ -78,6 +78,26 @@ identical motif carries "hu-ic er-go" in the tenor, alto and soprano. Movement 1
 so only movement 14 is still a hand-edited artefact — see *2026-09-03 (c):
 Lacrymosa's three-bar shift*.
 
+And newest, 2026-09-04: **seven more by-ear reports, all seven real**, spread
+across five movements — two notes an octave too high (II·1 bar 28 and VII bar
+72, the same Dies irae figure in two places), a `le,` for `me,` in "sal-va me"
+(II·6 bar 366), and three missing syllables (IV bars 99–100 `coe`, VII bar 98
+`di-es`, VII bar 274 `ae`). One of the seven is a **reversal of a verdict this
+file reached a day earlier**: Lacrymosa bar 653 was checked on 2026-09-03,
+found to differ from the choir file, and settled in our file's favour *because
+the printed page proves it* — and the page does print G♮, but the bass soloist,
+the piano reduction and the harmony in that same file all say C. The lesson
+gets sharper: a printed accidental is strong evidence about which note the
+engraver drew and none at all about whether he drew the right one. Bar 274 was
+a **`yhdista.py` bug**, not data: two syllables on one note (an elision, "mor-te
+ae-ter-na") were written by the source as two lyrics with the same verse number,
+and MuseScore silently printed only one of them. Four more movements (02, 07,
+13, 16) got their first `korjaa_kasin.py` tables, so six of the seven touched
+movements are now reproducible and only movement 14 is still hand-edited. The
+feature the singer asked for at the same time is in: **every page now carries
+the running movement name over its first bar**, at no cost in pages — see
+*2026-09-04*.
+
 Open, roughly in the order a singer would feel them:
 
 | Open | Where to read up |
@@ -87,7 +107,9 @@ Open, roughly in the order a singer would feel them:
 | Movement 14's `Kuoro B` is **settled** — notes match the choir file exactly, all 74 bars are metrically valid, 29 remaining wordless notes are melisma-internal or chord second notes. Its **Soprano/Alto/Tenor are not**: 48–59 % of their notes carry no syllable, and they still show fabricated content and contentless measures in bars 59–74 | *2026-08-31 (later)* section |
 | II·9b: Soprano/Alto/Tenor lyrics unchecked (its position is **settled**: 573–623, from the choir book) | *The missing Dies irae recall* |
 | Lacrymosa's `Kuoro B` is **settled** — every note checked against the choir file, every syllable against the printed page at note resolution, plus one nine-bar stretch where the printed edition itself was wrong. Its **Soprano/Alto/Tenor and soloists are not**, and the chorus tenor already shows one text gap at bar 688 | *2026-09-03 (c): Lacrymosa's three-bar shift* |
-| The "same figure must carry the same text in every voice" check found a defect the printed page could not. Not automated, and movement 11's S/A/T is the obvious first target | *2026-09-03 (c)*, section *The lesson* |
+| The "same figure must carry the same text in every voice" check found a defect the printed page could not, and the sharper version — "does this note fit what the other staves and the piano are doing on this beat" — reversed a wrong verdict. Neither is automated, and movement 11's S/A/T is the obvious first target | *2026-09-03 (c)*, section *The lesson*; *2026-09-04*, section *Lacrymosa 653* |
+| Three voices carry the same gaps the bass had, deliberately not fixed: Sanctus bars 99–100 missing `coe` in Alto I **and** Tenori I, Libera me bar 98 missing `di-es` in the chorus tenor | *2026-09-04*, section *Still open from this batch* |
+| Libera me bar 88's rhythm differs from the choir file; both readings fit the text and there is no source PDF for movement 16 | *2026-09-04*, section *Still open from this batch* |
 | Four Dies irae sub-movements (II·2, II·4, II·6, II·7 seams) may carry the same off-by-a-few numbering Lacrymosa had. Needs one bar number from **inside** each, not its heading | *2026-09-03 (c)*, section *The same trap* |
 | Liber scriptus: the "user recalls 6" half is **solved** (six one-bar interjections, three of which were missing — see *2026-09-03 (b)*); the Soprano-vs-A/T/B text disagreement at bars 247–254 is still unresolved without the physical score | *2026-08-31* section |
 | 13 lyric changes reported but deliberately not applied | `python3 korjaa_sanat.py --kuiva` lists them |
@@ -102,21 +124,22 @@ Open, roughly in the order a singer would feel them:
 | `01…16-*.mxl` | Source movements, numbered by position in the whole work |
 | `01-*.pdf`, `14-*.pdf` | Source PDFs for the two movements that had no MusicXML |
 | `Verdi_10bDies_irae.pdf` | Source PDF for II·9b, the missing "Dies irae" recall (see below) |
-| `Verdi_Lacymosa.pdf` | The printed source for movement 11, same CPDL edition as the `.mxl`. Not an `.mxl` source, but the authority the whole chorus bass was verified against — and it **prints its own bar numbers, 624–701** |
+| `Verdi_Lacymosa.pdf` | The printed source for movement 11, same CPDL edition as the `.mxl`. Not an `.mxl` source, but what the whole chorus bass was verified against — and it **prints its own bar numbers, 624–701**. Not an authority, though: it is wrong about the text at bars 657–665 and about one note at bar 653 |
 | `*.omr` | Audiveris projects, for manual correction |
 | `*-OMR-korjattu.mxl` | OMR'd sections with their chorus lyrics fixed from the PDFs |
-| `*-kasin.mxl` | **Generated**, not hand-edited: `korjaa_kasin.py`'s output, the file `yhdista.py` actually reads for movements 01, II·4 and II·10 |
+| `*-kasin.mxl` | **Generated**, not hand-edited: `korjaa_kasin.py`'s output, the file `yhdista.py` actually reads for movements 01, II·1, II·4, II·6, II·10, IV and VII |
 | `Verdi-Requiem-koko.mxl` | Merged score, 15 staves, 1807 measures |
 | `stemma-*.mxl` / `.pdf` | Eight choir reading parts |
 | `stemmat-sisallys.txt` | Where each movement starts in all eight |
 | `sisallys.py` | Rebuilds that listing from the eight PDFs; run it after any re-render |
 | `yhdista.py` | The merge tool; mapping table at the top |
+| `sivuotsikot.py` | Writes the running movement name over each page's first bar; run after `yhdista.py`, before rendering |
 | `korjaa_sanat.py` | Fixes OMR lyric errors against the source PDFs |
 | `korjaa_kasin.py` | The hand-verified fixes on top of that, as a table; writes the `*-kasin.mxl` files |
 | `nayta.py` | Prints a staff's notes, voices and **lyric rows** per bar — the first tool for any reported error |
 | `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |
 | `harjoitus-*.mscz` | The result, one per singer |
-| `test_*.py` | Tests; all of them: `python3 -m unittest discover -p 'test_*.py'` (85) |
+| `test_*.py` | Tests; all of them: `python3 -m unittest discover -p 'test_*.py'` (123) |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
 | `tiivistys.mss` | MuseScore style for the reading parts: multimeasure rests, a bar number on every bar, extra air between systems |
 | `musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files* |
@@ -1050,12 +1073,22 @@ line the user reads, but nothing in it is bass-specific.
 | Symptom | Layer | File |
 |---|---|---|
 | Movement I chorus bass: wrong/missing/extra syllable | hand-corrections table | `korjaa_kasin.py`, `OSA_I.korjaukset` |
+| Movement 02 (II·1 Dies irae) | hand-corrections table | `korjaa_kasin.py`, `OSA_II1` |
 | Liber scriptus (II·4), any voice | hand-corrections table | `korjaa_kasin.py`, `OSAT_II4` |
-| Any movement: the source file is right but the **part** is wrong | tool bug | `yhdista.py` + a test |
+| Movement 07 (II·6 Rex tremendae) | hand-corrections table | `korjaa_kasin.py`, `OSA_II6` |
 | Movement 11 (Lacrymosa), any voice | hand-corrections table | `korjaa_kasin.py`, `OSA_II10_KUORO_B` / `OSA_II10_DIVISI` |
+| Movement 13 (IV Sanctus) | hand-corrections table | `korjaa_kasin.py`, `OSA_IV` |
+| Movement 16 (VII Libera me) | hand-corrections table | `korjaa_kasin.py`, `OSA_VII` |
+| Any movement: the source file is right but the **part** is wrong | tool bug | `yhdista.py` + a test |
 | Movements 14/II·9b: wrong syllable | still baked into the source `.mxl` | see the last section below |
 | A passage is **missing entirely** | copy it from `musescore/` if the figure already exists elsewhere in the part | `kopioi_tahti`, see *2026-09-03 (b)* |
 | Systematic OCR text error in an OMR movement | PDF-driven pass | `korjaa_sanat.py` |
+
+A movement without a table yet is one `Osa` row away from having one: point
+`mxl` at the untouched source, `out` at a new `-kasin.mxl`, and add the file
+name to `yhdista.py`'s `MOVEMENTS`, `MAPPING`, `DIES_IRAE_ALUT` (Dies irae
+sub-movements only), `SANCTUS` (movement 13 only) and the pin in
+`test_yhdista.py`. Four movements moved over that way on 2026-09-04.
 
 **The source-vs-part check is one command and it settles the layer question:**
 
@@ -1151,9 +1184,14 @@ the standing example.
     python3 korjaa_kasin.py
     python3 yhdista.py Verdi-Requiem-koko.mxl
     python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"
+    python3 sivuotsikot.py stemma-basso-1.mxl    # sivujen osaotsikot
     mscore -S tiivistys.mss -o stemma-basso-1.pdf stemma-basso-1.mxl
     python3 harjoitus.py --stemma "Basso I"
     python3 sisallys.py                # jos sivumäärät muuttuivat
+
+`sivuotsikot.py` must run **after** `yhdista.py` (which rewrites the file from
+scratch) and **before** rendering. It runs `mscore` itself, twice per part, to
+read the computed page layout back.
 
 Then render the finished part and **look at it**. Every session that skipped
 this shipped something. Checks that have caught real problems:
@@ -1161,14 +1199,16 @@ this shipped something. Checks that have caught real problems:
 - Per-staff note counts before and after. A lyric-only change must leave every
   count identical; anything else means content moved.
 - `mscore` converts without `-f`.
-- `python3 -m unittest discover -p 'test_*.py'` — 85 tests.
+- `python3 -m unittest discover -p 'test_*.py'` — 123 tests.
 
 ### The one movement not yet in the table
 
 Movement 14 (Agnus Dei) still has its fixes written straight into
 `14-…-OMR-korjattu.mxl`, so that file is a hand-edited artefact and git is the
 only record of what was changed. Movements 01 and 11 were in the same state
-(01 until 2026-09-02, 11 until 2026-09-03) and both moved over.
+(01 until 2026-09-02, 11 until 2026-09-03) and both moved over. Movements 02,
+07, 13 and 16 never had hand edits at all — they got their first tables on
+2026-09-04, which needed no migration, only a new `Osa` row each.
 
 **The method, twice proven.** Diff the hand-edited file against the file it was
 derived from — a throwaway script comparing pitch, duration and lyric per note,
@@ -1394,11 +1434,13 @@ the three that do not:
 
 - Two (choir 117–118) are ours being *richer*, not poorer: we have `A3`+`C#4`
   as a chord where the choir file's Bass 1 has only the `C#4` — the divisi.
-- One is a real single-note disagreement, **flagged not fixed**: at II·1 bar 28,
-  the last syllable `la,` of "Da-vid cum Sy-bil-la," is `A3` in our file and
-  `A2` an octave lower in the choir's Bass 1 (their Bass 2 rests, so it is not
-  a divisi). Both are singable and there is no source PDF for movement 02, so
-  guessing would be exactly the thing this file warns against.
+- One was a real single-note disagreement, flagged not fixed at the time: at
+  II·1 bar 28, the last syllable `la,` of "Da-vid cum Sy-bil-la," is `A3` in
+  our file and `A2` an octave lower in the choir's Bass 1 (their Bass 2 rests,
+  so it is not a divisi). **Settled 2026-09-04 in the choir file's favour**:
+  the singer reported the same thing by ear, and the figure is internally
+  consistent — bars 32, 34 and 36 all drop the octave on the same cadence. See
+  *2026-09-04*.
 
 ### Verification
 
@@ -1480,10 +1522,11 @@ chorus-silent 1–21 and 48–53, and its 3-bar postlude trimmed — 30 bars, an
 
 | Bar | Ours | Choir file | Settled by the page |
 |---|---|---|---|
-| 653 | `G3` quarter | `C3` | **ours** — and the printed natural proves it: in D♭ major a `C` needs no accidental, a `G` does |
+| 653 | `G3` quarter | `C3` | ~~**ours** — and the printed natural proves it~~ — **wrong, reversed 2026-09-04**: the page really does print G♮, but the page is the only thing that says so. See *2026-09-04* |
 | 689 | `F3` half | `F3` quarter | **ours** — page 14 prints a half note |
 
-So the notes were already right, and the choir file is the one that differs.
+So one note was already right and the choir file differs; the other was the
+choir file being right and the printed page wrong.
 
 **Lyrics, against `Verdi_Lacymosa.pdf`, at note resolution.** This is the pass
 that closes the "melisma-internal placements are best-guess" item, and it needed
@@ -1602,6 +1645,151 @@ file exactly, with the 7 intended `P9` edits as the only difference.
   a `[613–623]` rest, the II·10 heading at 624, a `[624–644]` rest and the bass
   entering at **645**; page 8 shows the divisi's two lyric rows at 677–679 and
   "A men." at **697–698**.
+
+## 2026-09-04: seven by-ear reports, and a running movement name per page
+
+The singer read along in rehearsal and reported seven spots plus one feature
+request. All seven were real. Six were in movements that had **never had a
+hand-corrections table** — 02 (Dies irae), 07 (Rex tremendae), 13 (Sanctus)
+and 16 (Libera me) — so those four moved into `korjaa_kasin.py`, and only
+movement 14 is still a hand-edited artefact.
+
+| Reported | What was wrong | Settled by |
+|---|---|---|
+| II·1 t.28, 2nd note an octave lower | `A3` where the choir file has `A2` | the only difference in all 91 bars, plus the same cadence dropping the octave at 32/34/36 |
+| II·6 t.366, "me" not "le" | `le,` — a typo for `me,` in "sal-va me" | the chorus soprano sings `me,` on the same beat |
+| II·10 t.653, C not G | `G3`♮ | the bass **soloist** and the piano's left hand, in the same file |
+| IV t.99–100, "cae-li" missing | t.99 carried no syllable at all | Soprano I has it; A/T/B all lack the same `coe` |
+| VII t.72, 2nd note an octave lower | `A3` where the choir file has `A2` | same figure as II·1 t.28 — Libera me opens with the Dies irae theme |
+| VII t.98, "di-es" missing | both syllables absent | the alto's identical bar, and the bass's own t.100 |
+| VII t.274, "ae" missing | two `<lyric>` on one note, **same** verse number | a `yhdista.py` bug, not data — see below |
+
+### The one that had been checked and got the wrong answer: Lacrymosa 653
+
+*2026-09-03 (c)* compared this movement's chorus bass against the choir file,
+found two differences and resolved **both** in our file's favour. One of those
+two was wrong, and the reasoning that made it wrong is worth keeping:
+
+> 653 · ours `G3` · choir `C3` · **ours** — and the printed natural proves it:
+> in D♭ major a `C` needs no accidental, a `G` does.
+
+The page really does print G with a natural, re-read from the image and not
+misread. But **everything else says C, and three of those live in the same
+file**:
+
+- The **bass soloist** (`P4`) doubles the chorus bass at the unison through
+  bars 651–652 note for note, and ends on `C3`. The chorus tenor likewise
+  doubles the tenor soloist and both end on `G4` — so the doubling holds
+  everywhere except this one note, in this one staff.
+- The **piano's left hand** plays `C2`+`C3` on that beat.
+- The chord is C7 (chorus S/A on `E4`, T on `G4`, piano right hand
+  `Bes5-E6-G6`). With the chorus bass on G the root is missing from the choir
+  entirely.
+- The choir's own MuseScore file has `C3`, and the singer's rehearsal book
+  evidently does too.
+
+So the printed CPDL edition has an engraving error in one staff, of the same
+kind as the "Lacrymosa dies illa" text error nine bars later — plausibly a
+copyist taking the note from the tenor staff, which is where the G♮ belongs.
+
+**The lesson, sharpened.** *2026-09-03 (c)* already concluded that verifying
+against the print cannot catch an editorial error. What this adds: when the
+print disagrees with the rest of the same file, **the rest of the file wins**,
+and the check that decides it is the one that needs no external source at all
+— does this note fit what the other staves and the piano reduction are doing
+on the same beat? A printed accidental is strong evidence about *which note
+the engraver drew*, and no evidence at all about whether he drew the right
+one. The 2026-09-03 pass stopped at the first of those questions.
+
+### Two syllables on one note: the part silently dropped one
+
+Bar 274 of Libera me sings "mor-te ae-ter-na" with `te` and `ae` on the same
+eighth — an elision. The Sibelius/Dolet source writes that as **two
+`<lyric>` elements with the same verse number** on one note, and MuseScore
+renders only one of them: the part read "mor - te" and `ae` was simply not on
+the page. The source is right about the music, so this is a tool bug, and the
+fix is `merge_elisions` in `yhdista.py`: same-verse lyrics on one note are
+merged into a single `<lyric>` whose parts are separated by `<elision>`.
+
+Three details that took measurement:
+
+- **The elision character must be a non-breaking space** (U+00A0). A plain
+  space is dropped on import and the syllables collide into `teae`; the
+  undertie U+203F comes out the same way. Measured by rendering all three and
+  reading the PDF's text layer.
+- **The same check catches a duplicate.** Movement 16's bar 416 has `me,`
+  twice on one note with the same verse number. That is not an elision, it is
+  a source error, so the second one is dropped rather than merged.
+- Only three notes in the whole work are affected (movement 16's bars 274 in
+  two parts, and 416), but the rule belongs in the tool: a data fix would have
+  left the soprano soloist's identical bar broken.
+
+Running `merge_elisions` before `normalise_lyrics` also makes the latter more
+accurate: "a note carries two lyrics" now means "two rows are genuinely
+needed" rather than "possibly an elision".
+
+### A running movement name at the top of every page
+
+The singer's request: *"if every page said, above the first bar, which section
+is running, it would help browsing."* The big bold movement title only appears
+where a movement starts, so a page opened mid-movement said nothing.
+
+`sivuotsikot.py` writes it, in italic at the bar-number height, and skips the
+pages where the movement starts at the first bar (the big title is already
+there). Cost: **zero pages** — the label fits in space the bar-number row
+already reserves, and all eight parts kept their page counts and
+`stemmat-sisallys.txt` came out byte-identical.
+
+**Page breaks are not in the file**, so "the first bar of a page" cannot be
+known before layout. Two approaches were tried and one works:
+
+| Approach | Result |
+|---|---|
+| `<credit page="N">` — MusicXML's own way to place text on a given page, and layout-independent | **MuseScore 4.7.4 ignores it.** Credits set for pages 2 and 3 never reached the PDF |
+| MuseScore's page header — is per page | Its text is one string for the whole file, and there is no "current section" macro |
+| **Ask MuseScore for the layout, then write the labels** | Works. `mscore -o x.musicxml` exports the *computed* layout as `<print new-page="yes">`, so page starts are read straight out of it |
+
+The two-pass loop is not theoretical: on **two of the eight parts the labels
+moved the page breaks**, and the script noticed and did a second round. It
+iterates to a fixed point and fails loudly after five rounds.
+
+**Movement detection is by exact text, not by font.** `yhdista.py` now exposes
+`osaotsikko()` and `OSAOTSIKOT`, and the label is matched against that list.
+The first attempt looked for bold `<words>` and picked up the sources' own
+bold directions — Libera me's last page got the heading **"Alle"**. `nayta.py`
+had the same bug and now shares the same list; its movement column used to
+print `[Alle]` and `[4 soli]`.
+
+### Verification
+
+- Per-staff note counts and the 1807-bar total identical before and after,
+  every row — the two pitch changes and five lyric changes move nothing.
+- All eight parts and the full score convert without `-f`. Part page counts
+  unchanged (S I/S II/T II 17, rest 16); `stemmat-sisallys.txt` unchanged. The
+  full score went 362 → 363 pages, from the three syllables that are now
+  actually printed.
+- 123 tests (85 before, +38), including one pinning *why* Lacrymosa 653 is C
+  against its own printed page, and one pinning that the first statement of
+  the octave-drop figure (II·1 t.24, VII t.68) correctly does **not** drop —
+  it is the same in both files, so it must not be "fixed" later.
+- Read back off the rendered `stemma-basso-1.pdf` as images, all seven spots:
+  t.28 and t.72 now leap the octave down, t.366 reads "sal-va me,", t.653 sits
+  a fifth lower with no natural, t.99–101 read "coe-li et ter-ra", t.98–99
+  "di-es ma-gna," and t.274–275 "mor - te ae-ter - na,".
+
+### Still open from this batch
+
+- The singer said **bar 93** for the missing "di-es"; the bar was **98**. Bar
+  93 is correct as it stands ("il-la,"), and the detail that located 98 was
+  their own — "on the first and third notes", which only 98 fits. A test pins
+  93 so it is not "corrected" later.
+- **Alto I and Tenor I have the same missing `coe`** in Sanctus bars 99–100,
+  and the **chorus tenor has the same missing `di-es`** in Libera me bar 98.
+  Not fixed: the singer reads bass, and each would need its own check.
+- Libera me **bar 88** differs from the choir file in rhythm, not pitch: ours
+  is `(♪.♪ q)(♪.♪ q)`, theirs `(♪.♪)(♪.♪) q q`, both filling the bar and both
+  fitting "ma-gna et a-ma-ra". Not reported by ear, no source PDF for movement
+  16, so flagged only.
 
 ## The choir's own MuseScore practice files
 

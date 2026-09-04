@@ -5,20 +5,21 @@
 | Tiedosto | Sisältö |
 |---|---|
 | `Verdi-Requiem-koko.mxl` | Koko teos, 15 viivastoa, 1807 tahtia |
-| `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, kaikki ajan tasalla (II·9b mukana, tahtinumerointi juoksee Dies iraen läpi) |
+| `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, kaikki ajan tasalla (II·9b mukana, tahtinumerointi juoksee Dies iraen läpi, osan nimi joka sivun ylälaidassa) |
 | `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa, ajan tasalla |
 | `sisallys.py` | Rakentaa tuon luettelon uudelleen valmiista stemma-PDF:istä |
 | `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys, tahtinumero joka tahtiin, väljyys rivien välissä |
 | `harjoitus-*.mscz` | Harjoittelutiedosto: oma ääni trumpettina, muut piilossa |
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
+| `sivuotsikot.py` | Kirjoittaa käynnissä olevan osan nimen joka sivun ensimmäisen tahdin päälle |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
 | `korjaa_sanat.py` | Korjaa osien 01, 14 ja II·9b:n kuorosanat lähde-PDF:ää vasten |
-| `korjaa_kasin.py` | Käsin todennetut korjaukset (osa I, Liber scriptus, Lacrymosa), taulukkona |
+| `korjaa_kasin.py` | Käsin todennetut korjaukset (osat I, II·1, II·4, II·6, II·10, IV ja VII), taulukkona |
 | `nayta.py` | Näyttää viivaston nuotit, äänet ja sanarivit tahdeittain |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
 | `Verdi_10bDies_irae.pdf` | II·9b:n lähde-PDF (käyttäjän löytämä) |
 | `10b-Verdi_Dies_irae_paluu-OMR*.mxl` | II·9b, konelukemisen tulos ja sanakorjattu versio |
-| `*-kasin.mxl` | **Skriptin tuottamia**, ei käsin muokattuja: `korjaa_kasin.py`:n tulos, ja juuri nämä `yhdista.py` lukee osista I, II·4 ja II·10 |
+| `*-kasin.mxl` | **Skriptin tuottamia**, ei käsin muokattuja: `korjaa_kasin.py`:n tulos, ja juuri nämä `yhdista.py` lukee osista I, II·1, II·4, II·6, II·10, IV ja VII |
 
 ## Työnkulku
 
@@ -70,11 +71,14 @@ Jos lähdeaineisto muuttuu, aja koko ketju **tässä järjestyksessä** —
     python3 korjaa_kasin.py                       # 2. todennetut korjaukset
     python3 yhdista.py Verdi-Requiem-koko.mxl     # 3. partituuri
     python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"   # 4. stemmat
+    python3 sivuotsikot.py stemma-basso-1.mxl     # 5. sivujen osaotsikot
     "/Applications/MuseScore 4.app/Contents/MacOS/mscore" \
         -S tiivistys.mss -o stemma-basso-1.pdf stemma-basso-1.mxl
-    python3 harjoitus.py --stemma "Basso I"       # 5. harjoittelutiedosto
+    python3 harjoitus.py --stemma "Basso I"       # 6. harjoittelutiedosto
+    python3 sisallys.py                           # 7. sisällysluettelo
 
-Vaiheet 4 ja 5 toistetaan kullekin tarvittavalle äänelle. Yksittäiset
+Vaiheet 4-6 toistetaan kullekin tarvittavalle äänelle; `sivuotsikot.py` ottaa
+monta tiedostoa kerralla (`python3 sivuotsikot.py stemma-*.mxl`). Yksittäiset
 komennot ovat alla.
 
     # koko partituuri, 15 viivastoa
@@ -114,6 +118,30 @@ Hinta 11,5:stä on 1-2 sivua stemmaa kohti; B I on nyt 16 sivua.
 Sama tyyli käyttöliittymässä: Format -> Style -> Load Style -> `tiivistys.mss`.
 Jätä tyyli pois koko partituurin PDF:stä; tiivistys on tarkoitettu yhden
 stemman lukemiseen, ei partituuriin.
+
+## Osan nimi joka sivulla
+
+`sivuotsikot.py` kirjoittaa **käynnissä olevan osan nimen** joka sivun
+ensimmäisen tahdin päälle kursiivilla, tahtinumeroiden tasalle:
+
+    13   VII  Libera me    154        155 ...
+
+Iso lihava osaotsikko kertoo vain siitä sivulta, josta osa alkaa; keskeltä
+osaa avatulta sivulta ei aiemmin nähnyt onko kyse Lacrymosasta vai Libera
+mestä. Jos osa alkaa juuri sivun ensimmäisestä tahdista, otsikkoa ei toisteta
+— iso otsikko on jo paikallaan.
+
+Ajetaan `yhdista.py`:n jälkeen ja ennen PDF:n tekoa. Tiedostoa muokataan
+paikallaan ja uudelleenajo on turvallista.
+
+**Miksi tämä on erillinen komento eikä tyyliasetus.** Sivunvaihdot eivät ole
+tiedostossa vaan MuseScore laskee ne, joten "sivun ensimmäinen tahti" ei ole
+tiedettävissä ennen taittoa. Skripti kysyy taiton MuseScorelta (`mscore -o
+x.musicxml` kirjoittaa lasketun sivujaon), kirjoittaa otsikot ja kysyy taiton
+uudelleen; jos otsikot siirsivät sivunvaihtoja, kierros toistetaan. Kahdessa
+sopraanostemmasta kahdeksasta niin todella kävi, ja toinen kierros riitti.
+Sivumäärä ei kasvanut yhdessäkään stemmassa — otsikko mahtuu tahtinumerorivin
+tasalle.
 
 `--stemma` rakentaa laulajan stemman: kaksoiskuoro esiintyy vain Sanctuksessa,
 joten esimerkiksi `Sopraano II` lukee tavallista sopraanoriviä kaikissa muissa
@@ -159,10 +187,16 @@ kopioida valmiin tahdin toisaalta samasta stemmasta (`kopioi_tahti`) — niin
 korjattiin Liber scriptuksen puuttuneet "Di-es i-rae." -välihuudahdukset
 tahdeissa 229, 231 ja 233.
 
+Taulukko osaa myös **vaihtaa nuotin korkeuden** (`korkeus`), jos kuulet
+väärän sävelen eikä väärän tavun — niin korjattiin Dies iraen tahti 28 ja
+Libera men tahti 72, joissa sanan viimeinen tavu on oktaavia alempana kuin
+tiedostossa luki.
+
 Osan 14 (Agnus Dei) korjaukset on aikanaan tehty suoraan lähdetiedostoon,
-joten sillä ei vielä ole vastaavaa taulukkoa. Osa 11 (Lacrymosa) purettiin
-taulukoksi 2026-09-03: sen lähde on jälleen CPDL:n koskematon vienti ja
-korjaukset — 50 tavua — ovat `korjaa_kasin.py`:ssä rivi riviltä.
+joten sillä ei vielä ole vastaavaa taulukkoa. Muut korjatut osat on purettu
+taulukoksi: osa I ja osa 11 (Lacrymosa) 2026-09-02/03, ja osat 02 (Dies
+irae), 07 (Rex tremendae), 13 (Sanctus) ja 16 (Libera me) 2026-09-04. Niiden
+lähteet ovat jälleen koskemattomia CPDL-vientejä.
 
 ## Tarkistettavaa harjoituksissa
 
@@ -173,8 +207,12 @@ muutos `korjaa_kasin.py`:ssä.
 | Kohta | Mitä stemmassa nyt lukee | Mitä pitää tarkistaa |
 |---|---|---|
 | I, t. 51-52 | `om – – nis`, eli melisma tavulla "om" ja "nis" tahdin 52 viimeisellä nuotilla — pyyntösi mukaan | Lähde-PDF merkitsee toisin päin: "nis" tahdin 51 kolmannelle iskulle ja melisma sen jälkeen. Kumpaa kuoro laulaa? |
-| II·1, t. 28 | "Da-vid cum Sy-bil-la," viimeinen tavu `la,` on **A3** | Kuoron omassa MuseScore-tiedostossa se on oktaavia alempi **A2**. Osalle 02 ei ole lähde-PDF:ää, joten kumpikaan ei ole varmistettavissa täältä käsin. |
+| II·10, t. 653 | "De-us." viimeinen nuotti on **C**, pyyntösi mukaan | Lähde-PDF painaa tähän kuorobassolle **G:n palautusmerkillä**. C:n puolesta ovat sinun korvasi, kuoron oma tiedosto, saman tiedoston bassosolisti (laulaa jakson unisonossa ja päättyy C:hen) ja pianon vasen käsi (C2+C3). Jos kirja sanoo G, yksi rivi kääntää sen takaisin. |
 | II·4, t. 247-254 | Altto, tenori ja basso laulavat "Solvet saeclum in favilla" kahdesti | Sopraanolla on samassa kohdassa sen sijaan ylimääräiset "Dies irae, dies illa" -toistot. Nuotit on tarkistettu oikeiksi kaikilla äänillä; kyse on vain siitä, kumpi teksti on oikea. |
+
+Neljäs, pienempi: **Sanctuksessa kirjoitusasu on "coe-li" eikä "cae-li"**.
+Lähdetiedosto käyttää coe-asua kaikkialla (myös t. 27), joten pysyttiin
+siinä; jos kirja kirjoittaa cae, se on kahden rivin muutos.
 
 Neljäs kohta on kokonaisen alaosan numerointi, ja siihen auttaisi eniten yksi
 tieto kirjasta. Lacrymosassa paljastui 2026-09-03, että kirjan osio-otsikon
@@ -379,6 +417,19 @@ rivi 1 on käytössä — esimerkiksi Rex tremendaen tahdit 46-48, joissa divisi
 laulaa kahta tekstiä yhtä aikaa.
 
 Vaikutus kuorobasson PDF:ään oli 18 sivusta 14:ään.
+
+**Kaksi tavua samalla nuotilla.** Peräkkäisten sanojen tavut voivat osua
+samalle nuotille — Libera men tahdissa 274 "mor-te ae-ter-na" laulaa "te" ja
+"ae" samalla kahdeksasosalla. Lähde kirjoittaa ne kahdeksi tavuksi, joilla on
+**sama** sanarivin numero, ja MuseScore piirtää silloin vain toisen: stemmassa
+luki "mor - te" ja "ae" katosi kokonaan. `merge_elisions` yhdistää ne yhdeksi
+tavuksi, jonka osat erottaa `<elision>`, ja tulos on "mor - te ae-". Sama
+tarkistus poistaa lähteen kahdennuksen (osan 16 tahti 416 laulaa "me," kaksi
+kertaa samalla nuotilla).
+
+Elisiomerkki on **rikkumaton välilyönti**, ei tavallinen välilyönti eikä
+sidekaari: MuseScore 4.7.4 pudottaa tavallisen välilyönnin tuonnissa, jolloin
+tavut painuvat yhteen muotoon "teae", ja sidekaari käy samoin.
 
 ## Kartoituksen erikoistapaukset
 

@@ -7,8 +7,9 @@ fraasin hajoaminen kahdelle riville tekee stemmasta lukukelvottoman.
 import unittest
 import xml.etree.ElementTree as ET
 
-from yhdista import (DIES_IRAE_ALUT, DIES_IRAE_SIIRTYMAT, normalise_lyrics,
-                     saumaraportti, verse_number)
+from yhdista import (DIES_IRAE_ALUT, DIES_IRAE_SIIRTYMAT, ELISIO, MOVEMENTS,
+                     OSAOTSIKOT, merge_elisions, normalise_lyrics,
+                     osaotsikko, saumaraportti, verse_number)
 
 
 def measure(*notes):
@@ -30,6 +31,73 @@ def rows(m):
     """Poimi tulos muodossa [(rivi, tavu), ...] nuottijärjestyksessä."""
     return [(ly.get("number"), ly.findtext("text"))
             for n in m.findall("note") for ly in n.findall("lyric")]
+
+
+class Elisiot(unittest.TestCase):
+    """Kaksi tavua yhdellä nuotilla samalla sanarivillä.
+
+    Peräkkäisten sanojen tavut voivat osua samalle nuotille ("mor-te ae-ter-na"
+    Libera messä), ja lähde kirjoittaa ne kahdeksi <lyric>-alkioksi samalla
+    numerolla. MuseScore piirtää silloin vain toisen, eli tavu katoaa
+    stemmasta kokonaan.
+    """
+
+    def test_samalle_riville_osuvat_tavut_yhdistyvat(self):
+        m = measure((1, [("1", "mor")]), (1, [("1", "te"), ("1", "ae")]))
+        self.assertEqual(merge_elisions(m), 1)
+        self.assertEqual(rows(m), [("1", "mor"), ("1", "te")])
+        ly = m.findall("note")[1].find("lyric")
+        self.assertEqual([e.tag for e in ly],
+                         ["text", "elision", "text"])
+        self.assertEqual([e.text for e in ly], ["te", ELISIO, "ae"])
+
+    def test_elisiomerkki_on_rikkumaton_valilyonti(self):
+        # Tavallinen välilyönti katoaa MuseScoren tuonnissa ja tavut painuvat
+        # yhteen ("teae"); mitattu 4.7.4:llä.
+        self.assertEqual(ELISIO, "\u00a0")
+
+    def test_kahdennus_poistetaan_eika_yhdisteta(self):
+        # Osan 16 t.416 laulaa saman "me,":n kahdesti samalla nuotilla.
+        m = measure((1, [("1", "me,"), ("1", "me,")]))
+        self.assertEqual(merge_elisions(m), 1)
+        self.assertEqual(rows(m), [("1", "me,")])
+        self.assertIsNone(m.find("note/lyric/elision"))
+
+    def test_eri_sanariveihin_ei_kosketa(self):
+        # Divisin kaksi ääntä laulavat eri tekstiä ja tarvitsevat kaksi riviä.
+        m = measure((1, [("1", "par"), ("2", "Pi")]))
+        self.assertEqual(merge_elisions(m), 0)
+        self.assertEqual(rows(m), [("1", "par"), ("2", "Pi")])
+
+    def test_jatkoviiva_pysyy_lyricin_viimeisena(self):
+        # <extend> on MusicXML:ssä <lyric>:n viimeinen lapsi.
+        m = measure((1, [("1", "te"), ("1", "ae")]))
+        ly = m.find("note/lyric")
+        ET.SubElement(ly, "extend")
+        merge_elisions(m)
+        self.assertEqual([e.tag for e in ly][-1], "extend")
+
+    def test_yhdistetty_tavu_paatyy_sanariville_yksi(self):
+        # merge_elisions ajetaan ennen normalise_lyriciä, joten nuotti ei
+        # enää näytä "kaksi tavua, tarvitaan kaksi riviä" -tapaukselta.
+        m = measure((1, [("part5verse1", "te"), ("part5verse1", "ae")]))
+        merge_elisions(m)
+        normalise_lyrics(m)
+        self.assertEqual(rows(m), [("1", "te")])
+
+
+class Osaotsikot(unittest.TestCase):
+    """Otsikon muoto on sopimus: sivuotsikot.py tunnistaa osanvaihdoksen
+    valmiista tiedostosta juuri tällä merkkijonolla."""
+
+    def test_muoto_on_numero_kaksi_valia_nimi(self):
+        self.assertEqual(osaotsikko("II·10", "Lacrymosa"), "II·10  Lacrymosa")
+
+    def test_lista_kattaa_kaikki_osat_jarjestyksessa(self):
+        self.assertEqual(len(OSAOTSIKOT), len(MOVEMENTS))
+        self.assertEqual(OSAOTSIKOT[0], "I  Requiem & Kyrie")
+        self.assertEqual(OSAOTSIKOT[-1], "VII  Libera me")
+        self.assertEqual(len(set(OSAOTSIKOT)), len(OSAOTSIKOT))
 
 
 class VerseNumber(unittest.TestCase):
@@ -115,10 +183,10 @@ class DiesIraenNumerointi(unittest.TestCase):
     joskus uudelleen "oikein", tämä testi kaatuu.
     """
 
-    KIRJA = {"02-Verdi-Dies_irae.mxl": 1, "03-Verdi-Tuba_mirum.mxl": 91,
+    KIRJA = {"02-Verdi-Dies_irae-kasin.mxl": 1, "03-Verdi-Tuba_mirum.mxl": 91,
              "04-Verdi-Mors_stupebit.mxl": 143,
              "05-Verdi-Liber_scriptus-kasin.mxl": 162,
-             "06-Verdi-Quid_sum_miser.mxl": 271, "07-Verdi-Rex.mxl": 322,
+             "06-Verdi-Quid_sum_miser.mxl": 271, "07-Verdi-Rex-kasin.mxl": 322,
              "08-Verdi_Recordare.mxl": 386, "09-Verdi_Ingemisco.mxl": 450,
              "10-Verdi_Confutatis.mxl": 507,
              "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": 573,

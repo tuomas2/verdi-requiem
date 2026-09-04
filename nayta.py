@@ -31,6 +31,8 @@ import sys
 import zipfile
 import xml.etree.ElementTree as ET
 
+import yhdista
+
 
 def load(path):
     if path.lower().endswith(".mxl"):
@@ -109,13 +111,17 @@ def main(argv):
     lo, hi = int(argv[1]), int(argv[2])
     # Tahtinumerot alkavat joka pääosassa alusta, joten sama numero osuu
     # yhdistetyssä tiedostossa moneen kohtaan. yhdista.py kirjoittaa osan
-    # otsikon lihavoituna sanana osan ensimmäiseen tahtiin; poimitaan se,
-    # jotta tulosteesta näkee kummasta tahdista 126 on kyse.
+    # otsikon osan ensimmäiseen tahtiin; poimitaan se, jotta tulosteesta
+    # näkee kummasta tahdista 126 on kyse.
+    #
+    # Otsikko tunnistetaan tekstistä eikä fontista: lähteissä on omia
+    # lihavoituja ohjetekstejä ("Alle", "4 soli"), ja fonttihaku näytti niitä
+    # osan nimenä — Libera men tahti 274 luki "[Alle]".
     osa = ""
     for m in part.findall("measure"):
         for w in m.findall("direction/direction-type/words"):
-            if w.get("font-weight") == "bold":
-                osa = w.text or ""
+            if w.text in yhdista.OSAOTSIKOT:
+                osa = w.text
         numero = int(m.get("number"))
         if not lo <= numero <= hi:
             continue

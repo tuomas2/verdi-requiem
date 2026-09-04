@@ -14,6 +14,7 @@ import copy
 import sys
 import zipfile
 import xml.etree.ElementTree as ET
+from collections import OrderedDict
 
 # ---------------------------------------------------------------- kohdeviivastot
 # (nimi, lyhenne, viivastoja, oletusavain kun osasto vaikenee koko osan)
@@ -39,22 +40,22 @@ TARGETS = [
 # (tiedosto, numero partituurissa, nimi)
 MOVEMENTS = [
     ("01-Verdi_Requiem-kasin.mxl",                  "I",     "Requiem & Kyrie"),
-    ("02-Verdi-Dies_irae.mxl",                      "II·1",  "Dies irae"),
+    ("02-Verdi-Dies_irae-kasin.mxl",                "II·1",  "Dies irae"),
     ("03-Verdi-Tuba_mirum.mxl",                     "II·2",  "Tuba mirum"),
     ("04-Verdi-Mors_stupebit.mxl",                  "II·3",  "Mors stupebit"),
     ("05-Verdi-Liber_scriptus-kasin.mxl",           "II·4",  "Liber scriptus"),
     ("06-Verdi-Quid_sum_miser.mxl",                 "II·5",  "Quid sum miser"),
-    ("07-Verdi-Rex.mxl",                            "II·6",  "Rex tremendae"),
+    ("07-Verdi-Rex-kasin.mxl",                      "II·6",  "Rex tremendae"),
     ("08-Verdi_Recordare.mxl",                      "II·7",  "Recordare"),
     ("09-Verdi_Ingemisco.mxl",                      "II·8",  "Ingemisco"),
     ("10-Verdi_Confutatis.mxl",                     "II·9",  "Confutatis"),
     ("10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl",  "II·9b", "Dies irae (kertaus)"),
     ("11-Verdi_Lacrymosa-kasin.mxl",                "II·10", "Lacrymosa"),
     ("12-Verdi_Offertorio.mxl",                     "III",   "Offertorio"),
-    ("13-Verdi-Sanctus.mxl",                        "IV",    "Sanctus"),
+    ("13-Verdi-Sanctus-kasin.mxl",                  "IV",    "Sanctus"),
     ("14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl", "V",     "Agnus Dei"),
     ("15-Verdi_Lux_aeterna.mxl",                    "VI",    "Lux aeterna"),
-    ("16-Libera_Me.mxl",                            "VII",   "Libera me"),
+    ("16-Libera_Me-kasin.mxl",                      "VII",   "Libera me"),
 ]
 
 # ---------------------------------------------------------------- kartoitus
@@ -82,7 +83,7 @@ MAPPING = {
         # tähän "Piano": ["P17"].
         # P9 on kokonaan tyhjä eikä sitä käytetä.
     },
-    "02-Verdi-Dies_irae.mxl": {
+    "02-Verdi-Dies_irae-kasin.mxl": {
         "Kuoro S": ["P1"], "Kuoro A": ["P2"], "Kuoro T": ["P3"], "Kuoro B": ["P4"],
         "Piano": ["P5"],
     },
@@ -101,7 +102,7 @@ MAPPING = {
     "06-Verdi-Quid_sum_miser.mxl": {
         "Solisti S": ["P1"], "Solisti M-S": ["P2"], "Solisti T": ["P3"], "Piano": ["P4"],
     },
-    "07-Verdi-Rex.mxl": {
+    "07-Verdi-Rex-kasin.mxl": {
         "Solisti S": ["P1"], "Solisti M-S": ["P2"], "Solisti T": ["P3"], "Solisti B": ["P4"],
         "Kuoro S": ["P5"], "Kuoro A": ["P6"], "Kuoro T": ["P7"], "Kuoro B": ["P8"],
         "Piano": ["P9"],
@@ -130,7 +131,7 @@ MAPPING = {
         "Solisti S": ["P1"], "Solisti M-S": ["P2"], "Solisti T": ["P3"], "Solisti B": ["P4"],
         "Piano": ["P5"],
     },
-    "13-Verdi-Sanctus.mxl": {
+    "13-Verdi-Sanctus-kasin.mxl": {
         "Kuoro S": ["P1"], "Kuoro A": ["P2"], "Kuoro T": ["P3"], "Kuoro B": ["P4"],
         "Kuoro S II": ["P5"], "Kuoro A II": ["P6"], "Kuoro T II": ["P7"], "Kuoro B II": ["P8"],
         "Piano": ["P9"],
@@ -147,7 +148,7 @@ MAPPING = {
         # Nimeämättömät osastot; Lux aeterna on mezzon, tenorin ja basson trio.
         "Solisti M-S": ["P1"], "Solisti T": ["P2"], "Solisti B": ["P3"], "Piano": ["P4"],
     },
-    "16-Libera_Me.mxl": {
+    "16-Libera_Me-kasin.mxl": {
         "Solisti S": ["P1"],
         "Kuoro S": ["P2"], "Kuoro A": ["P3"], "Kuoro T": ["P4"], "Kuoro B": ["P5"],
         "Piano": ["P6"],
@@ -167,7 +168,7 @@ OMR_SOURCES = {"01-Verdi_Requiem-kasin.mxl",
                "14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl",
                "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl"}
 
-SANCTUS = "13-Verdi-Sanctus.mxl"
+SANCTUS = "13-Verdi-Sanctus-kasin.mxl"
 SINGER_PARTS = {
     "Sopraano I":     ("Kuoro S", "Kuoro S"),
     "Sopraano II":    ("Kuoro S", "Kuoro S II"),
@@ -212,10 +213,11 @@ SINGER_PARTS = {
 # luku *2026-09-02 (later): the book's own bar numbers for Dies irae*.
 NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False
 DIES_IRAE_ALUT = {
-    "02-Verdi-Dies_irae.mxl": 1, "03-Verdi-Tuba_mirum.mxl": 91,
+    "02-Verdi-Dies_irae-kasin.mxl": 1, "03-Verdi-Tuba_mirum.mxl": 91,
     "04-Verdi-Mors_stupebit.mxl": 143,
     "05-Verdi-Liber_scriptus-kasin.mxl": 162,
-    "06-Verdi-Quid_sum_miser.mxl": 271, "07-Verdi-Rex.mxl": 322,
+    "06-Verdi-Quid_sum_miser.mxl": 271,
+    "07-Verdi-Rex-kasin.mxl": 322,
     "08-Verdi_Recordare.mxl": 386, "09-Verdi_Ingemisco.mxl": 450,
     "10-Verdi_Confutatis.mxl": 507,
     "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": 573,
@@ -584,6 +586,66 @@ def verse_number(value):
     return int(digits[-1]) if "verse" in (value or "") else int(digits)
 
 
+# Elisiomerkki on rikkumaton välilyönti (U+00A0) eikä tavallinen välilyönti
+# eikä sidekaari (U+203F): mitattu MuseScore 4.7.4:llä. Tavallinen välilyönti
+# katoaa tuonnissa ja tavut painuvat yhteen ("teae"), sidekaaren fontti ei
+# tunne ja tulos on sama. Rikkumattomalla tulee väli, eli "te ae".
+ELISIO = " "
+
+
+def merge_elisions(measure):
+    """Yhdistä samalle nuotille ja samalle sanariville osuvat tavut.
+
+    Kaksi peräkkäisen sanan tavua voi tulla yhdelle nuotille — "morte
+    aeterna" lauletaan Libera messä niin, että "te" ja "ae" ovat samalla
+    kahdeksasosalla. Lähde (Sibelius + Dolet) kirjoittaa ne kahdeksi
+    <lyric>-alkioksi, joilla on SAMA sanarivin numero, ja MuseScore piirtää
+    silloin vain toisen: stemmassa luki pelkkä "mor - te" ja "ae" katosi.
+    Oikea esitystapa on yksi <lyric>, jossa tavut erottaa <elision>.
+
+    Sama tarkistus poimii kiinni myös kahdennuksen: jos molemmilla tavuilla
+    on sama teksti, kyse ei ole elisiosta vaan lähteen virheestä (osan 16
+    tahti 416 laulaa "me," kahdesti samalla nuotilla), ja jälkimmäinen
+    poistetaan.
+
+    Eri sanariville merkittyihin tavuihin ei kosketa — divisin kaksi ääntä
+    laulavat eri tekstiä ja tarvitsevat kaksi riviä.
+    """
+    yhdistetty = 0
+    for note in measure.findall("note"):
+        lyrics = note.findall("lyric")
+        if len(lyrics) < 2:
+            continue
+        ryhmat = OrderedDict()
+        for lyric in lyrics:
+            ryhmat.setdefault(verse_number(lyric.get("number")), []).append(lyric)
+        for samalla in ryhmat.values():
+            first = samalla[0]
+            for extra in samalla[1:]:
+                if extra.findtext("text") == first.findtext("text"):
+                    note.remove(extra)
+                    yhdistetty += 1
+                    continue
+                # <extend> on <lyric>:n viimeinen lapsi, joten uudet tavut
+                # työnnetään sen eteen.
+                kohta = len(first)
+                for i, lapsi in enumerate(first):
+                    if lapsi.tag == "extend":
+                        kohta = i
+                        break
+                osat = [ET.Element("elision")]
+                osat[0].text = ELISIO
+                for tag in ("syllabic", "text"):
+                    e = extra.find(tag)
+                    if e is not None:
+                        osat.append(e)
+                for i, e in enumerate(osat):
+                    first.insert(kohta + i, e)
+                note.remove(extra)
+                yhdistetty += 1
+    return yhdistetty
+
+
 def normalise_lyrics(measure):
     """Yhtenäistä sanarivien numerot ja siirrä eksyneet tavut pääriville.
 
@@ -723,6 +785,20 @@ def saumaraportti(alueet):
     return ["Dies iraen saumat (numerointi kirjan mukaan, ks. DIES_IRAE_ALUT):"] + rivit
 
 
+def osaotsikko(numero, otsikko):
+    """Osan otsikko sellaisena kuin se kirjoitetaan osan ensimmäisen tahdin
+    päälle. Muoto on sopimus: `nayta.py` ja `sivuotsikot.py` tunnistavat
+    osanvaihdoksen valmiista tiedostosta juuri tällä merkkijonolla, koska
+    lähteissä on omia lihavoituja ohjetekstejä ("Alle", "4 soli") joita
+    pelkkä fonttihaku poimisi mukaan."""
+    return f"{numero}  {otsikko}"
+
+
+# Kaikkien osien otsikot siinä järjestyksessä kuin ne partituuriin tulevat.
+OSAOTSIKOT = [osaotsikko(numero, otsikko)
+              for _tiedosto, numero, otsikko in MOVEMENTS]
+
+
 def title_direction(label):
     d = ET.Element("direction", {"placement": "above"})
     dt = ET.SubElement(d, "direction-type")
@@ -794,6 +870,7 @@ def main():
     repaired = 0
     filled = 0
     evened = 0
+    elisions = 0
     stats = {name: 0 for name, *_ in TARGETS}
 
     alueet = []
@@ -869,6 +946,7 @@ def main():
                     m.remove(pr)
 
                 filled += ensure_filled(m, div, beats, btype, staves)
+                elisions += merge_elisions(m)
                 normalise_lyrics(m)
                 repaired += fix_halved_notes(m, div, beats, btype)
                 repaired += fix_rest_overflow(m, div, beats, btype)
@@ -894,7 +972,7 @@ def main():
                     m.insert(0, pr)
                     if name in TITLE_PARTS or len(TARGETS) == 1:
                         pos = 1 + (1 if m.find("attributes") is not None else 0)
-                        m.insert(pos, title_direction(f"{numero}  {otsikko}"))
+                        m.insert(pos, title_direction(osaotsikko(numero, otsikko)))
                 if slot == len(numbers) - 1 and m.find("barline") is None:
                     bl = ET.SubElement(m, "barline", {"location": "right"})
                     ET.SubElement(bl, "bar-style").text = "light-heavy"
@@ -920,6 +998,9 @@ def main():
         print(f"täytetty {filled} sisällötöntä tahtia kokotahdin tauolla")
     if evened:
         print(f"tasattu {evened} vääränmittaista tahtia (konelukemisen osat)")
+    if elisions:
+        print(f"yhdistetty {elisions} samalle nuotille osunutta tavuparia "
+              f"(elisio, ks. merge_elisions)")
     if repaired:
         print(f"korjattu {repaired} kaksinkertaista nuottiarvoa (piano)")
     for rivi in saumaraportti(alueet):

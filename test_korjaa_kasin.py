@@ -7,8 +7,10 @@ jokaisen toimenpiteen pitää kaatua kun lähtötilanne ei ole odotettu.
 import unittest
 import xml.etree.ElementTree as ET
 
-from korjaa_kasin import (OSA_I, OSA_II10_DIVISI, OSA_II10_KUORO_B, OSAT_II4,
-                          Osa, find_part, load, sovella, yksi_sanarivi)
+from korjaa_kasin import (OSA_I, OSA_II1, OSA_II6, OSA_II10_DIVISI,
+                          OSA_II10_KUORO_B, OSA_IV, OSA_VII, OSAT_II4,
+                          Osa, find_part, kuvaa, load, lue_korkeus, sovella,
+                          yksi_sanarivi)
 
 
 def osa(korjaukset, yksi_rivi=False):
@@ -104,6 +106,58 @@ class Toimenpiteet(unittest.TestCase):
                         ("2", 0, "lisaa", "end", "nis")]))
         self.assertEqual(rows(p), [("2", 0, "1", "end", "nis")])
 
+    def test_korkeus_vaihtaa_oktaavin(self):
+        p = part([("A3", [("1", "end", "la,")])])
+        sovella(p, osa([("1", 0, "korkeus", "A3", "A2")]))
+        n = p.find("measure/note")
+        self.assertEqual(n.findtext("pitch/step"), "A")
+        self.assertEqual(n.findtext("pitch/octave"), "2")
+        self.assertIsNone(n.find("pitch/alter"))
+        # Tavu ei liiku korkeuden mukana.
+        self.assertEqual(rows(p), [("1", 0, "1", "end", "la,")])
+
+    def test_korkeus_pudottaa_vanhan_korkeuden_asemointivihjeet(self):
+        # <accidental>, <stem> ja default-y on laskettu vanhalle korkeudelle:
+        # Lacrymosan t.653 G:llä oli painettu palautusmerkki, joka olisi
+        # C:llä väärä, ja varren suunta kääntyy oktaavihypyssä.
+        p = part([("G3", [])])
+        n = p.find("measure/note")
+        n.set("default-y", "-35")
+        ET.SubElement(n, "accidental").text = "natural"
+        ET.SubElement(n, "stem").text = "up"
+        sovella(p, osa([("1", 0, "korkeus", "G3", "C3")]))
+        self.assertIsNone(n.find("accidental"))
+        self.assertIsNone(n.find("stem"))
+        self.assertNotIn("default-y", n.attrib)
+
+    def test_korkeus_kirjoittaa_etumerkin_alteriksi(self):
+        p = part([("C3", [])])
+        sovella(p, osa([("1", 0, "korkeus", "C3", "Bes2")]))
+        n = p.find("measure/note")
+        self.assertEqual((n.findtext("pitch/step"), n.findtext("pitch/alter"),
+                          n.findtext("pitch/octave")), ("B", "-1", "2"))
+        # <pitch>:n lasten järjestys on MusicXML:ssä sidottu.
+        self.assertEqual([e.tag for e in n.find("pitch")],
+                         ["step", "alter", "octave"])
+
+
+class Korkeudenluku(unittest.TestCase):
+    """Kirjoitusasu on sama kuin nayta.py:n tulosteessa, jotta laulajan
+    raportin tarkistanut voi kopioida sen suoraan taulukkoon."""
+
+    def test_edestakainen(self):
+        for teksti in ("C3", "A2", "Bes3", "Fis4", "Ceses2", "Gisis3"):
+            with self.subTest(teksti=teksti):
+                p = part([("C3", [])])
+                sovella(p, osa([("1", 0, "korkeus", "C3", teksti)]))
+                self.assertEqual(kuvaa(p.find("measure/note")), teksti)
+
+    def test_tuntematon_asu_kaataa(self):
+        for teksti in ("H3", "C", "Cb3", "C3x"):
+            with self.subTest(teksti=teksti):
+                with self.assertRaises(AssertionError):
+                    lue_korkeus(teksti)
+
 
 class Vartijat(unittest.TestCase):
     """Väärään paikkaan osuva korjaus on pahempi kuin pysähtynyt ajo."""
@@ -143,6 +197,16 @@ class Vartijat(unittest.TestCase):
         sovella(p, osa([("1", 0, "jatka")]))
         with self.assertRaises(AssertionError):
             sovella(p, osa([("1", 0, "jatka")]))
+
+    def test_korkeus_kaataa_jos_vanha_korkeus_on_eri(self):
+        p = part([("A3", [])])
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", 0, "korkeus", "A2", "A3")]))
+
+    def test_korkeus_kaataa_tauolla(self):
+        p = part([(None, [])])
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", 0, "korkeus", "rest", "A2")]))
 
     def test_nuotin_poisto_kaataa_jos_kohde_ei_ole_tauko(self):
         p = part([("C3", []), ("D3", [])])
@@ -348,6 +412,127 @@ class LacrymosaKokonaisuutena(unittest.TestCase):
                          [("1", "end", "ce")])
         self.assertEqual([t for _, _, t in self.tavut(find_part(root, "P9"), "54")],
                          ["La", "cry", "mo"])
+
+    def test_tahti_653_on_c_eika_g(self):
+        """Painettu sivu 6 on tässä väärässä, ks. korjauksen kommentti.
+
+        Naulattu siksi, että tämä kohta on kertaalleen tarkistettu ja
+        ratkaistu G:n hyväksi juuri siksi että painettu palautusmerkki
+        näytti todistavan sen. Tiedoston sisäiset todisteet — bassosolisti
+        ja pianon vasen käsi — sanovat C.
+        """
+        p = find_part(load(OSA_II10_KUORO_B.mxl), "P8")
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        alkuun = tahdit["30"].findall("note")[0]
+        self.assertEqual(kuvaa(alkuun), "G3")
+        self.assertEqual(alkuun.findtext("accidental"), "natural")
+
+        p = find_part(load(OSA_II10_KUORO_B.mxl), "P8")
+        sovella(p, OSA_II10_KUORO_B)
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        korjattu = tahdit["30"].findall("note")[0]
+        self.assertEqual(kuvaa(korjattu), "C3")
+        self.assertIsNone(korjattu.find("accidental"))
+        # Sama sävel kuin bassosolistilla, joka laulaa jakson unisonossa.
+        solisti = find_part(load(OSA_II10_KUORO_B.mxl), "P4")
+        soolo = {m.get("number"): m for m in solisti.findall("measure")}
+        self.assertEqual(kuvaa(soolo["30"].findall("note")[0]), "C3")
+
+
+class DiesIraeJaLiberaMeSamaKuvio(unittest.TestCase):
+    """Sama "puolinuotti + oktaavia alempi kahdeksasosa" kahdessa osassa.
+
+    Laulaja raportoi kummankin erikseen (II·1 t.28 ja VII t.72), ja
+    kuorotiedostot vahvistivat kummankin. Kuvion ensimmäinen esiintymä
+    (t.24 ja t.68) EI putoa oktaavia kummassakaan osassa, ja se on
+    molemmissa tiedostoissa niin — poikkeus on aito eikä vika, joten se
+    naulataan tähän ettei sitä "korjata" myöhemmin.
+    """
+
+    def kuvio(self, osa_, tahti):
+        p = find_part(load(osa_.mxl), osa_.osasto)
+        sovella(p, osa_)
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        return [kuvaa(n) for n in tahdit[tahti].findall("note")[:2]]
+
+    def test_dies_iraen_tahti_28_putoaa_oktaavin(self):
+        self.assertEqual(self.kuvio(OSA_II1, "28"), ["A3", "A2"])
+
+    def test_dies_iraen_tahti_24_ei_putoa(self):
+        self.assertEqual(self.kuvio(OSA_II1, "24"), ["A3", "A3"])
+
+    def test_libera_men_tahti_72_putoaa_oktaavin(self):
+        self.assertEqual(self.kuvio(OSA_VII, "72"), ["A3", "A2"])
+
+    def test_libera_men_tahti_68_ei_putoa(self):
+        self.assertEqual(self.kuvio(OSA_VII, "68"), ["A3", "A3"])
+
+
+class MuutOsatKokonaisuutena(unittest.TestCase):
+    """Rex tremendae, Sanctus ja Libera me oikeita lähdetiedostoja vasten."""
+
+    def tavut(self, osa_, tahti):
+        p = find_part(load(osa_.mxl), osa_.osasto)
+        sovella(p, osa_)
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        return [(ly.findtext("syllabic"), ly.findtext("text"))
+                for n in tahdit[tahti].findall("note")
+                for ly in n.findall("lyric")]
+
+    def test_rex_tremendae_laulaa_salva_me(self):
+        # t.44-46 = juokseva 365-367: "sal-va me, sal-va me,"
+        self.assertEqual(self.tavut(OSA_II6, "45"),
+                         [("single", "me,"), ("begin", "sal"), ("end", "va")])
+
+    def test_rex_tremendae_lahteessa_on_le(self):
+        p = find_part(load(OSA_II6.mxl), "P8")
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        self.assertEqual(tahdit["45"].findtext("note/lyric/text"), "le,")
+
+    def test_sanctus_laulaa_coeli_et_terra(self):
+        self.assertEqual(self.tavut(OSA_IV, "99"), [("begin", "coe")])
+        self.assertEqual(self.tavut(OSA_IV, "100"),
+                         [("end", "li"), ("single", "et")])
+
+    def test_sanctus_kirjoitusasu_on_lahteen_oma(self):
+        # Sama lause t.27 kirjoittaa "coe", ei "cae"; pysytään siinä.
+        p = find_part(load(OSA_IV.mxl), "P4")
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        self.assertIn("coe", [ly.findtext("text")
+                              for n in tahdit["27"].findall("note")
+                              for ly in n.findall("lyric")])
+
+    def test_libera_me_tahti_98_laulaa_dies(self):
+        # Tavut tulevat 1. ja 3. nuotille; 2. on melisman sisällä.
+        p = find_part(load(OSA_VII.mxl), OSA_VII.osasto)
+        sovella(p, OSA_VII)
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        notes = tahdit["98"].findall("note")
+        self.assertEqual([n.findtext("lyric/text") for n in notes],
+                         ["di", None, "es"])
+        # Sama jako kuin basson omassa tahdissa 100.
+        notes = tahdit["100"].findall("note")
+        self.assertEqual([n.findtext("lyric/text") for n in notes],
+                         ["di", None, "es"])
+
+    def test_libera_me_tahti_93_ei_muutu(self):
+        """Laulaja sanoi tahdiksi 93, mutta 93 on oikein ja 98 oli väärä.
+
+        Tämä on tässä ettei numeroa 93 korjattaisi myöhemmin "laulajan
+        mukaan": 93 laulaa "il-la," aivan kuten saman kuvion 68 ja 72.
+        """
+        self.assertEqual(self.tavut(OSA_VII, "93"),
+                         [("begin", "il"), ("end", "la,")])
+
+    def test_lahdetiedostoja_ei_muuteta(self):
+        for osa_, tahti, odotus in ((OSA_IV, "99", []),
+                                    (OSA_VII, "98", [])):
+            p = find_part(load(osa_.mxl), osa_.osasto)
+            tahdit = {m.get("number"): m for m in p.findall("measure")}
+            with self.subTest(osa=osa_.mxl):
+                self.assertEqual([ly.findtext("text")
+                                  for n in tahdit[tahti].findall("note")
+                                  for ly in n.findall("lyric")], odotus)
 
 
 if __name__ == "__main__":

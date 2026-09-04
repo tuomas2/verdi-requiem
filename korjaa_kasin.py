@@ -53,6 +53,7 @@ class Osa:
 #   ("lisaa", syllabic, teksti)         lisää tavu nuotille jolla ei ole
 #   ("aseta", vanha, syllabic, teksti)  korvaa tavu toisella
 #   ("jatka",)                          lisää tavuun melisman jatkoviiva
+#   ("korkeus", vanha, uusi)            vaihda nuotin korkeus, esim. "A3"->"A2"
 #   ("poista_nuotti", kuvaus)           poista nuotti tai tauko
 #   ("kopioi_tahti", lähdetahti)        korvaa tauolla oleva tahti toisen
 #                                       tahdin sisällöllä, sanat mukaan lukien
@@ -102,6 +103,29 @@ OSA_I = Osa(
     ),
 )
 
+# Dies irae (II·1), tahti 28. Laulaja raportoi 2026-09-04, että tahdin toinen
+# nuotti on oktaavia alempi A. Sama havainto oli jo kirjattu avoimena
+# 2026-09-03: kuoron oma tiedosto (musescore/02_dies_irae) laulaa siellä A2:n
+# ja sen Bass 2 on tauolla, joten kyse ei ole divisistä.
+#
+# Kaksi asiaa vahvistaa lukeman. Ensin: kuorotiedoston Bass 1 ja meidän P4
+# täsmäävät koko osan 91 tahdista 90:ssä ja tahti 28 on niiden AINOA ero.
+# Toiseksi kuvio on osan sisällä johdonmukainen: sama "puolinuotti + oktaavia
+# alempi kahdeksasosa" -kadenssi toistuu tahdeissa 32 (C4->C3), 34
+# (Bes3->Bes2) ja 36 (Aes3->Aes2). Tahti 24 (A3->A3) ei putoa oktaavia, ja
+# sekin on molemmissa tiedostoissa sama — eli poikkeus on aito eikä vika.
+# Osalla 02 ei ole lähde-PDF:ää, joten silmällä tarkistettavaa sivua ei ole.
+OSA_II1 = Osa(
+    mxl="02-Verdi-Dies_irae.mxl",
+    out="02-Verdi-Dies_irae-kasin.mxl",
+    osasto="P4",
+    nimi="Kuoro B",
+    yksi_sanarivi=False,
+    korjaukset=(
+        ("28", 1, "korkeus", "A3", "A2"),   # "Sy-bil-la," viimeinen tavu
+    ),
+)
+
 # Liber scriptus, paikalliset tahdit 68, 70 ja 72 (juoksevat 229, 231 ja 233):
 # kuoron lyhyt "Di-es i-rae." -välihuudahdus puuttui kokonaan kaikilta
 # neljältä ääneltä. Lähdetiedostossa on kolme näistä kuudesta (paikalliset
@@ -126,6 +150,22 @@ OSAT_II4 = [
     for pid, nimi in (("P2", "Kuoro S"), ("P3", "Kuoro A"),
                       ("P4", "Kuoro T"), ("P5", "Kuoro B"))
 ]
+
+# Rex tremendae (II·6), paikallinen tahti 45 = juokseva 366. Laulaja raportoi,
+# että tahdin ensimmäisellä nuotilla pitää olla "me" eikä "le" — teksti on
+# "sal-va me". Kirjoitusvirhe lähdetiedostossa, ja se näkyy siitä että
+# kuorosopraano (P5) laulaa samassa tahdissa samalla iskulla "me,". Basson
+# ympäristö on jo oikein: t.44 "sal-va", t.45 "sal-va", t.46 "me,".
+OSA_II6 = Osa(
+    mxl="07-Verdi-Rex.mxl",
+    out="07-Verdi-Rex-kasin.mxl",
+    osasto="P8",
+    nimi="Kuoro B",
+    yksi_sanarivi=False,
+    korjaukset=(
+        ("45", 0, "aseta", "le,", "single", "me,"),
+    ),
+)
 
 # Lacrymosa (II·10). Sanakerros on CPDL:n lähteessä väärä kahdessa äänessä,
 # ja kyse ei ole konelukemasta: tämä tiedosto tulee Finale + Dolet -erästä,
@@ -159,6 +199,28 @@ OSA_II10_KUORO_B = Osa(
     nimi="Kuoro B",
     yksi_sanarivi=False,
     korjaukset=(
+        # --- t.653: painettu sivu on väärässä, kaikki muu sanoo C ---
+        #
+        # Laulaja raportoi 2026-09-04, että "De-us."-sanan viimeinen nuotti on
+        # C eikä G. Tämä oli 2026-09-03 tarkistettu ja ratkaistu VÄÄRIN meidän
+        # hyväksi: lähde-PDF:n sivu 6 painaa kuorobasson viivastolle G:n
+        # palautusmerkillä (todettu kuvasta uudelleen, siinä ei ole
+        # lukuvirhettä), ja koska Des-duurissa C ei tarvitse merkkiä mutta G
+        # tarvitsee, painettu merkki näytti todistavan G:n.
+        #
+        # Kaikki muu sanoo C, ja kolme näistä on tästä samasta tiedostosta:
+        #   * bassosolisti P4 laulaa tahdit 28-29 nuotilleen samat kuin
+        #     kuorobasso ja päättyy C3:een — kuoro kaksintaa solistit tässä
+        #     jaksossa unisonossa, ja kuorotenori P7 päättyy samaan G4:ään
+        #     kuin tenorisolisti P3, joten muissa äänissä kaksinnus pitää.
+        #   * pianon vasen käsi soittaa t.30 ensimmäisellä iskulla C2+C3.
+        #   * sointu on C7 (kuoro S/A E4, T G4, pianon oikea käsi Bes5-E6-G6):
+        #     G:llä perussävel jäisi kokonaan kuorosta pois.
+        #   * kuoron oma tiedosto (musescore/04_dies_irae_2) laulaa C3:n.
+        # Painettu palautusmerkki poistuu korjauksen mukana; C on Des-duurissa
+        # merkitön. Jos kirja joskus osoittaa G:tä, tämä rivi kääntyy takaisin.
+        ("30", 0, "korkeus", "G3", "C3"),              # t.653
+
         # --- lähde-PDF:n sivut 7-9: kolme kertaa "huic ergo parce Deus" ---
         #
         # Laulaja raportoi 2026-09-03, että tahdista 657 alkaen kuorobasso
@@ -294,10 +356,66 @@ OSA_II10_DIVISI = Osa(
     ),
 )
 
+# Sanctus (IV), tahdit 99-100. Laulaja raportoi, että sana "cae-li" puuttuu:
+# rivi kuuluu "ple-ni sunt cae-li et ter-ra". Tahdin 99 kokonuotilla ei ollut
+# tavua lainkaan ja tahdin 100 "li" oli merkitty yksitavuiseksi (single),
+# joten stemmassa luki "sunt _ li et ter-ra".
+#
+# Kuoro I:n sopraano (P1) on samoissa tahdeissa oikein — "coe" t.99, "li"
+# t.100 — ja alt-, tenori- ja bassoäänestä puuttuu kaikista sama "coe".
+# Kirjoitusasu on tässä lähteessä "coe" eikä "cae" (niin myös osan aiemmassa
+# samassa lauseessa t.27), joten pysytään tiedoston omassa asussa.
+# Alto I ja Tenori I ovat yhä korjaamatta — laulaja lukee bassoa.
+OSA_IV = Osa(
+    mxl="13-Verdi-Sanctus.mxl",
+    out="13-Verdi-Sanctus-kasin.mxl",
+    osasto="P4",
+    nimi="Kuoro B",
+    yksi_sanarivi=False,
+    korjaukset=(
+        ("99", 0, "lisaa", "begin", "coe"),
+        ("100", 0, "aseta", "li", "end", "li"),   # single -> end, tavuviiva
+    ),
+)
+
+# Libera me (VII). Kaksi eri vikaa.
+#
+# 1. Tahti 72, toinen nuotti oktaavia alempi A. Sama kuvio ja sama vika kuin
+#    Dies iraen tahdissa 28 (ks. OSA_II1): osan alku on Dies irae -teeman
+#    kolmas paluu. Kuoron oma tiedosto (musescore/07_libera_me) laulaa siellä
+#    A2:n ja sen Bass 2 on tauolla. Kohdistus on yksikäsitteinen: sopraanon
+#    stemma osuu kuorotiedoston mezzoon yhtenä 127 tahdin lohkona (meidän
+#    44-170 = kuoron 11-137), ja sillä siirrolla basso täsmää muualla
+#    tahdista tahtiin. Tahti 68 on sama kuvio A3->A3 ja se täsmää — eli
+#    poikkeus on aito, kuten Dies iraen tahdissa 24.
+#
+# 2. Tahti 98, sanan "di-es" molemmat tavut puuttuivat kokonaan. Laulaja
+#    sanoi tahdiksi 93, mutta 93 laulaa "il-la," ja on oikein; hän kertoi
+#    myös tavut menevän tahdin ensimmäiselle ja kolmannelle nuotille, ja
+#    juuri tahti 98 on lähistön ainoa kolmen nuotin tahti ilman sanoja.
+#    Sanat jatkuvat tahdista 99 "ma-gna," eli "di-es mag-na" — juuri niin
+#    kuin laulaja sanoi. Kuoroaltto (P3) laulaa tahdissa 98 saman kuvion
+#    samalla jaolla ("di" 1. nuotille, 3. nuotille "es", välinuotti
+#    melismana), ja basson oma tahti 100 on rakenteeltaan identtinen.
+#    Kuorotenorilta (P4) puuttuvat samat tavut, mutta se on korjaamatta.
+OSA_VII = Osa(
+    mxl="16-Libera_Me.mxl",
+    out="16-Libera_Me-kasin.mxl",
+    osasto="P5",
+    nimi="Kuoro B",
+    yksi_sanarivi=False,
+    korjaukset=(
+        ("72", 1, "korkeus", "A3", "A2"),   # "di-es il-la," viimeinen tavu
+        ("98", 0, "lisaa", "begin", "di"),
+        ("98", 2, "lisaa", "end", "es"),
+    ),
+)
+
 # Osan 14 (Agnus Dei) korjaukset on aikanaan tehty suoraan lähdetiedostoon,
 # joten sillä ei ole omaa Osa-riviä. Jos se joskus puretaan tänne, ks.
 # CLAUDE.md, *Recipe*-luvun viimeinen kappale.
-OSAT = [OSA_I] + OSAT_II4 + [OSA_II10_KUORO_B, OSA_II10_DIVISI]
+OSAT = ([OSA_I, OSA_II1] + OSAT_II4
+        + [OSA_II6, OSA_II10_KUORO_B, OSA_II10_DIVISI, OSA_IV, OSA_VII])
 
 
 def lyriikat(note):
@@ -315,13 +433,54 @@ def uusi_lyric(syllabic, text):
     return ly
 
 
+# Korkeuden kirjoitusasu on sama kuin nayta.py:n tulosteessa, jotta laulajan
+# raportin tarkistanut voi kopioida sen suoraan taulukkoon: Bes3, Fis4, C3.
+MERKIT = {"-2": "eses", "-1": "es", "1": "is", "2": "isis"}
+ALTERIT = {v: k for k, v in MERKIT.items()}
+
+
 def kuvaa(note):
-    """Nuotin tunniste virheilmoituksia varten."""
+    """Nuotin tunniste virheilmoituksia varten, esim. "Bes3" tai "rest"."""
     pitch = note.find("pitch")
     if pitch is None:
         return "rest"
-    return (pitch.findtext("step") + (pitch.findtext("alter") or "")
+    alter = pitch.findtext("alter")
+    return (pitch.findtext("step") + MERKIT.get(alter, alter or "")
             + pitch.findtext("octave"))
+
+
+def lue_korkeus(teksti):
+    """"Bes3" -> ("B", "-1", "3"). Kääntää kuvaa():n tuloksen takaisin."""
+    assert len(teksti) >= 2, f"korkeus on vähintään sävel ja oktaavi: {teksti!r}"
+    step, loput = teksti[0], teksti[1:]
+    assert step in "ABCDEFG", f"tuntematon sävel {teksti!r}"
+    merkki, oktaavi = loput[:-1], loput[-1]
+    assert oktaavi.isdigit(), f"tuntematon oktaavi {teksti!r}"
+    assert merkki in ALTERIT or merkki == "", f"tuntematon etumerkki {teksti!r}"
+    return step, ALTERIT.get(merkki), oktaavi
+
+
+def aseta_korkeus(note, teksti):
+    """Kirjoita nuotin korkeus uudelleen ja pudota vanhan asemointivihjeet.
+
+    <accidental> on painettu etumerkki, <stem> varren suunta ja default-y
+    nuottipään pystysijainti — kaikki kolme on laskettu VANHALLE korkeudelle,
+    joten ne poistetaan ja MuseScore laskee ne uudelleen. Etumerkin se päättää
+    <alter>:sta ja sävellajista, joten oikea merkki tulee silti näkyviin.
+    """
+    step, alter, oktaavi = lue_korkeus(teksti)
+    pitch = note.find("pitch")
+    assert pitch is not None, "tauolla ei ole korkeutta"
+    for lapsi in list(pitch):
+        pitch.remove(lapsi)
+    ET.SubElement(pitch, "step").text = step
+    if alter is not None:
+        ET.SubElement(pitch, "alter").text = alter
+    ET.SubElement(pitch, "octave").text = oktaavi
+    for turha in ("accidental", "stem"):
+        for e in note.findall(turha):
+            note.remove(e)
+    note.attrib.pop("default-y", None)
 
 
 def sovella(part, osa):
@@ -379,6 +538,14 @@ def sovella(part, osa):
             ET.SubElement(ly[0], "extend")
             selosteet.append(f"t.{tahti}: jatkoviiva tavulle "
                              f"{teksti(ly[0])!r}")
+
+        elif laji == "korkeus":
+            odotettu, uusi = args
+            assert kuvaa(note) == odotettu, (
+                f"t.{tahti} nuotti {i}: odotettiin {odotettu}, "
+                f"on {kuvaa(note)}")
+            aseta_korkeus(note, uusi)
+            selosteet.append(f"t.{tahti}: {odotettu} -> {uusi}")
 
         elif laji == "kopioi_tahti":
             (lahde,) = args
