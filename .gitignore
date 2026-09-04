@@ -16,5 +16,8 @@ __pycache__/
 # Syntyvät komennolla harjoitus.py.
 harjoitus/
 
+# Vanha käsin tallennettu koko partituuri; ei viittauksia mistään.
+Verdi-Requiem-koko-oma.mscz
+
 # Sivuston paikallinen esikatselu; CI rakentaa julkaistavan version.
 _sivusto/
