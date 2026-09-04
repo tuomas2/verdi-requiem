@@ -107,8 +107,10 @@ nimestä, joten komennot toimivat sekä nimellä että täydellä polulla.
 
 ## Nuottien alkuperä
 
-Sävellys on public domainissa; Verdi kuoli 1901. Nuottiaineisto on CPDL:n
-(Choral Public Domain Library) editioita kahdesta erästä, ja erän tunnistaa
+Sävellys on public domainissa; Verdi kuoli 1901. Nuottiaineisto on peräisin
+CPDL:n (Choral Public Domain Library) Requiem-sivulta —
+<https://www.cpdl.org/wiki/index.php/Requiem_(Giuseppe_Verdi)> — kahtena
+eränä, ja erän tunnistaa
 tiedostonimen väliviivasta tai alaviivasta — **niitä ei siis pidä
 normalisoida**:
 

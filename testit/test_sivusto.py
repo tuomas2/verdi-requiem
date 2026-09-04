@@ -84,6 +84,13 @@ class Luotettavuus(unittest.TestCase):
         self.assertNotIn("✔", html)
         self.assertNotIn("melisma", html)
 
+    def test_lahde_on_linkitetty(self):
+        """Aineisto on CPDL:n editioita; lähde kuuluu näkyä sivulla eikä
+        vain repossa."""
+        html = sivusto.stemmasivu()
+        self.assertIn(sivusto.CPDL, html)
+        self.assertIn("cpdl.org", sivusto.CPDL)
+
     def test_referenssiedition_nimi_nakyy(self):
         """Käytännössä tärkein yksittäinen tieto laulajalle: täsmäävätkö
         tahtinumerot siihen nuottiin joka hänellä on kädessä."""

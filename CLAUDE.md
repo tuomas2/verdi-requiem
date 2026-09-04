@@ -174,6 +174,11 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `luotettavuus.py` | Per movement × voice: what has been verified and what has not |
 | `sivusto.py` | Builds the website into `_sivusto/`; CI runs the same command |
 
+All the source `.mxl` and PDF files came from **CPDL's Requiem page**,
+<https://www.cpdl.org/wiki/index.php/Requiem_(Giuseppe_Verdi)>, which is the
+citation to give when the sources need one. (The site sits behind a Cloudflare
+challenge, so `curl` gets a 403 — open it in a browser.)
+
 **The hyphen/underscore in source names encodes provenance, so do not
 normalise it.** Among the `Verdi*` files, `Verdi-*` came from a Sibelius 7.5.1
 export dated 2017-10-10 (movements 02–07, 13) and `Verdi_*` from a CPDL Finale

@@ -33,6 +33,7 @@ POHJA = "sivusto"
 VERKKOTUNNUS = "requiem.tuomasairaksinen.fi"
 
 GITHUB = "https://github.com/tuomas2/verdi-requiem"
+CPDL = "https://www.cpdl.org/wiki/index.php/Requiem_(Giuseppe_Verdi)"
 
 # Kaksi sivua riittää, ja stemmat on niistä se jota luetaan: se on etusivu.
 # Kun kohtia on näin vähän, jokainen mahtuu kertomaan mihin se vie.
@@ -120,11 +121,12 @@ def alaviite():
     """
     return """
 <h2>Mistä tämä on peräisin</h2>
-<p>Sävellys on public domainissa; Verdi kuoli 1901. Nuottiaineisto on CPDL:n
-(Choral Public Domain Library) editioita, jotka saa vapaasti levittää ja
-esittää. Kuusitoista erillistä osatiedostoa on yhdistetty yhdeksi
-partituuriksi, ja stemmat on tuotettu siitä. Tahtinumerointi on sovitettu
-Edition Petersin painokseen, jota vasten kuorobasso on myös käyty läpi.</p>
+<p>Sävellys on public domainissa; Verdi kuoli 1901. Nuottiaineisto on peräisin
+<a href="{CPDL}">CPDL:n (Choral Public Domain Library) Requiem-sivulta</a>:
+sen editiot saa vapaasti levittää ja esittää. Kuusitoista erillistä
+osatiedostoa on yhdistetty yhdeksi partituuriksi, ja stemmat on tuotettu
+siitä. Tahtinumerointi on sovitettu Edition Petersin painokseen, jota vasten
+kuorobasso on myös käyty läpi.</p>
 <p>Lähtökohta on kuorolaisen käytännön tarve: lukea omaa stemmaa niin että muu
 kuoro ja pianosäestys kuuluvat, kantaa stemma mukana lukulaitteella, ja löytää
 yksittäinen tahti kun kuoronjohtaja huutaa numeron.</p>
