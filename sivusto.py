@@ -119,7 +119,7 @@ def alaviite():
     Oma etusivunsa tälle olisi väliporras, joka pitää klikata pois tieltä
     ennen kuin pääsee siihen mitä sivustolta haetaan.
     """
-    return """
+    return f"""
 <h2>Mistä tämä on peräisin</h2>
 <p>Sävellys on public domainissa; Verdi kuoli 1901. Nuottiaineisto on peräisin
 <a href="{CPDL}">CPDL:n (Choral Public Domain Library) Requiem-sivulta</a>:
@@ -273,12 +273,14 @@ def stemmasivu():
 
     koko = "Verdi-Requiem-koko.mxl"
     sisalto = f"""
+<header class="masthead">
 <h1>Messa da Requiem</h1>
 <p class="johdanto">Verdin <em>Messa da Requiem</em>, kahdeksan kuorostemmaa
 harjoittelua varten. Jokaisen tahdin päällä on tahtinumero ja jokaisen sivun
 yläreunassa käynnissä olevan osan nimi, jotta yksittäisen tahdin löytää
 kuoronjohtajan huudosta. <strong>Tahtinumerot täsmäävät
 {e(luotettavuus.REFERENSSI)}in painoksen kanssa.</strong></p>
+</header>
 
 {luotettavuusteksti()}
 

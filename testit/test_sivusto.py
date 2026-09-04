@@ -105,6 +105,29 @@ class Luotettavuus(unittest.TestCase):
                 self.assertNotIn(tekninen, html)
 
 
+class Muotoilu(unittest.TestCase):
+    def test_sivuille_ei_jaa_muotoilemattomia_paikkamerkkeja(self):
+        """f-merkin unohtaminen mallipohjasta ei näy mitenkään ennen kuin
+        sivulla lukee {CPDL} — ja se ehti kerran julkaisuun asti."""
+        import re
+        for nimi, html in [("stemmat", sivusto.stemmasivu()),
+                           ("teksti", sivusto.tekstisivu())]:
+            jaljelle = re.findall(r"\{[A-Za-z_][A-Za-z_0-9.()\[\]]*\}", html)
+            with self.subTest(sivu=nimi):
+                self.assertEqual(jaljelle, [])
+
+    def test_otsikkotyyli_on_sama_kuin_tekstisivulla(self):
+        """Tekstisivu on itsenäinen omine tyyleineen, joten yhteinen ulkoasu
+        on ylläpidettävä eikä se seuraa itsestään."""
+        import re
+        def h1_koko(css):
+            osuma = re.search(r"h1\{[^}]*font-size:\s*([^;}]+)", css, re.S)
+            return osuma.group(1).strip() if osuma else None
+        jaettu = open("sivusto/tyyli.css", encoding="utf-8").read()
+        oma = open("sivusto/requiem.html", encoding="utf-8").read()
+        self.assertEqual(h1_koko(jaettu), h1_koko(oma))
+
+
 class Rakennus(unittest.TestCase):
     def test_kaikki_sivut_syntyvat(self):
         with tempfile.TemporaryDirectory() as d:
