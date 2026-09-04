@@ -8,9 +8,13 @@ import unittest
 import xml.etree.ElementTree as ET
 
 from korjaa_kasin import (OSA_I, OSA_II1, OSA_II6, OSA_II10_DIVISI,
-                          OSA_II10_KUORO_B, OSA_IV, OSA_VII, OSAT_II4,
-                          Osa, find_part, kuvaa, load, lue_korkeus, sovella,
+                          OSA_II10_KUORO_B, OSA_VII, OSA_VII_TENORI,
+                          OSAT_II4, OSAT_IV, Osa, find_part, kuvaa,
+                          kuvaa_kesto, load, lue_korkeus, sovella,
                           yksi_sanarivi)
+
+
+OSA_IV = next(o for o in OSAT_IV if o.osasto == "P4")   # Kuoro B
 
 
 def osa(korjaukset, yksi_rivi=False):
@@ -139,6 +143,111 @@ class Toimenpiteet(unittest.TestCase):
         # <pitch>:n lasten järjestys on MusicXML:ssä sidottu.
         self.assertEqual([e.tag for e in n.find("pitch")],
                          ["step", "alter", "octave"])
+
+
+def rytmi_part(*notes):
+    """Osasto yhdellä tahdilla; nuotti on (korkeus, "192/eighth.", aksentti).
+
+    part() ei kirjoita kestoja lainkaan, koska sanakorjaukset eivät niitä
+    tarvitse; rytmin ja aksentin toimenpiteet tarvitsevat.
+    """
+    p = ET.Element("part", {"id": "P1"})
+    m = ET.SubElement(p, "measure", {"number": "1"})
+    for pitch, kesto, aksentti in notes:
+        n = ET.SubElement(m, "note")
+        pe = ET.SubElement(n, "pitch")
+        ET.SubElement(pe, "step").text = pitch[0]
+        ET.SubElement(pe, "octave").text = pitch[1]
+        d, loput = kesto.split("/")
+        ET.SubElement(n, "duration").text = d
+        ET.SubElement(n, "voice").text = "1"
+        ET.SubElement(n, "type").text = loput.rstrip(".")
+        for _ in range(len(loput) - len(loput.rstrip("."))):
+            ET.SubElement(n, "dot")
+        if aksentti:
+            ET.SubElement(ET.SubElement(ET.SubElement(n, "notations"),
+                                        "articulations"), "accent")
+    return p
+
+
+class Rytmi(unittest.TestCase):
+    """Nuottiarvon ja aksentin vaihto, Libera men tahdin 88 tapaus."""
+
+    # Tahdin pituus tarkistetaan, joten kestoja vaihdetaan aina pareittain:
+    # yksi rivi yksinään ei voi olla kelvollinen korjaus.
+    PARI = (("1", 0, "kesto", "256/quarter", "192/eighth."),
+            ("1", 1, "kesto", "64/16th", "128/eighth"))
+
+    def rytmipari(self):
+        return rytmi_part(("F3", "256/quarter", False),
+                          ("E3", "64/16th", False))
+
+    def test_kesto_vaihtaa_arvon_ja_lisaa_pisteen(self):
+        p = self.rytmipari()
+        sovella(p, osa(self.PARI))
+        n, m = p.findall("measure/note")
+        self.assertEqual([kuvaa_kesto(n), kuvaa_kesto(m)],
+                         ["192/eighth.", "128/eighth"])
+        # <dot> tulee MusicXML:ssä heti <type>:n jälkeen.
+        self.assertEqual([e.tag for e in n],
+                         ["pitch", "duration", "voice", "type", "dot"])
+        self.assertNotIn("dot", [e.tag for e in m])
+
+    def test_kesto_poistaa_pisteen(self):
+        p = rytmi_part(("F3", "192/eighth.", False), ("E3", "64/16th", False))
+        sovella(p, osa([("1", 0, "kesto", "192/eighth.", "64/16th"),
+                        ("1", 1, "kesto", "64/16th", "192/eighth.")]))
+        self.assertEqual([kuvaa_kesto(n) for n in p.findall("measure/note")],
+                         ["64/16th", "192/eighth."])
+
+    def test_kesto_pudottaa_default_x_n(self):
+        # Vaakasijainti on laskettu vanhalle rytmille.
+        p = self.rytmipari()
+        p.find("measure/note").set("default-x", "164")
+        sovella(p, osa(self.PARI))
+        self.assertNotIn("default-x", p.find("measure/note").attrib)
+
+    def test_tahdin_pituus_tarkistetaan(self):
+        """Rytmin uudelleenjako ei saa lyhentää eikä pidentää tahtia.
+
+        Tämä on koko `kesto`-toimenpiteen turvaverkko: yksittäinen rivi
+        näyttää aina järkevältä, mutta ryhmän summan pitää täsmätä.
+        """
+        p = rytmi_part(("F3", "256/quarter", False),
+                       ("E3", "256/quarter", False))
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", 0, "kesto", "256/quarter", "192/eighth.")]))
+
+    def test_tahdin_pituus_kelpaa_kun_summa_sailyy(self):
+        p = self.rytmipari()
+        sovella(p, osa(self.PARI))
+        self.assertEqual(sum(int(n.findtext("duration"))
+                             for n in p.findall("measure/note")), 320)
+
+    def test_aksentti_pois_ja_takaisin(self):
+        p = rytmi_part(("E3", "192/eighth.", True), ("E3", "64/16th", False))
+        sovella(p, osa([("1", 0, "poista_aksentti"),
+                        ("1", 1, "lisaa_aksentti")]))
+        akseneja = [len(n.findall("notations/articulations/accent"))
+                    for n in p.findall("measure/note")]
+        self.assertEqual(akseneja, [0, 1])
+
+    def test_aksentin_lisays_kaataa_jos_se_on_jo(self):
+        p = rytmi_part(("E3", "256/quarter", True))
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", 0, "lisaa_aksentti")]))
+
+    def test_aksentin_poisto_kaataa_jos_sita_ei_ole(self):
+        p = rytmi_part(("E3", "256/quarter", False))
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", 0, "poista_aksentti")]))
+
+    def test_kesto_kaataa_jos_vanha_arvo_on_eri(self):
+        # Summa säilyisi, joten kaatumisen syy on nimenomaan lähtötilanne.
+        p = self.rytmipari()
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", 0, "kesto", "192/eighth.", "256/quarter"),
+                            ("1", 1, "kesto", "64/16th", "64/16th")]))
 
 
 class Korkeudenluku(unittest.TestCase):
@@ -489,10 +598,23 @@ class MuutOsatKokonaisuutena(unittest.TestCase):
         tahdit = {m.get("number"): m for m in p.findall("measure")}
         self.assertEqual(tahdit["45"].findtext("note/lyric/text"), "le,")
 
-    def test_sanctus_laulaa_coeli_et_terra(self):
-        self.assertEqual(self.tavut(OSA_IV, "99"), [("begin", "coe")])
-        self.assertEqual(self.tavut(OSA_IV, "100"),
-                         [("end", "li"), ("single", "et")])
+    def test_sanctus_laulaa_coeli_et_terra_kaikilla_kolmella(self):
+        # Sama puute altolla, tenorilla ja bassolla; sopraano oli jo oikein.
+        for osa_ in OSAT_IV:
+            with self.subTest(aani=osa_.nimi):
+                self.assertEqual(self.tavut(osa_, "99"), [("begin", "coe")])
+                self.assertEqual(self.tavut(osa_, "100")[0], ("end", "li"))
+        self.assertEqual([o.osasto for o in OSAT_IV], ["P2", "P3", "P4"])
+
+    def test_sanctus_sopraano_oli_jo_oikein(self):
+        p = find_part(load(OSA_IV.mxl), "P1")
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        self.assertEqual(tahdit["99"].findtext("note/lyric/text"), "coe")
+
+    def test_sanctus_kuoro_ii_laulaa_hosannaa_eika_koskettu(self):
+        # P5-P8 laulaa samassa kohdassa eri tekstiä.
+        osastot = {o.osasto for o in OSAT_IV}
+        self.assertTrue(osastot.isdisjoint({"P5", "P6", "P7", "P8"}))
 
     def test_sanctus_kirjoitusasu_on_lahteen_oma(self):
         # Sama lause t.27 kirjoittaa "coe", ei "cae"; pysytään siinä.
@@ -515,6 +637,43 @@ class MuutOsatKokonaisuutena(unittest.TestCase):
         self.assertEqual([n.findtext("lyric/text") for n in notes],
                          ["di", None, "es"])
 
+    def test_libera_me_tahti_88_saa_kuorotiedoston_rytmin(self):
+        """Toinen pisteellinen kuvio tulee tavuille "et a" eikä "a ma".
+
+        Kohta on kuorobasson yksinlaulua, eikä osalle 16 ole lähde-PDF:ää,
+        joten ainoa toinen lähde on kuoron oma tiedosto. Sen tahti 55 on
+        tämä, ja sen naapuritahdit 54 ja 56 ovat meidän 87 ja 89 nuotilleen
+        ja aksentilleen samat — ero on täsmälleen yhden tahdin mitassa.
+        """
+        p = find_part(load(OSA_VII.mxl), OSA_VII.osasto)
+        sovella(p, OSA_VII)
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        notes = tahdit["88"].findall("note")
+        self.assertEqual([kuvaa(n) for n in notes],
+                         ["Ges3", "Ges3", "F3", "F3", "Ees3", "D3"])
+        self.assertEqual([kuvaa_kesto(n) for n in notes],
+                         ["192/eighth.", "64/16th", "192/eighth.",
+                          "64/16th", "256/quarter", "256/quarter"])
+        # Aksentit iskuilla, ei uudella 16-osalla.
+        self.assertEqual([bool(n.findall("notations/articulations/accent"))
+                          for n in notes],
+                         [True, False, True, False, True, True])
+        # Tavut pysyivät samoilla nuoteilla ja tahti täyttyy täsmälleen.
+        self.assertEqual([n.findtext("lyric/text") for n in notes],
+                         ["ma", "gna", "et", "a", "ma", "ra"])
+        self.assertEqual(sum(int(n.findtext("duration")) for n in notes), 1024)
+
+    def test_libera_me_tenori_saa_saman_dies_kuin_basso(self):
+        p = find_part(load(OSA_VII_TENORI.mxl), OSA_VII_TENORI.osasto)
+        sovella(p, OSA_VII_TENORI)
+        tahdit = {m.get("number"): m for m in p.findall("measure")}
+        # Tenorilla on tahdissa 98 kaksi nuottia, ei kolmea kuin bassolla.
+        self.assertEqual([n.findtext("lyric/text")
+                          for n in tahdit["98"].findall("note")], ["di", "es"])
+        # Sama kuvio ja sama jako kuin tenorin omassa tahdissa 100.
+        self.assertEqual([n.findtext("lyric/text")
+                          for n in tahdit["100"].findall("note")], ["di", "es"])
+
     def test_libera_me_tahti_93_ei_muutu(self):
         """Laulaja sanoi tahdiksi 93, mutta 93 on oikein ja 98 oli väärä.
 
@@ -526,7 +685,8 @@ class MuutOsatKokonaisuutena(unittest.TestCase):
 
     def test_lahdetiedostoja_ei_muuteta(self):
         for osa_, tahti, odotus in ((OSA_IV, "99", []),
-                                    (OSA_VII, "98", [])):
+                                    (OSA_VII, "98", []),
+                                    (OSA_VII_TENORI, "98", [])):
             p = find_part(load(osa_.mxl), osa_.osasto)
             tahdit = {m.get("number"): m for m in p.findall("measure")}
             with self.subTest(osa=osa_.mxl):

@@ -54,11 +54,20 @@ class Osa:
 #   ("aseta", vanha, syllabic, teksti)  korvaa tavu toisella
 #   ("jatka",)                          lisää tavuun melisman jatkoviiva
 #   ("korkeus", vanha, uusi)            vaihda nuotin korkeus, esim. "A3"->"A2"
+#   ("kesto", vanha, uusi)              vaihda nuottiarvo, esim.
+#                                       "256/quarter" -> "192/eighth."
+#                                       (piste per pisteellisyys)
+#   ("lisaa_aksentti",)                 lisää aksentti nuotille jolla ei ole
+#   ("poista_aksentti",)                poista nuotin aksentti
 #   ("poista_nuotti", kuvaus)           poista nuotti tai tauko
 #   ("kopioi_tahti", lähdetahti)        korvaa tauolla oleva tahti toisen
 #                                       tahdin sisällöllä, sanat mukaan lukien
 # Nuotti on indeksi tahdin <note>-alkioissa, tauot mukaan luettuina, tai None
 # kun toimenpide koskee koko tahtia.
+#
+# `kesto` muuttaa tahdin sisäistä jakoa, joten sovella() tarkistaa jokaisesta
+# tahdista jota se koskee, että äänen kestojen summa on jäljestäpäin sama kuin
+# ennen: rytmin uudelleenjako ei saa lyhentää eikä pidentää tahtia.
 
 OSA_I = Osa(
     mxl="01-Verdi_Requiem-OMR-korjattu.mxl",
@@ -362,23 +371,22 @@ OSA_II10_DIVISI = Osa(
 # joten stemmassa luki "sunt _ li et ter-ra".
 #
 # Kuoro I:n sopraano (P1) on samoissa tahdeissa oikein — "coe" t.99, "li"
-# t.100 — ja alt-, tenori- ja bassoäänestä puuttuu kaikista sama "coe".
+# t.100 — ja altolta, tenorilta ja bassolta puuttuu kaikilta sama "coe".
 # Kirjoitusasu on tässä lähteessä "coe" eikä "cae" (niin myös osan aiemmassa
 # samassa lauseessa t.27), joten pysytään tiedoston omassa asussa.
-# Alto I ja Tenori I ovat yhä korjaamatta — laulaja lukee bassoa.
-OSA_IV = Osa(
-    mxl="13-Verdi-Sanctus.mxl",
-    out="13-Verdi-Sanctus-kasin.mxl",
-    osasto="P4",
-    nimi="Kuoro B",
-    yksi_sanarivi=False,
-    korjaukset=(
-        ("99", 0, "lisaa", "begin", "coe"),
-        ("100", 0, "aseta", "li", "end", "li"),   # single -> end, tavuviiva
-    ),
-)
+#
+# Kuoro II (P5-P8) laulaa samassa kohdassa "Ho-san-na," eikä siihen kosketa.
+SANCTUS_COELI = (("99", 0, "lisaa", "begin", "coe"),
+                 ("100", 0, "aseta", "li", "end", "li"))  # single -> end
+OSAT_IV = [
+    Osa(mxl="13-Verdi-Sanctus.mxl",
+        out="13-Verdi-Sanctus-kasin.mxl",
+        osasto=pid, nimi=nimi, yksi_sanarivi=False,
+        korjaukset=SANCTUS_COELI)
+    for pid, nimi in (("P2", "Kuoro A"), ("P3", "Kuoro T"), ("P4", "Kuoro B"))
+]
 
-# Libera me (VII). Kaksi eri vikaa.
+# Libera me (VII), kuorobasso. Kolme eri vikaa.
 #
 # 1. Tahti 72, toinen nuotti oktaavia alempi A. Sama kuvio ja sama vika kuin
 #    Dies iraen tahdissa 28 (ks. OSA_II1): osan alku on Dies irae -teeman
@@ -389,7 +397,25 @@ OSA_IV = Osa(
 #    tahdista tahtiin. Tahti 68 on sama kuvio A3->A3 ja se täsmää — eli
 #    poikkeus on aito, kuten Dies iraen tahdissa 24.
 #
-# 2. Tahti 98, sanan "di-es" molemmat tavut puuttuivat kokonaan. Laulaja
+# 2. Tahti 88, väärä rytmi. Kohta on kuorobasson yksinlaulua (S, A ja T ovat
+#    tauolla t.87-89), ja kuorotiedoston vastaava tahti 55 jakaa sen toisin:
+#
+#      meillä   Ges. Ges16  F♩     Ees. Ees16  D♩    "ma gna et  a ma ra"
+#      kuorolla Ges. Ges16  F. F16 Ees♩ D♩           "ma gna et  a ma ra"
+#
+#    eli toinen pisteellinen kuvio tulee tavuille "et a" eikä "a ma". Molemmat
+#    täyttävät tahdin ja molemmat sopivat sanoihin, joten tämä jäi ensin vain
+#    kirjatuksi; laulaja vahvisti 2026-09-04 että kuorotiedosto on oikeassa.
+#    Kuorotiedostoa on lupa uskoa juuri tässä: sen tahdit 54 ja 56 (= meidän
+#    87 ja 89) ovat nuotilleen, etumerkilleen ja aksentilleen samat kuin
+#    meidän, eli ero on täsmälleen yhden tahdin mitassa.
+#
+#    Aksentit tulevat samasta lähteestä: kuorotiedostossa ne ovat iskuilla
+#    (nuotit 0, 2, 4, 5) eikä uudella 16-osalla ole aksenttia. Meillä ne
+#    olivat vanhan rytmin iskuilla (0, 2, 3, 5), joten aksentti siirtyy
+#    nuotilta 3 nuotille 4. Tavut pysyvät samoilla nuoteilla.
+#
+# 3. Tahti 98, sanan "di-es" molemmat tavut puuttuivat kokonaan. Laulaja
 #    sanoi tahdiksi 93, mutta 93 laulaa "il-la," ja on oikein; hän kertoi
 #    myös tavut menevän tahdin ensimmäiselle ja kolmannelle nuotille, ja
 #    juuri tahti 98 on lähistön ainoa kolmen nuotin tahti ilman sanoja.
@@ -397,7 +423,6 @@ OSA_IV = Osa(
 #    kuin laulaja sanoi. Kuoroaltto (P3) laulaa tahdissa 98 saman kuvion
 #    samalla jaolla ("di" 1. nuotille, 3. nuotille "es", välinuotti
 #    melismana), ja basson oma tahti 100 on rakenteeltaan identtinen.
-#    Kuorotenorilta (P4) puuttuvat samat tavut, mutta se on korjaamatta.
 OSA_VII = Osa(
     mxl="16-Libera_Me.mxl",
     out="16-Libera_Me-kasin.mxl",
@@ -406,8 +431,30 @@ OSA_VII = Osa(
     yksi_sanarivi=False,
     korjaukset=(
         ("72", 1, "korkeus", "A3", "A2"),   # "di-es il-la," viimeinen tavu
+        # t.88: F♩ -> F. + Ees. -> F16, ja Ees16 -> Ees♩
+        ("88", 2, "kesto", "256/quarter", "192/eighth."),
+        ("88", 3, "korkeus", "Ees3", "F3"),
+        ("88", 3, "kesto", "192/eighth.", "64/16th"),
+        ("88", 3, "poista_aksentti"),
+        ("88", 4, "kesto", "64/16th", "256/quarter"),
+        ("88", 4, "lisaa_aksentti"),
         ("98", 0, "lisaa", "begin", "di"),
         ("98", 2, "lisaa", "end", "es"),
+    ),
+)
+
+# Sama puuttuva "di-es" myös kuorotenorilla. Sillä tahdissa 98 on kaksi
+# nuottia eikä kolmea, joten tavut tulevat molemmille — täsmälleen niin kuin
+# tenorin omassa tahdissa 100, joka on nuotilleen sama kuvio.
+OSA_VII_TENORI = Osa(
+    mxl="16-Libera_Me.mxl",
+    out="16-Libera_Me-kasin.mxl",
+    osasto="P4",
+    nimi="Kuoro T",
+    yksi_sanarivi=False,
+    korjaukset=(
+        ("98", 0, "lisaa", "begin", "di"),
+        ("98", 1, "lisaa", "end", "es"),
     ),
 )
 
@@ -415,7 +462,8 @@ OSA_VII = Osa(
 # joten sillä ei ole omaa Osa-riviä. Jos se joskus puretaan tänne, ks.
 # CLAUDE.md, *Recipe*-luvun viimeinen kappale.
 OSAT = ([OSA_I, OSA_II1] + OSAT_II4
-        + [OSA_II6, OSA_II10_KUORO_B, OSA_II10_DIVISI, OSA_IV, OSA_VII])
+        + [OSA_II6, OSA_II10_KUORO_B, OSA_II10_DIVISI] + OSAT_IV
+        + [OSA_VII_TENORI, OSA_VII])
 
 
 def lyriikat(note):
@@ -460,6 +508,51 @@ def lue_korkeus(teksti):
     return step, ALTERIT.get(merkki), oktaavi
 
 
+def kuvaa_kesto(note):
+    """Nuottiarvo muodossa "192/eighth." — kesto, tyyppi ja pisteet."""
+    return "%s/%s%s" % (note.findtext("duration"), note.findtext("type"),
+                        "." * len(note.findall("dot")))
+
+
+def aseta_kesto(note, teksti):
+    """Kirjoita nuottiarvo uudelleen.
+
+    default-x on nuotin vaakasijainti, joka on laskettu VANHALLE rytmille,
+    joten se poistetaan samasta syystä kuin korkeuden vaihdossa default-y.
+    Palkkeja ei tarvitse laskea: nämä lähteet eivät kirjoita <beam>-alkioita
+    lainkaan, joten MuseScore palkittaa itse.
+    """
+    kesto, loput = teksti.split("/")
+    tyyppi = loput.rstrip(".")
+    pisteet = len(loput) - len(tyyppi)
+    assert kesto.isdigit(), f"tuntematon kesto {teksti!r}"
+    note.find("duration").text = kesto
+    note.find("type").text = tyyppi
+    for dot in note.findall("dot"):
+        note.remove(dot)
+    # <dot> tulee MusicXML:ssä heti <type>:n jälkeen.
+    kohta = list(note).index(note.find("type")) + 1
+    for i in range(pisteet):
+        note.insert(kohta + i, ET.Element("dot"))
+    note.attrib.pop("default-x", None)
+
+
+def articulations(note):
+    return note.find("notations/articulations")
+
+
+def kestosummat(measure):
+    """Äänittäin soivien kestojen summa. Soinnun toiset sävelet eivät soi
+    peräkkäin, joten ne jätetään pois."""
+    summat = {}
+    for note in measure.findall("note"):
+        if note.find("chord") is not None:
+            continue
+        aani = note.findtext("voice") or "1"
+        summat[aani] = summat.get(aani, 0) + int(note.findtext("duration") or 0)
+    return summat
+
+
 def aseta_korkeus(note, teksti):
     """Kirjoita nuotin korkeus uudelleen ja pudota vanhan asemointivihjeet.
 
@@ -487,6 +580,11 @@ def sovella(part, osa):
     """Aja osan korjaukset osastoon ja palauta selosteet."""
     tahdit = {m.get("number"): m for m in part.findall("measure")}
     selosteet = []
+
+    # Rytmin uudelleenjako ei saa muuttaa tahdin pituutta; otetaan lähtöarvot
+    # talteen ennen kuin mitään on kirjoitettu.
+    ennen = {t: kestosummat(tahdit[t]) for t, _i, laji, *_ in osa.korjaukset
+             if laji == "kesto" and t in tahdit}
 
     for tahti, i, laji, *args in osa.korjaukset:
         measure = tahdit.get(tahti)
@@ -547,6 +645,34 @@ def sovella(part, osa):
             aseta_korkeus(note, uusi)
             selosteet.append(f"t.{tahti}: {odotettu} -> {uusi}")
 
+        elif laji == "kesto":
+            odotettu, uusi = args
+            assert kuvaa_kesto(note) == odotettu, (
+                f"t.{tahti} nuotti {i}: odotettiin {odotettu}, "
+                f"on {kuvaa_kesto(note)}")
+            aseta_kesto(note, uusi)
+            selosteet.append(f"t.{tahti}: nuottiarvo {odotettu} -> {uusi}")
+
+        elif laji == "lisaa_aksentti":
+            art = articulations(note)
+            assert art is None or art.find("accent") is None, (
+                f"t.{tahti} nuotti {i}: aksentti on jo")
+            if art is None:
+                notations = note.find("notations")
+                if notations is None:
+                    notations = ET.SubElement(note, "notations")
+                art = ET.SubElement(notations, "articulations")
+            ET.SubElement(art, "accent")
+            selosteet.append(f"t.{tahti}: lisätty aksentti nuotille {i}")
+
+        elif laji == "poista_aksentti":
+            art = articulations(note)
+            accents = [] if art is None else art.findall("accent")
+            assert accents, f"t.{tahti} nuotti {i}: aksenttia ei ole"
+            for accent in accents:
+                art.remove(accent)
+            selosteet.append(f"t.{tahti}: poistettu aksentti nuotilta {i}")
+
         elif laji == "kopioi_tahti":
             (lahde,) = args
             malli = tahdit.get(lahde)
@@ -574,6 +700,12 @@ def sovella(part, osa):
 
         else:
             raise AssertionError(f"tuntematon toimenpide {laji}")
+
+    for tahti, summat in ennen.items():
+        nyt = kestosummat(tahdit[tahti])
+        assert nyt == summat, (
+            f"t.{tahti}: kestojen summa muuttui {summat} -> {nyt}; "
+            f"rytmin uudelleenjaon pitää täyttää tahti täsmälleen")
 
     if osa.yksi_sanarivi:
         selosteet.append(yksi_sanarivi(part))

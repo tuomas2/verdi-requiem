@@ -78,7 +78,7 @@ identical motif carries "hu-ic er-go" in the tenor, alto and soprano. Movement 1
 so only movement 14 is still a hand-edited artefact — see *2026-09-03 (c):
 Lacrymosa's three-bar shift*.
 
-And newest, 2026-09-04: **seven more by-ear reports, all seven real**, spread
+And newest, 2026-09-04: **eight more by-ear reports, all eight real**, spread
 across five movements — two notes an octave too high (II·1 bar 28 and VII bar
 72, the same Dies irae figure in two places), a `le,` for `me,` in "sal-va me"
 (II·6 bar 366), and three missing syllables (IV bars 99–100 `coe`, VII bar 98
@@ -95,8 +95,11 @@ and MuseScore silently printed only one of them. Four more movements (02, 07,
 13, 16) got their first `korjaa_kasin.py` tables, so six of the seven touched
 movements are now reproducible and only movement 14 is still hand-edited. The
 feature the singer asked for at the same time is in: **every page now carries
-the running movement name over its first bar**, at no cost in pages — see
-*2026-09-04*.
+the running movement name over its first bar**, at no cost in pages. The three
+things that batch had flagged but not fixed — Libera me bar 88's rhythm, and
+the same missing syllables in the alto and tenor — were then confirmed and
+fixed too, so **Libera me's chorus bass now matches the choir file as one
+67-bar block** where it used to match in three pieces. See *2026-09-04*.
 
 Open, roughly in the order a singer would feel them:
 
@@ -108,8 +111,6 @@ Open, roughly in the order a singer would feel them:
 | II·9b: Soprano/Alto/Tenor lyrics unchecked (its position is **settled**: 573–623, from the choir book) | *The missing Dies irae recall* |
 | Lacrymosa's `Kuoro B` is **settled** — every note checked against the choir file, every syllable against the printed page at note resolution, plus one nine-bar stretch where the printed edition itself was wrong. Its **Soprano/Alto/Tenor and soloists are not**, and the chorus tenor already shows one text gap at bar 688 | *2026-09-03 (c): Lacrymosa's three-bar shift* |
 | The "same figure must carry the same text in every voice" check found a defect the printed page could not, and the sharper version — "does this note fit what the other staves and the piano are doing on this beat" — reversed a wrong verdict. Neither is automated, and movement 11's S/A/T is the obvious first target | *2026-09-03 (c)*, section *The lesson*; *2026-09-04*, section *Lacrymosa 653* |
-| Three voices carry the same gaps the bass had, deliberately not fixed: Sanctus bars 99–100 missing `coe` in Alto I **and** Tenori I, Libera me bar 98 missing `di-es` in the chorus tenor | *2026-09-04*, section *Still open from this batch* |
-| Libera me bar 88's rhythm differs from the choir file; both readings fit the text and there is no source PDF for movement 16 | *2026-09-04*, section *Still open from this batch* |
 | Four Dies irae sub-movements (II·2, II·4, II·6, II·7 seams) may carry the same off-by-a-few numbering Lacrymosa had. Needs one bar number from **inside** each, not its heading | *2026-09-03 (c)*, section *The same trap* |
 | Liber scriptus: the "user recalls 6" half is **solved** (six one-bar interjections, three of which were missing — see *2026-09-03 (b)*); the Soprano-vs-A/T/B text disagreement at bars 247–254 is still unresolved without the physical score | *2026-08-31* section |
 | 13 lyric changes reported but deliberately not applied | `python3 korjaa_sanat.py --kuiva` lists them |
@@ -139,7 +140,7 @@ Open, roughly in the order a singer would feel them:
 | `nayta.py` | Prints a staff's notes, voices and **lyric rows** per bar — the first tool for any reported error |
 | `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |
 | `harjoitus-*.mscz` | The result, one per singer |
-| `test_*.py` | Tests; all of them: `python3 -m unittest discover -p 'test_*.py'` (123) |
+| `test_*.py` | Tests; all of them: `python3 -m unittest discover -p 'test_*.py'` (136) |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
 | `tiivistys.mss` | MuseScore style for the reading parts: multimeasure rests, a bar number on every bar, extra air between systems |
 | `musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files* |
@@ -1199,7 +1200,7 @@ this shipped something. Checks that have caught real problems:
 - Per-staff note counts before and after. A lyric-only change must leave every
   count identical; anything else means content moved.
 - `mscore` converts without `-f`.
-- `python3 -m unittest discover -p 'test_*.py'` — 123 tests.
+- `python3 -m unittest discover -p 'test_*.py'` — 136 tests.
 
 ### The one movement not yet in the table
 
@@ -1649,10 +1650,11 @@ file exactly, with the 7 intended `P9` edits as the only difference.
 ## 2026-09-04: seven by-ear reports, and a running movement name per page
 
 The singer read along in rehearsal and reported seven spots plus one feature
-request. All seven were real. Six were in movements that had **never had a
-hand-corrections table** — 02 (Dies irae), 07 (Rex tremendae), 13 (Sanctus)
-and 16 (Libera me) — so those four moved into `korjaa_kasin.py`, and only
-movement 14 is still a hand-edited artefact.
+request, then confirmed an eighth from this session's own findings. All eight
+were real. Six were in movements that had **never had a hand-corrections
+table** — 02 (Dies irae), 07 (Rex tremendae), 13 (Sanctus) and 16 (Libera
+me) — so those four moved into `korjaa_kasin.py`, and only movement 14 is
+still a hand-edited artefact.
 
 | Reported | What was wrong | Settled by |
 |---|---|---|
@@ -1663,6 +1665,7 @@ movement 14 is still a hand-edited artefact.
 | VII t.72, 2nd note an octave lower | `A3` where the choir file has `A2` | same figure as II·1 t.28 — Libera me opens with the Dies irae theme |
 | VII t.98, "di-es" missing | both syllables absent | the alto's identical bar, and the bass's own t.100 |
 | VII t.274, "ae" missing | two `<lyric>` on one note, **same** verse number | a `yhdista.py` bug, not data — see below |
+| VII t.88, wrong rhythm | second dotted figure on "a ma" instead of "et a" | the choir file, whose neighbouring bars are identical to ours — flagged first, confirmed by the singer, then fixed |
 
 ### The one that had been checked and got the wrong answer: Lacrymosa 653
 
@@ -1768,14 +1771,57 @@ print `[Alle]` and `[4 soli]`.
   unchanged (S I/S II/T II 17, rest 16); `stemmat-sisallys.txt` unchanged. The
   full score went 362 → 363 pages, from the three syllables that are now
   actually printed.
-- 123 tests (85 before, +38), including one pinning *why* Lacrymosa 653 is C
-  against its own printed page, and one pinning that the first statement of
-  the octave-drop figure (II·1 t.24, VII t.68) correctly does **not** drop —
-  it is the same in both files, so it must not be "fixed" later.
+- 136 tests (85 before, +51), including one pinning *why* Lacrymosa 653 is C
+  against its own printed page, one pinning that the first statement of the
+  octave-drop figure (II·1 t.24, VII t.68) correctly does **not** drop — it is
+  the same in both files, so it must not be "fixed" later — and one pinning
+  bar 88's whole rewritten bar, accents included, against the choir file.
 - Read back off the rendered `stemma-basso-1.pdf` as images, all seven spots:
   t.28 and t.72 now leap the octave down, t.366 reads "sal-va me,", t.653 sits
   a fifth lower with no natural, t.99–101 read "coe-li et ter-ra", t.98–99
   "di-es ma-gna," and t.274–275 "mor - te ae-ter - na,".
+
+### Three more, from the same conversation
+
+The three items this batch had flagged but not fixed were all confirmed and
+fixed the same day.
+
+**Libera me bar 88's rhythm.** Ours was `(♪.♪ ♩)(♪.♪ ♩)`, the choir file
+`(♪.♪)(♪.♪) ♩ ♩` — the second dotted figure belongs to "et a", not "a ma".
+Both fill the bar and both fit the text, so it had been recorded and left; the
+singer confirmed the choir file is right. **This is the case where the choir
+file may be believed on rhythm**, because its neighbouring bars 54 and 56 (our
+87 and 89) are identical to ours down to the accidentals and the accents, so
+the disagreement is exactly one bar wide. The passage is chorus-bass solo (S/A/T
+rest through 87–89), so the other voices cannot help, and there is no source
+PDF for movement 16.
+
+The choir file settled the **accents** too, which is why it was worth reading
+rather than reasoning about: its accents sit on the four beats (notes 0, 2, 4,
+5) and the new sixteenth carries none. Ours were on the old rhythm's beats
+(0, 2, 3, 5), so one accent moved from note 3 to note 4. The six syllables stay
+on the same six notes.
+
+That needed three new operations in `korjaa_kasin.py` — `kesto` (note value,
+written `"256/quarter"` → `"192/eighth."`, a period per dot), `lisaa_aksentti`
+and `poista_aksentti`. `kesto` drops the note's `default-x` for the same reason
+`korkeus` drops `default-y`: it was computed for the old rhythm. Beams needed no
+bookkeeping — these sources write no `<beam>` elements at all, so MuseScore
+beams by itself.
+
+**`kesto` carries its own safety net.** A single row always looks plausible
+while silently lengthening or shortening the bar, so `sovella` snapshots the
+per-voice duration sum of every measure a `kesto` row touches and asserts it is
+unchanged afterwards. In practice that means rhythm rows come in pairs or
+larger groups; the tests are written that way because a lone row cannot be a
+valid correction.
+
+**The same gaps in the other voices.** Sanctus bars 99–100 were missing `coe`
+in the alto and tenor as well as the bass (the soprano was right all along, and
+Choir II sings "Ho-san-na" there and was left alone), and Libera me bar 98 was
+missing `di-es` in the chorus tenor. Both are now fixed for all the affected
+voices. The tenor's bar 98 has **two** notes where the bass has three, so its
+two syllables go one per note — exactly as its own bar 100 already had them.
 
 ### Still open from this batch
 
@@ -1783,13 +1829,11 @@ print `[Alle]` and `[4 soli]`.
   93 is correct as it stands ("il-la,"), and the detail that located 98 was
   their own — "on the first and third notes", which only 98 fits. A test pins
   93 so it is not "corrected" later.
-- **Alto I and Tenor I have the same missing `coe`** in Sanctus bars 99–100,
-  and the **chorus tenor has the same missing `di-es`** in Libera me bar 98.
-  Not fixed: the singer reads bass, and each would need its own check.
-- Libera me **bar 88** differs from the choir file in rhythm, not pitch: ours
-  is `(♪.♪ q)(♪.♪ q)`, theirs `(♪.♪)(♪.♪) q q`, both filling the bar and both
-  fitting "ma-gna et a-ma-ra". Not reported by ear, no source PDF for movement
-  16, so flagged only.
+- Libera me's chorus bass now matches the choir file **as one 67-bar block**
+  (our 44–110) where it used to match in three pieces broken at 72 and 88. The
+  only remaining discrepancy in the whole overlap is bars 111–112, and that is
+  not a difference: it is the divisi, written as chords by us and as
+  `Bass 1`/`Bass 2` by them.
 
 ## The choir's own MuseScore practice files
 

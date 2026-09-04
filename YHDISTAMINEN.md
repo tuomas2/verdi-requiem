@@ -14,7 +14,7 @@
 | `sivuotsikot.py` | Kirjoittaa käynnissä olevan osan nimen joka sivun ensimmäisen tahdin päälle |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
 | `korjaa_sanat.py` | Korjaa osien 01, 14 ja II·9b:n kuorosanat lähde-PDF:ää vasten |
-| `korjaa_kasin.py` | Käsin todennetut korjaukset (osat I, II·1, II·4, II·6, II·10, IV ja VII), taulukkona |
+| `korjaa_kasin.py` | Käsin todennetut korjaukset (osat I, II·1, II·4, II·6, II·10, IV ja VII), taulukkona — tavut, korkeudet, rytmi |
 | `nayta.py` | Näyttää viivaston nuotit, äänet ja sanarivit tahdeittain |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
 | `Verdi_10bDies_irae.pdf` | II·9b:n lähde-PDF (käyttäjän löytämä) |
@@ -190,7 +190,14 @@ tahdeissa 229, 231 ja 233.
 Taulukko osaa myös **vaihtaa nuotin korkeuden** (`korkeus`), jos kuulet
 väärän sävelen eikä väärän tavun — niin korjattiin Dies iraen tahti 28 ja
 Libera men tahti 72, joissa sanan viimeinen tavu on oktaavia alempana kuin
-tiedostossa luki.
+tiedostossa luki. Jos vika on **rytmissä**, siihen on `kesto` (nuottiarvo,
+esim. `"256/quarter"` -> `"192/eighth."`, piste per pisteellisyys) sekä
+`lisaa_aksentti` ja `poista_aksentti`. Niillä korjattiin Libera men tahti 88.
+
+Rytmiä muutettaessa taulukko tarkistaa itse, että tahdin pituus säilyy:
+kestojen summa lasketaan ennen ja jälkeen, ja ajo kaatuu jos se muuttui. Siksi
+rytmirivit tulevat aina pareittain tai ryhminä — yksi rivi yksinään ei voi olla
+kelvollinen korjaus.
 
 Osan 14 (Agnus Dei) korjaukset on aikanaan tehty suoraan lähdetiedostoon,
 joten sillä ei vielä ole vastaavaa taulukkoa. Muut korjatut osat on purettu
@@ -212,7 +219,11 @@ muutos `korjaa_kasin.py`:ssä.
 
 Neljäs, pienempi: **Sanctuksessa kirjoitusasu on "coe-li" eikä "cae-li"**.
 Lähdetiedosto käyttää coe-asua kaikkialla (myös t. 27), joten pysyttiin
-siinä; jos kirja kirjoittaa cae, se on kahden rivin muutos.
+siinä; jos kirja kirjoittaa cae, se on kahden rivin muutos joka ääni.
+
+Puuttunut "coe" on korjattu altolle, tenorille ja bassolle (sopraano oli jo
+oikein), ja Libera men tahdin 98 puuttunut "di-es" bassolle ja tenorille.
+Sopraano ja altto olivat siinä jo oikein.
 
 Neljäs kohta on kokonaisen alaosan numerointi, ja siihen auttaisi eniten yksi
 tieto kirjasta. Lacrymosassa paljastui 2026-09-03, että kirjan osio-otsikon
