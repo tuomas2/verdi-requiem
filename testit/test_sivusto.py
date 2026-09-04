@@ -61,6 +61,14 @@ class Rakennus(unittest.TestCase):
                 with self.subTest(nimi=nimi):
                     self.assertTrue(os.path.exists(os.path.join(d, nimi)))
 
+    def test_oma_verkkotunnus_kirjoitetaan(self):
+        """Ilman CNAME-tiedostoa oma domain lakkaa toimimasta hiljaa, jos
+        Pagesin asetukset nollautuvat."""
+        with tempfile.TemporaryDirectory() as d:
+            sivusto.rakenna(d)
+            with open(os.path.join(d, "CNAME"), encoding="utf-8") as f:
+                self.assertEqual(f.read().strip(), sivusto.VERKKOTUNNUS)
+
     def test_stemmojen_pdf_t_kopioidaan(self):
         with tempfile.TemporaryDirectory() as d:
             sivusto.rakenna(d)

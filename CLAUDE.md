@@ -144,6 +144,7 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `harjoitus/` | Practice `.mscz`, **not** in version control — they are 3.2 MB each and rebuilt wholesale |
 | `sivusto/` | Website sources: the shared stylesheet, `requiem.html`, part thumbnails |
 | `docs/suunnitelmat/` | Design and implementation plans |
+| `testit/` | The test suite |
 
 | Pattern | What it is |
 |---|---|
@@ -165,7 +166,7 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `nayta.py` | Prints a staff's notes, voices and **lyric rows** per bar — the first tool for any reported error |
 | `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |
 | `harjoitus/*.mscz` | The result, one per singer. Gitignored |
-| `test_*.py` | Tests; all of them: `python3 -m unittest discover -p 'test_*.py'` (169) |
+| `testit/test_*.py` | Tests; all of them: `python3 -m unittest discover -s testit -t .` (169). Run from the repo root — the tests and the scripts both use relative paths |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
 | `tiivistys.mss` | MuseScore style for the reading parts: multimeasure rests, a bar number on every bar, extra air between systems |
 | `musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files*. **Not in the repo**: authorship is unknown and the filenames carried singers' names, so they were kept out of the public history. They exist only on the user's own machine |
@@ -1236,7 +1237,7 @@ this shipped something. Checks that have caught real problems:
 - Per-staff note counts before and after. A lyric-only change must leave every
   count identical; anything else means content moved.
 - `mscore` converts without `-f`.
-- `python3 -m unittest discover -p 'test_*.py'` — 169 tests.
+- `python3 -m unittest discover -s testit -t .` — 169 tests.
 
 ### The one movement not yet in the table
 
@@ -2224,6 +2225,24 @@ Built in CI and **not committed**, so it cannot go stale unnoticed. The
 workflow installs `mupdf-tools` because 15 tests read source PDFs with
 `mutool`; MuseScore is not needed, since no test invokes it and the parts'
 PDFs come from the repo.
+
+The site is destined for **requiem.tuomasairaksinen.fi**, so `sivusto.py`
+writes a `CNAME` file into the output. Setting the custom domain in the Pages
+settings alone would work until those settings are reset; a file in the
+published directory is the durable form. It still needs a DNS `CNAME` record
+pointing at `tuomas2.github.io`.
+
+The deploy job is gated on `github.event.repository.visibility == 'public'`.
+The repo starts private, and `deploy-pages` fails with a bare "Not Found" in a
+private repo — a permanently red CI that says nothing useful. Keying the
+condition to visibility means nothing has to be remembered: publication starts
+working by itself when the repo is made public (Pages still has to be switched
+on once, Settings → Pages → Source: GitHub Actions).
+
+The tests live in `testit/`, run from the repo root:
+`python3 -m unittest discover -s testit -t .`. The `-t .` keeps the root on
+`sys.path` so `import yhdista` works, and `testit/__init__.py` exists because
+Python 3.9's `discover` refuses a start directory that is not importable.
 
 ### History: removals rewritten, moves not
 

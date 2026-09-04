@@ -33,7 +33,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y mupdf-tools
 
       - name: Aja testit
-        run: python3 -m unittest discover -p 'test_*.py'
+        run: python3 -m unittest discover -s testit -t .
 
       - name: Rakenna sivusto
         run: python3 sivusto.py _sivusto

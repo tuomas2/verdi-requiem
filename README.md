@@ -4,6 +4,10 @@ Verdin *Messa da Requiem* MusicXML-muodossa: kuusitoista erillistä
 osatiedostoa yhdistettynä yhdeksi partituuriksi, ja siitä tuotetut kahdeksan
 kuorostemmaa harjoittelua varten.
 
+**Aineisto selattavassa muodossa: [requiem.tuomasairaksinen.fi](https://requiem.tuomasairaksinen.fi)**
+— stemmat, koko messun teksti latinaksi ja suomeksi, ja osakohtainen tieto
+siitä mikä on tarkistettu ja mikä ei.
+
 Lähtökohta on kuorolaisen käytännön tarve: lukea omaa stemmaa niin että muu
 kuoro ja pianosäestys kuuluvat, kantaa stemma mukana lukulaitteella, ja
 löytää yksittäinen tahti kun kuoronjohtaja huutaa numeron. Siitä seuraa kaksi
@@ -63,7 +67,7 @@ python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"
 python3 sivuotsikot.py stemma-basso-1.mxl      # osan nimi joka sivulle
 mscore -S tiivistys.mss -o stemmat/stemma-basso-1.pdf stemmat/stemma-basso-1.mxl
 python3 sisallys.py                            # sisällysluettelo
-python3 -m unittest discover -p 'test_*.py'
+python3 -m unittest discover -s testit -t .
 ```
 
 Kaksi varoitusta, jotka ovat maksaneet aikaa:
@@ -89,6 +93,7 @@ nimestä, joten komennot toimivat sekä nimellä että täydellä polulla.
 | `johdetut/` | Skriptien tuottamat korjatut osat ja yhdistetty partituuri |
 | `stemmat/` | Kahdeksan stemmaa ja niiden sisällysluettelo |
 | `sivusto/` | Verkkosivuston lähteet |
+| `testit/` | Testit. Aja repon juuresta, koska polut ovat suhteellisia |
 
     lahteet/ ──korjaa_sanat.py──> johdetut/
     lahteet/ ─┐

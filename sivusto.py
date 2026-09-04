@@ -26,6 +26,12 @@ import yhdista
 
 POHJA = "sivusto"
 
+# Oma verkkotunnus. GitHub Pages lukee sen julkaistavasta hakemistosta, joten
+# tiedosto kirjoitetaan tuotokseen eikä pelkästään Pagesin asetuksiin — näin
+# se ei katoa jos asetukset nollautuvat. Vaatii DNS:ään CNAME-tietueen, joka
+# osoittaa tuomas2.github.io:hon.
+VERKKOTUNNUS = "requiem.tuomasairaksinen.fi"
+
 NAVI = [("index.html", "Etusivu"),
         ("teksti.html", "Teksti"),
         ("stemmat.html", "Stemmat"),
@@ -319,6 +325,9 @@ def rakenna(ulos="_sivusto"):
                          ("teksti.html", tekstisivu())]:
         with open(os.path.join(ulos, nimi), "w", encoding="utf-8") as f:
             f.write(teksti)
+
+    with open(os.path.join(ulos, "CNAME"), "w", encoding="utf-8") as f:
+        f.write(VERKKOTUNNUS + "\n")
 
     kohde = os.path.join(ulos, "stemmat")
     os.makedirs(kohde, exist_ok=True)
