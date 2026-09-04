@@ -10,3 +10,11 @@
 # Python
 __pycache__/
 *.pyc
+
+# Generoidut harjoitustiedostot: 3,2 MB kappale ja uusi kopio joka
+# rakennuskerralla — suurin yksittäinen syy siihen että .git paisui.
+# Syntyvät komennolla harjoitus.py.
+harjoitus/
+
+# Sivuston paikallinen esikatselu; CI rakentaa julkaistavan version.
+_sivusto/
