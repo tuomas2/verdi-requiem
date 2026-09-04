@@ -31,12 +31,13 @@ import sys
 import zipfile
 import xml.etree.ElementTree as ET
 
+import polut
 import yhdista
 
 
 def load(path):
     if path.lower().endswith(".mxl"):
-        with zipfile.ZipFile(path) as z:
+        with zipfile.ZipFile(polut.polku(path)) as z:
             name = next(n for n in z.namelist()
                         if not n.startswith("META-INF")
                         and n.lower().endswith(".xml"))

@@ -38,6 +38,7 @@ import sys
 import tempfile
 import xml.etree.ElementTree as ET
 
+import polut
 import yhdista
 from korjaa_sanat import load, save
 
@@ -55,7 +56,7 @@ def vie_asettelu(mxl):
     """
     with tempfile.TemporaryDirectory() as tmp:
         ulos = os.path.join(tmp, "asettelu.musicxml")
-        subprocess.run([MSCORE, "-S", TYYLI, "-o", ulos, mxl],
+        subprocess.run([MSCORE, "-S", TYYLI, "-o", ulos, polut.polku(mxl)],
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # mscore kaatuu purkautuessaan noin joka kolmannella ajolla vaikka
         # tiedosto on kirjoitettu kokonaan, joten paluuarvoa ei katsota vaan

@@ -2,6 +2,18 @@
 
 ## Tiedostot
 
+Nuottiaineisto on neljässä hakemistossa, jotka vastaavat datan kulkusuuntaa:
+`lahteet/` → `johdetut/` → `stemmat/`. Skriptit ja niiden taulukot puhuvat
+paljaista tiedostonimistä; `polut.py` selvittää hakemiston nimestä, joten
+komennot toimivat sekä nimellä että täydellä polulla.
+
+| Hakemisto | Sisältö |
+|---|---|
+| `lahteet/` | Alkuperäiset CPDL-tiedostot, lähde-PDF:t ja Audiveris-projektit. Näitä ei muokata |
+| `johdetut/` | Skriptien tuottamat korjatut osat ja yhdistetty partituuri |
+| `stemmat/` | Kahdeksan stemmaa ja sisällysluettelo |
+| `harjoitus/` | Harjoittelutiedostot, eivät versionhallinnassa |
+
 | Tiedosto | Sisältö |
 |---|---|
 | `Verdi-Requiem-koko.mxl` | Koko teos, 15 viivastoa, 1807 tahtia |
@@ -17,6 +29,7 @@
 | `korjaa_kasin.py` | Käsin todennetut korjaukset (osat I, II·1, II·4, II·6, II·10, IV ja VII), taulukkona — tavut, korkeudet, rytmi |
 | `nayta.py` | Näyttää viivaston nuotit, äänet ja sanarivit tahdeittain |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
+| `polut.py` | Kertoo mistä hakemistosta mikäkin nuottitiedosto löytyy |
 | `Verdi_10bDies_irae.pdf` | II·9b:n lähde-PDF (käyttäjän löytämä) |
 | `10b-Verdi_Dies_irae_paluu-OMR*.mxl` | II·9b, konelukemisen tulos ja sanakorjattu versio |
 | `*-kasin.mxl` | **Skriptin tuottamia**, ei käsin muokattuja: `korjaa_kasin.py`:n tulos, ja juuri nämä `yhdista.py` lukee osista I, II·1, II·4, II·6, II·10, IV ja VII |

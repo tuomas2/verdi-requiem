@@ -11,10 +11,13 @@ Käyttö:  python3 yhdista.py [ulostulo.mxl]
 """
 
 import copy
+import os
 import sys
 import zipfile
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
+
+import polut
 
 # ---------------------------------------------------------------- kohdeviivastot
 # (nimi, lyhenne, viivastoja, oletusavain kun osasto vaikenee koko osan)
@@ -230,7 +233,7 @@ TARGETS_BY_NAME = [(t[0], t) for t in TARGETS]
 
 
 def load(path):
-    with zipfile.ZipFile(path) as z:
+    with zipfile.ZipFile(polut.polku(path)) as z:
         name = next(n for n in z.namelist()
                     if not n.startswith("META-INF") and n.lower().endswith(".xml"))
         return ET.fromstring(z.read(name))
@@ -820,7 +823,7 @@ def main():
         i = args.index("--stemma")
         singer = args[i + 1]
         del args[i:i + 2]
-    out_path = args[0] if args else "Verdi-Requiem-koko.mxl"
+    out_path = polut.polku(args[0] if args else "Verdi-Requiem-koko.mxl")
 
     if singer:
         if singer not in SINGER_PARTS:
@@ -980,6 +983,7 @@ def main():
                 stats[name] += sum(1 for n in m.findall("note") if n.find("rest") is None)
                 target.append(m)
 
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("META-INF/container.xml",
                    '<?xml version="1.0" encoding="UTF-8"?>\n<container><rootfiles>'

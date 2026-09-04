@@ -9,10 +9,13 @@ edelleen "Kuoro B" vaikka se soi trumpettina.
 """
 import collections
 import json
+import os
 import re
 import subprocess
 import sys
 import zipfile
+
+import polut
 
 from yhdista import SINGER_PARTS
 
@@ -183,9 +186,10 @@ def _mscore(*args):
 def build(voice, source=LAHDE, style=TYYLI):
     """Rakentaa harjoittelutiedoston yhdelle laulajalle."""
     own = SINGER_PARTS[voice]
-    out = "harjoitus-%s.mscz" % slug(voice)
+    out = polut.polku("harjoitus-%s.mscz" % slug(voice))
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
 
-    _mscore("-S", style, "-o", out, source)
+    _mscore("-S", style, "-o", out, polut.polku(source))
     if not zipfile.is_zipfile(out):
         raise SystemExit("MuseScore ei kirjoittanut tiedostoa %s" % out)
 

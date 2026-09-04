@@ -3,6 +3,7 @@ kahdeksassa stemma-PDF:ssä. Sivu löytyy etsimällä osan otsikkoteksti
 ("V  Agnus Dei") PDF:n tekstisisällöstä sivu kerrallaan."""
 import re, subprocess, sys
 
+import polut
 from yhdista import MOVEMENTS
 
 ULOS = 'stemmat-sisallys.txt'
@@ -14,6 +15,7 @@ STEMMAT = [("S I", "stemma-sopraano-1.pdf"), ("S II", "stemma-sopraano-2.pdf"),
 
 
 def sivujen_teksti(pdf):
+    pdf = polut.polku(pdf)
     n = int(re.search(r'Pages: (\d+)',
             subprocess.run(['mutool', 'info', pdf], capture_output=True,
                            text=True).stdout).group(1))
@@ -58,7 +60,7 @@ def main():
               ' ' * 7 + 'sivuja'.ljust(20) + ''.join(f'{kaikki[l][1]:>7}' for l, _ in STEMMAT),
               '']
     out = '\n'.join(rivit)
-    open(ULOS, 'w').write(out)
+    open(polut.polku(ULOS), 'w').write(out)
     print(out)
 
 

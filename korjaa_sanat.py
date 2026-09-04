@@ -6,12 +6,15 @@ OCR-virheitä. Molempien PDF:ien sanat ovat kuitenkin oikeaa tekstiä eivät
 kuvaa, joten oikea sanoitus saadaan poimittua suoraan lähteestä.
 """
 import difflib
+import os
 import re
 import subprocess
 import zipfile
 import xml.etree.ElementTree as ET
 from collections import Counter
 from dataclasses import dataclass
+
+import polut
 
 VALIMERKIT = ",.;:!?"
 
@@ -207,7 +210,7 @@ def _consistent(rows):
 
 
 def _stext(pdf_path, pages):
-    cmd = ["mutool", "draw", "-F", "stext", "-o", "-", pdf_path]
+    cmd = ["mutool", "draw", "-F", "stext", "-o", "-", polut.polku(pdf_path)]
     if pages:
         cmd.append(",".join(str(p) for p in pages))
     done = subprocess.run(cmd, capture_output=True, check=True)
@@ -520,7 +523,7 @@ class Slot:
 
 
 def load(path):
-    with zipfile.ZipFile(path) as z:
+    with zipfile.ZipFile(polut.polku(path)) as z:
         name = next(n for n in z.namelist()
                     if not n.startswith("META-INF") and n.lower().endswith(".xml"))
         return ET.fromstring(z.read(name))
@@ -533,12 +536,14 @@ def save(root, template, path):
     XML-tiedostoon. Ilman containeria MuseScore ei tunnista tiedostoa,
     joten muut jäsenet kopioidaan sellaisenaan.
     """
-    with zipfile.ZipFile(template) as z:
+    with zipfile.ZipFile(polut.polku(template)) as z:
         score = next(n for n in z.namelist()
                      if not n.startswith("META-INF") and n.lower().endswith(".xml"))
         members = [(n, z.read(n)) for n in z.namelist()]
 
     body = ET.tostring(root, encoding="UTF-8", xml_declaration=True)
+    path = polut.polku(path)
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
         for name, data in members:
             z.writestr(name, body if name == score else data)

@@ -8,6 +8,7 @@ taulukoissa mainittu tiedosto on oikeasti siinä hakemistossa jonka sääntö
 osoittaa.
 """
 
+import os
 import unittest
 
 import polut
@@ -56,6 +57,51 @@ class Saanto(unittest.TestCase):
                          "johdetut/Verdi-Requiem-koko.mxl")
         self.assertEqual(polut.polku("/tmp/koe.mxl"), "/tmp/koe.mxl")
 
+
+
+def taulukoiden_nimet():
+    """Jokainen tiedostonimi, jonka jokin skriptin taulukko mainitsee."""
+    import korjaa_kasin
+    import korjaa_sanat
+    import sisallys
+    import yhdista
+
+    nimet = set()
+    nimet.update(t for t, _, _ in yhdista.MOVEMENTS)
+    nimet.update(yhdista.MAPPING)
+    nimet.update(yhdista.DIES_IRAE_ALUT)
+    nimet.update(yhdista.OMR_SOURCES)
+    nimet.add(yhdista.SANCTUS)
+    for s in korjaa_sanat.SOURCES:
+        nimet.update([s.mxl, s.pdf, s.out])
+    for osa in korjaa_kasin.OSAT:
+        nimet.update([osa.mxl, osa.out])
+    nimet.update(pdf for _nimi, pdf in sisallys.STEMMAT)
+    nimet.add(sisallys.ULOS)
+    return nimet
+
+
+class Olemassaolo(unittest.TestCase):
+    """Sääntö ei saa jäädä hiljaiseksi oletukseksi.
+
+    Jos jokin tiedosto on muualla kuin sääntö osoittaa, ajo lukisi väärää
+    tiedostoa tai kaatuisi vasta ketjun puolivälissä. Tämä kaataa sen heti.
+    """
+
+    def test_jokainen_taulukon_nimi_loytyy_saannon_osoittamasta_paikasta(self):
+        for nimi in sorted(taulukoiden_nimet()):
+            with self.subTest(nimi=nimi):
+                self.assertTrue(os.path.exists(polut.polku(nimi)),
+                                f"{nimi} ei ole polussa {polut.polku(nimi)}")
+
+    def test_tiedosto_ei_ole_kahdessa_hakemistossa(self):
+        """Eksynyt kopio antaisi hiljaa väärän tuloksen."""
+        kaikki = [polut.LAHTEET, polut.JOHDETUT, polut.STEMMAT, polut.HARJOITUS]
+        for nimi in sorted(taulukoiden_nimet()):
+            paikat = [h for h in kaikki
+                      if os.path.exists(os.path.join(h, nimi))]
+            with self.subTest(nimi=nimi):
+                self.assertEqual(len(paikat), 1, f"{nimi} löytyy: {paikat}")
 
 if __name__ == "__main__":
     unittest.main()
