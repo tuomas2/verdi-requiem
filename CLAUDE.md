@@ -1,3 +1,15 @@
+> **Mikä tämä tiedosto on.** Tämä on työpäiväkirja, jota on kirjoitettu
+> istunto kerrallaan Claude Code -avusteisessa työssä, ja se on kirjoitettu
+> ohjeeksi seuraavalle istunnolle — ei esittelyksi. Siksi se on englanniksi ja
+> puhuu tekijästä kolmannessa persoonassa ("the user"): kyseessä on
+> kuorolainen, joka laulaa bassoa ja lukee omaa stemmaansa.
+>
+> Se on silti tämän repon perusteellisin aineisto. Jos aiot parantaa nuotteja,
+> lue erityisesti luku *Recipe: a singer reports a wrong syllable by ear* ja
+> heti alun taulukko *Open* — ne kertovat mistä kannattaa aloittaa ja mitkä
+> menetelmät on jo kokeiltu ja hylätty. Yleiskuva on suomeksi tiedostoissa
+> `README.md` ja `YHDISTAMINEN.md`.
+
 # Verdi Requiem — working notes
 
 Verdi's *Messa da Requiem* in MusicXML, assembled from 16 separate movement
