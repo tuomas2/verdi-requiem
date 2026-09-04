@@ -1,0 +1,54 @@
+name: Julkaise sivusto
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Rinnakkaiset julkaisut peruisivat toisensa kesken; jonotetaan sen sijaan.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  rakenna:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 15 testiä lukee lähde-PDF:iä mutoolilla. MuseScorea ei tarvita:
+      # yksikään testi ei kutsu sitä, ja stemmojen PDF:t tulevat reposta
+      # valmiina, koska niitä ei voi rakentaa ilman MuseScorea.
+      - name: Asenna mutool
+        run: sudo apt-get update && sudo apt-get install -y mupdf-tools
+
+      - name: Aja testit
+        run: python3 -m unittest discover -p 'test_*.py'
+
+      - name: Rakenna sivusto
+        run: python3 sivusto.py _sivusto
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _sivusto
+
+  julkaise:
+    needs: rakenna
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
