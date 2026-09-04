@@ -266,9 +266,16 @@ if __name__ == "__main__":
 
 - [ ] **Askel 2: Aja ketju puhtaalta pöydältä ja ota sormenjälki**
 
+> **ÄLÄ aja `korjaa_sanat.py`:tä ilman `--kuiva`-lippua.** Se kirjoittaa
+> `-OMR-korjattu.mxl`-tiedostot alusta uusiksi OMR-originaaleista, ja osan 14
+> sekä II·9b:n käsin tehdyt korjaukset (tacet-jaksot, 15 nuottikorjausta)
+> elävät vain noissa tiedostoissa — ajo tuhoaisi ne hiljaa. Ks. CLAUDE.md,
+> *Fixing OMR lyrics from the source PDFs*. Näiden tiedostojen on tarkoitus
+> pysyä ennallaan koko tämän työn ajan; ne ovat ketjun syöte, eivät tulos.
+
 ```bash
 cd /Users/tuomasairaksinen/verdi-requiem
-python3 korjaa_sanat.py
+python3 korjaa_sanat.py --kuiva > /dev/null && echo "korjaa_sanat toimii"
 python3 korjaa_kasin.py
 python3 yhdista.py Verdi-Requiem-koko.mxl
 for s in "Sopraano I:sopraano-1" "Sopraano II:sopraano-2" \
@@ -429,7 +436,8 @@ Jos jokin testi avaa tiedoston suoraan nimellä, korjaa se `polut.polku()`:lla.
 - [ ] **Askel 6: Aja koko ketju uudelleen ja vertaa**
 
 ```bash
-python3 korjaa_sanat.py && python3 korjaa_kasin.py
+python3 korjaa_sanat.py --kuiva > /dev/null   # EI ilman --kuiva, ks. tehtävä 2
+python3 korjaa_kasin.py
 python3 yhdista.py Verdi-Requiem-koko.mxl
 for s in "Sopraano I:sopraano-1" "Sopraano II:sopraano-2" \
          "Altto I:altto-1" "Altto II:altto-2" \
@@ -607,7 +615,9 @@ Tarvitset MuseScore 4:n komentoriviltä (`mscore`) ja `mutool`in
 (`brew install mupdf-tools`). Python 3.9, ei riippuvuuksia.
 
 ```bash
-python3 korjaa_sanat.py                       # OMR-osien sanat lähde-PDF:istä
+python3 korjaa_sanat.py --kuiva               # OMR-osien sanat: raportoi vain
+                                              # (ilman --kuiva ylikirjoittaa
+                                              #  käsin korjatut osat 14 ja II·9b)
 python3 korjaa_kasin.py                       # käsin varmistetut korjaukset
 python3 yhdista.py Verdi-Requiem-koko.mxl     # yhdistetty partituuri
 python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"
