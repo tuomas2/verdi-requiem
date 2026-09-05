@@ -1,25 +1,47 @@
 # JailBee-asetukset Verdin Requiem -projektille.
 #
-# Projekti on puhdasta Python-standardikirjastoa; varsinaiset työkalut ovat
-# järjestelmätason ohjelmia: MuseScore (nuottien renderöinti), mutool
-# (PDF:n tekstin ja rasterikuvien luku) ja xmllint (MusicXML-skeeman
-# tarkistus, ks. CLAUDE.md kohta "Merging: things that were learned the
-# hard way").
+# Repo on puhdasta Python-standardikirjastoa (ei pyproject.tomlia, ei
+# riippuvuuksia), joten pip-asennuksia ei tarvita. Ulkoiset työkalut ovat
+# järjestelmätason ohjelmia:
+#
+#   mutool   (mupdf-tools)   — lukee lähde-PDF:istä sanat tekstinä ja
+#                              rasteroi sivuja 450 dpi:llä; 15 testiä kutsuu
+#   mscore   (MuseScore 4)   — renderöi stemmojen PDF:t, ajaa sivuotsikot.py:n
+#                              sivutaittokierrokset ja rakentaa harjoitus-.mscz:t
+#   xmllint  (libxml2-utils) — MusicXML-skeematarkistus, ks. CLAUDE.md kohta
+#                              "Merging: things that were learned the hard way"
+#
+# Ks. myös CLAUDE.md ja YHDISTAMINEN.md.
 
-container_prefix: verdi-requiem
+# Hakemiston nimi "verdi-requiem" kelpaa sellaisenaan container_prefixiksi,
+# joten sitä ei aseteta tässä erikseen.
 
 defaults:
+  # Skriptit ovat kevyitä; raskain yksittäinen työ on koko partituurin
+  # (1807 tahtia, 363 sivua) renderöinti MuseScorella.
   memory: 8GiB
   cpu: 4
+  network: strict
 
 golden:
   extra_apt_packages:
-    - mupdf-tools      # mutool: PDF-lähteiden sanat ja 450 dpi -rasterointi
-    - libxml2-utils    # xmllint: MusicXML-skeematarkistus
+    - mupdf-tools          # mutool: PDF:ien tekstikerros ja rasterointi
+    - libxml2-utils        # xmllint: MusicXML-skeematarkistus
 
-# Tiukassa tilassa (oletus) vain nämä ovat auki. github.com jätetään
-# tarkoituksella pois: se on jailbeen turvaraja, ja pushia varten
-# vaihdetaan `jailbee net loose`.
+  provision_env:
+    # Pinnataan sama versio jolla repon committoidut stemma-PDF:t on tehty.
+    # 65-musescore.sh hakee ilman tätä uusimman julkaisun, ja eri versio
+    # taittaa sivut hieman eri tavalla — sivumäärät ovat repossa kirjattuja
+    # tarkistuslukuja (stemmat-sisallys.txt), joten taiton pitää pysyä samana.
+    MUSESCORE_VERSION: "4.7.4"
+
+# Tiukassa tilassa (oletus) vain nämä ovat auki; loose-tila ohittaa listan.
+# Repo ei hae mitään verkosta ajon aikana, joten tässä on lähinnä apt, jotta
+# kontissa voi asentaa työkalun käsin ilman tilanvaihtoa.
+#
+# github.com on tarkoituksella poissa: se on jailbeen turvaraja. Työnnä
+# muutokset "jailbee git push" -sillalla tai vaihda tilaksi loose silloin
+# kun sitä oikeasti haluat.
 egress_allow:
   - archive.ubuntu.com:80        # apt: extra_apt_packages ja myöhemmät asennukset
   - archive.ubuntu.com:443
@@ -27,3 +49,7 @@ egress_allow:
   - security.ubuntu.com:443
   - www.cpdl.org:443             # nuottien alkuperäislähde, ks. README.md
   - cpdl.org:443
+
+# Autostart-askelia ei ole: mitään ei tarvitse asentaa eikä mikään palvelin
+# jää taustalle pyörimään. Testit ajetaan käsin repon juuressa:
+#     python3 -m unittest discover -s testit -t .
