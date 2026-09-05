@@ -1,0 +1,29 @@
+# JailBee-asetukset Verdin Requiem -projektille.
+#
+# Projekti on puhdasta Python-standardikirjastoa; varsinaiset työkalut ovat
+# järjestelmätason ohjelmia: MuseScore (nuottien renderöinti), mutool
+# (PDF:n tekstin ja rasterikuvien luku) ja xmllint (MusicXML-skeeman
+# tarkistus, ks. CLAUDE.md kohta "Merging: things that were learned the
+# hard way").
+
+container_prefix: verdi-requiem
+
+defaults:
+  memory: 8GiB
+  cpu: 4
+
+golden:
+  extra_apt_packages:
+    - mupdf-tools      # mutool: PDF-lähteiden sanat ja 450 dpi -rasterointi
+    - libxml2-utils    # xmllint: MusicXML-skeematarkistus
+
+# Tiukassa tilassa (oletus) vain nämä ovat auki. github.com jätetään
+# tarkoituksella pois: se on jailbeen turvaraja, ja pushia varten
+# vaihdetaan `jailbee net loose`.
+egress_allow:
+  - archive.ubuntu.com:80        # apt: extra_apt_packages ja myöhemmät asennukset
+  - archive.ubuntu.com:443
+  - security.ubuntu.com:80
+  - security.ubuntu.com:443
+  - www.cpdl.org:443             # nuottien alkuperäislähde, ks. README.md
+  - cpdl.org:443
