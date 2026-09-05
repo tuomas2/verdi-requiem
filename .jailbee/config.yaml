@@ -1,13 +1,15 @@
-# JailBee-asetukset tälle repolle.
+# JailBee-asetukset Verdin Requiem -projektille.
 #
-# Repo on puhdasta stdlib-Pythonia (ei pyproject.tomlia, ei riippuvuuksia),
-# joten mitään pakettien asennusta ei tarvita kontin luonnissa. Ulkoisia
-# työkaluja on kaksi, ja molemmat tulevat golden-kuvasta:
+# Repo on puhdasta Python-standardikirjastoa (ei pyproject.tomlia, ei
+# riippuvuuksia), joten pip-asennuksia ei tarvita. Ulkoiset työkalut ovat
+# järjestelmätason ohjelmia:
 #
-#   mutool   (mupdf-tools)  — lukee lähde-PDF:istä sanat tekstinä ja
-#                             rasteroi sivuja; 15 testiä kutsuu sitä
-#   mscore   (MuseScore 4)  — renderöi stemmojen PDF:t, ajaa sivuotsikot.py:n
-#                             sivutaittokierrokset ja rakentaa harjoitus-.mscz:t
+#   mutool   (mupdf-tools)   — lukee lähde-PDF:istä sanat tekstinä ja
+#                              rasteroi sivuja 450 dpi:llä; 15 testiä kutsuu
+#   mscore   (MuseScore 4)   — renderöi stemmojen PDF:t, ajaa sivuotsikot.py:n
+#                              sivutaittokierrokset ja rakentaa harjoitus-.mscz:t
+#   xmllint  (libxml2-utils) — MusicXML-skeematarkistus, ks. CLAUDE.md kohta
+#                              "Merging: things that were learned the hard way"
 #
 # Ks. myös CLAUDE.md ja YHDISTAMINEN.md.
 
@@ -24,6 +26,7 @@ defaults:
 golden:
   extra_apt_packages:
     - mupdf-tools          # mutool: PDF:ien tekstikerros ja rasterointi
+    - libxml2-utils        # xmllint: MusicXML-skeematarkistus
 
   provision_env:
     # Pinnataan sama versio jolla repon committoidut stemma-PDF:t on tehty.
@@ -32,15 +35,20 @@ golden:
     # tarkistuslukuja (stemmat-sisallys.txt), joten taiton pitää pysyä samana.
     MUSESCORE_VERSION: "4.7.4"
 
+# Tiukassa tilassa (oletus) vain nämä ovat auki; loose-tila ohittaa listan.
+# Repo ei hae mitään verkosta ajon aikana, joten tässä on lähinnä apt, jotta
+# kontissa voi asentaa työkalun käsin ilman tilanvaihtoa.
+#
+# github.com on tarkoituksella poissa: se on jailbeen turvaraja. Työnnä
+# muutokset "jailbee git push" -sillalla tai vaihda tilaksi loose silloin
+# kun sitä oikeasti haluat.
 egress_allow:
-  # Strict-tila estää oletuksena kaiken. Repo ei hae mitään verkosta ajon
-  # aikana, joten tässä on vain apt, jotta kontissa voi asentaa työkalun
-  # käsin ilman että pitää vaihtaa loose-tilaan.
-  # github.com on tarkoituksella poissa: strict-tilassa git push ei mene
-  # läpi, mikä on koko tilan pointti. Työnnä muutokset "jailbee git push"
-  # -sillalla tai vaihda tilaksi loose silloin kun sitä oikeasti haluat.
-  - archive.ubuntu.com
-  - security.ubuntu.com
+  - archive.ubuntu.com:80        # apt: extra_apt_packages ja myöhemmät asennukset
+  - archive.ubuntu.com:443
+  - security.ubuntu.com:80
+  - security.ubuntu.com:443
+  - www.cpdl.org:443             # nuottien alkuperäislähde, ks. README.md
+  - cpdl.org:443
 
 # Autostart-askelia ei ole: mitään ei tarvitse asentaa eikä mikään palvelin
 # jää taustalle pyörimään. Testit ajetaan käsin repon juuressa:

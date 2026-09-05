@@ -162,7 +162,8 @@ def hide_others(mscx, visible):
     return "".join(out)
 
 
-MSCORE = "/Applications/MuseScore 4.app/Contents/MacOS/mscore"
+MSCORE = os.environ.get(
+    "MSCORE", "/Applications/MuseScore 4.app/Contents/MacOS/mscore")
 LAHDE = "Verdi-Requiem-koko.mxl"
 TYYLI = "tiivistys.mss"
 
