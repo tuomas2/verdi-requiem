@@ -1,0 +1,47 @@
+# JailBee-asetukset tälle repolle.
+#
+# Repo on puhdasta stdlib-Pythonia (ei pyproject.tomlia, ei riippuvuuksia),
+# joten mitään pakettien asennusta ei tarvita kontin luonnissa. Ulkoisia
+# työkaluja on kaksi, ja molemmat tulevat golden-kuvasta:
+#
+#   mutool   (mupdf-tools)  — lukee lähde-PDF:istä sanat tekstinä ja
+#                             rasteroi sivuja; 15 testiä kutsuu sitä
+#   mscore   (MuseScore 4)  — renderöi stemmojen PDF:t, ajaa sivuotsikot.py:n
+#                             sivutaittokierrokset ja rakentaa harjoitus-.mscz:t
+#
+# Ks. myös CLAUDE.md ja YHDISTAMINEN.md.
+
+# Hakemiston nimi "verdi-requiem" kelpaa sellaisenaan container_prefixiksi,
+# joten sitä ei aseteta tässä erikseen.
+
+defaults:
+  # Skriptit ovat kevyitä; raskain yksittäinen työ on koko partituurin
+  # (1807 tahtia, 363 sivua) renderöinti MuseScorella.
+  memory: 8GiB
+  cpu: 4
+  network: strict
+
+golden:
+  extra_apt_packages:
+    - mupdf-tools          # mutool: PDF:ien tekstikerros ja rasterointi
+
+  provision_env:
+    # Pinnataan sama versio jolla repon committoidut stemma-PDF:t on tehty.
+    # 65-musescore.sh hakee ilman tätä uusimman julkaisun, ja eri versio
+    # taittaa sivut hieman eri tavalla — sivumäärät ovat repossa kirjattuja
+    # tarkistuslukuja (stemmat-sisallys.txt), joten taiton pitää pysyä samana.
+    MUSESCORE_VERSION: "4.7.4"
+
+egress_allow:
+  # Strict-tila estää oletuksena kaiken. Repo ei hae mitään verkosta ajon
+  # aikana, joten tässä on vain apt, jotta kontissa voi asentaa työkalun
+  # käsin ilman että pitää vaihtaa loose-tilaan.
+  # github.com on tarkoituksella poissa: strict-tilassa git push ei mene
+  # läpi, mikä on koko tilan pointti. Työnnä muutokset "jailbee git push"
+  # -sillalla tai vaihda tilaksi loose silloin kun sitä oikeasti haluat.
+  - archive.ubuntu.com
+  - security.ubuntu.com
+
+# Autostart-askelia ei ole: mitään ei tarvitse asentaa eikä mikään palvelin
+# jää taustalle pyörimään. Testit ajetaan käsin repon juuressa:
+#     python3 -m unittest discover -s testit -t .
