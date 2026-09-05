@@ -43,12 +43,18 @@ rm -rf /opt/musescore
 mv "$tmp/squashfs-root" /opt/musescore
 chmod -R a+rX /opt/musescore
 
-# Kääre eikä symlinkki: ilman offscreen-alustaa Qt yrittää avata näytön ja
-# kaatuu päättömässä kontissa, vaikka kyse olisi pelkästä tiedostomuunnoksesta.
+# Kääre eikä symlinkki: päättömässä kontissa Qt yrittää muuten avata näytön
+# ja kaatuu, vaikka kyse olisi pelkästä tiedostomuunnoksesta.
+#
+# Ratkaiseva muuttuja on MU_QT_QPA_PLATFORM, ei QT_QPA_PLATFORM: MuseScore
+# asettaa jälkimmäisen itse omasta muuttujastaan, joten pelkkä
+# QT_QPA_PLATFORM=offscreen ei tepsi — se yrittää silti xcb:tä ja kaatuu
+# "could not connect to display". Mitattu, ei arvattu.
 cat > /usr/local/bin/mscore <<'WRAP'
 #!/bin/bash
-# MuseScore ilman näyttöä. QT_QPA_PLATFORM asetetaan vain jos kutsuja ei
-# ole sitä itse asettanut, jotta GUI:n voi silti avata X11/Wayland-soketilla.
+# MuseScore ilman näyttöä. Arvot asetetaan vain jos kutsuja ei ole niitä itse
+# asettanut, jotta GUI:n voi silti avata X11/Wayland-soketin läpi.
+export MU_QT_QPA_PLATFORM="${MU_QT_QPA_PLATFORM:-offscreen}"
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
 exec /opt/musescore/AppRun "$@"
 WRAP
