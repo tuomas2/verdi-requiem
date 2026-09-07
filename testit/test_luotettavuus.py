@@ -91,5 +91,48 @@ class Perustelut(unittest.TestCase):
                 self.assertEqual(aani, "Kuoro B")
 
 
+class Markdown(unittest.TestCase):
+    """LUOTETTAVUUS.md on se muoto jota luetaan: sivusto ja README
+    viittaavat siihen. Generoitu tiedosto on versionhallinnassa, jotta
+    GitHub näyttää sen suoraan — ja siksi se voi jäädä jälkeen, mistä
+    ensimmäinen testi kertoo."""
+
+    def tiedosto(self):
+        with open(luotettavuus.MD_TIEDOSTO, encoding="utf-8") as f:
+            return f.read()
+
+    def test_versionhallinnassa_oleva_tiedosto_on_ajan_tasalla(self):
+        self.assertEqual(
+            self.tiedosto(), luotettavuus.markdown(),
+            f"{luotettavuus.MD_TIEDOSTO} on jäljessä: aja "
+            "python3 luotettavuus.py")
+
+    def test_jokainen_osa_on_taulukossa(self):
+        md = luotettavuus.markdown()
+        for _tiedosto, numero, otsikko in yhdista.MOVEMENTS:
+            with self.subTest(osa=numero):
+                self.assertIn(f"| {numero} | {otsikko} |", md)
+
+    def test_jokainen_poikkeus_nakyy_perusteluineen(self):
+        """Perustelu on koko tiedoston tarkoitus; hiljaa pudonnut rivi
+        näyttäisi valmiilta taulukolta josta puuttuu tieto."""
+        md = luotettavuus.markdown()
+        for (osa, aani), t in luotettavuus.POIKKEUKSET.items():
+            with self.subTest(osa=osa, aani=aani):
+                self.assertIn(t.perustelu, md)
+
+    def test_jokainen_kaytetty_merkki_on_selitetty(self):
+        selitetyt = {merkki for merkki, _nimi, _selite
+                     in luotettavuus.MERKINNAT}
+        for _tiedosto, numero, _otsikko in yhdista.MOVEMENTS:
+            for aani in luotettavuus.AANET:
+                merkki = luotettavuus.tila(numero, aani).merkki
+                with self.subTest(osa=numero, aani=aani):
+                    self.assertIn(merkki, selitetyt)
+
+    def test_referenssiedition_nimi_tulee_taulukosta(self):
+        self.assertIn(luotettavuus.REFERENSSI, luotettavuus.markdown())
+
+
 if __name__ == "__main__":
     unittest.main()

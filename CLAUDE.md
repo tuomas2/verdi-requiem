@@ -178,7 +178,8 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `tiivistys.mss` | MuseScore style for the reading parts: multimeasure rests, a bar number on every bar, extra air between systems |
 | `musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files*. **Not in the repo**: authorship is unknown and the filenames carried singers' names, so they were kept out of the public history. They exist only on the user's own machine |
 | `polut.py` | Derives which of the four directories a bare filename belongs to |
-| `luotettavuus.py` | Per movement × voice: what has been verified and what has not |
+| `luotettavuus.py` | Per movement × voice: what has been verified and what has not. Writes `LUOTETTAVUUS.md` |
+| `LUOTETTAVUUS.md` | **Generated**, but committed: the table in readable form. What the site and `README.md` link to |
 | `sivusto.py` | Builds the website into `_sivusto/`; CI runs the same command |
 
 All the source `.mxl` and PDF files came from **CPDL's Requiem page**,
@@ -1230,6 +1231,7 @@ the standing example.
     mscore -S tiivistys.mss -o stemmat/stemma-basso-1.pdf stemmat/stemma-basso-1.mxl
     python3 harjoitus.py --stemma "Basso I"
     python3 sisallys.py                # jos sivumäärät muuttuivat
+    python3 luotettavuus.py            # jos luotettavuustaulukko muuttui
     python3 sivusto.py                 # jos sivustolle näkyvä tieto muuttui
 
 The Python commands take bare filenames — `polut.py` finds the directory. Only
@@ -1238,6 +1240,8 @@ The Python commands take bare filenames — `polut.py` finds the directory. Only
 **A fix that changes what a voice is worth also belongs in `luotettavuus.py`.**
 That table is what the site tells a reader about how far to trust each part,
 and it is the one thing in this pipeline that no test can derive from the data.
+Run `python3 luotettavuus.py` after editing it — `LUOTETTAVUUS.md` is generated
+but committed, and a test fails if it is stale.
 
 `sivuotsikot.py` must run **after** `yhdista.py` (which rewrites the file from
 scratch) and **before** rendering. It runs `mscore` itself, twice per part, to
@@ -2371,3 +2375,43 @@ both voices' texts onto one row.
   (363 pages).
 - Read back off `stemma-basso-1.pdf` page 8 as an image: the upper row now
   reads "Pi - e Je - su Do - mi - ne," and the lower "Pi - e Je - - su".
+
+## 2026-09-07 (b): the reliability table is now a committed Markdown file
+
+The site's one link to the reliability detail pointed at
+`luotettavuus.py` on GitHub — a reader who wanted to know how far to trust
+their part landed in Python source, with the table spread across a dict of
+`namedtuple`s. `luotettavuus.py` now **generates `LUOTETTAVUUS.md`** and the
+site, `README.md` and the recipe link there instead.
+
+`markdown()` builds the whole file: the marks and their meanings, the
+17 × 4 grid of marks, and the per-movement justifications. Three details worth
+keeping:
+
+- **The legend is data, not prose.** `MERKINNAT` lists the five marks with a
+  generic description each, and a test asserts that every mark `tila()` can
+  return appears in it — a new mark cannot reach the file unexplained.
+- **Voices with the same justification are grouped.** The three upper voices
+  usually share one, and repeating it three times per movement would bury the
+  places where they differ. The grouping is by identical `Tila`, in `AANET`
+  order, so `II·4`'s soprano stays on its own row where it belongs.
+- **The defaults are stated once, in the intro and in *Perustelut*, and the
+  per-movement list holds only the exceptions.** That is the same shape the
+  table itself has, so the generated file cannot drift from it.
+
+The file is generated **and committed**, so GitHub renders it directly.
+That combination can go stale, so `test_luotettavuus.py` compares the
+committed bytes against `markdown()` and names the fix in the failure message
+(`aja python3 luotettavuus.py`). CI runs the tests, so a stale file is caught
+before it is published.
+
+`polut.py` is deliberately not used for the output path: it routes score
+files, and this is documentation at the repo root.
+
+### Verification
+
+- 193 tests (188 before, +5).
+- The site builds and its only reliability link now reads
+  `blob/main/LUOTETTAVUUS.md`; a test pins that `luotettavuus.py` no longer
+  appears in the page at all, and the existing test that the page carries no
+  per-movement marks (`✔`) still passes.
