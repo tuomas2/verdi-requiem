@@ -60,6 +60,8 @@ class Osa:
 #   ("lisaa_aksentti",)                 lisää aksentti nuotille jolla ei ole
 #   ("poista_aksentti",)                poista nuotin aksentti
 #   ("poista_nuotti", kuvaus)           poista nuotti tai tauko
+#   ("sanarivi", vanha, uusi)           siirrä tahdin tavut toiselle
+#                                       sanariville, esim. "2" -> "1"
 #   ("kopioi_tahti", lähdetahti)        korvaa tauolla oleva tahti toisen
 #                                       tahdin sisällöllä, sanat mukaan lukien
 # Nuotti on indeksi tahdin <note>-alkioissa, tauot mukaan luettuina, tai None
@@ -287,6 +289,14 @@ OSA_II10_KUORO_B = Osa(
         ("55", 0, "aseta", "De", "begin", "Je"),       # t.678
         ("56", 0, "aseta", "us", "end", "su"),         # t.679
 
+        # Divisin sanarivit olivat päittäin: tämä ala-ääni oli ylemmällä
+        # rivillä ja ylä-ääni alemmalla. Sivu 11 painaa ne toisin päin —
+        # ylä-äänen sanat viivaston yläpuolelle, tämän ala-äänen alapuolelle
+        # — ja niin ne myös luetaan. Ks. OSA_II10_DIVISI.
+        ("54", None, "sanarivi", "1", "2"),            # t.677
+        ("55", None, "sanarivi", "1", "2"),            # t.678
+        ("56", None, "sanarivi", "1", "2"),            # t.679
+
         # --- sivu 12 ---
         ("58", 1, "aseta", "La", "begin", "Do"),       # t.681
         ("58", 3, "aseta", "cry", "middle", "na"),     # t.681
@@ -362,6 +372,17 @@ OSA_II10_DIVISI = Osa(
         ("55", 2, "aseta", "di", "begin", "Do"),       # t.678
         ("55", 3, "aseta", "es", "middle", "mi"),      # t.678
         ("56", 0, "aseta", "il", "end", "ne,"),        # t.679
+
+        # Ylä-ääni ylemmälle sanariville. Laulaja raportoi 2026-09-07, että
+        # tahtien 677-679 kaksi sanariviä ovat päittäin: stemmassa ylärivillä
+        # luki ala-äänen "Pi-e Je-su" ja alarivillä tämän ylä-äänen "Pi-e
+        # Je-su Do-mi-ne,". Lähdesivu 11 painaa ne juuri toisin päin, ja
+        # ylempi rivi kuuluu ylemmälle äänelle muutenkin. Lähdetiedoston oma
+        # järjestys (default-y -80 ja -97) oli tässä väärin päin, koska
+        # osastot ovat siellä erillisiä eikä kumpikaan tiedä toisestaan.
+        ("54", None, "sanarivi", "2", "1"),            # t.677
+        ("55", None, "sanarivi", "2", "1"),            # t.678
+        ("56", None, "sanarivi", "2", "1"),            # t.679
     ),
 )
 
@@ -689,6 +710,24 @@ def sovella(part, osa):
                 measure.insert(kohta + offset, copy.deepcopy(n))
             selosteet.append(f"t.{tahti}: kopioitu tahdista {lahde} "
                              f"({len(malli.findall('note'))} nuottia)")
+
+        elif laji == "sanarivi":
+            # Koko tahdin tavut siirtyvät riviltä toiselle. Divisissä rivi
+            # kertoo kummasta äänestä on kyse, joten se on sisältöä eikä
+            # asettelua: ylä-ääni kuuluu ylemmälle riville. `default-y` on
+            # laskettu vanhalle riville, joten se pudotetaan samasta syystä
+            # kuin `korkeus` pudottaa omansa — MuseScore asettelee itse.
+            vanha, uusi = args
+            ly = [x for n in notes for x in lyriikat(n)]
+            assert ly, f"t.{tahti}: ei tavuja siirrettäväksi"
+            on = sorted({x.get("number") for x in ly})
+            assert on == [vanha], (
+                f"t.{tahti}: odotettiin sanariviä {vanha!r}, on {on}")
+            for x in ly:
+                x.set("number", uusi)
+                x.attrib.pop("default-y", None)
+            selosteet.append(f"t.{tahti}: sanarivi {vanha} -> {uusi} "
+                             f"({len(ly)} tavua)")
 
         elif laji == "poista_nuotti":
             (odotettu,) = args

@@ -506,13 +506,36 @@ class LacrymosaKokonaisuutena(unittest.TestCase):
             [t for _, _, t in self.tavut(self.div, "54")], ["Pi", "e", "Je"])
         self.assertEqual(
             [t for _, _, t in self.tavut(self.div, "55")], ["su", "Do", "mi"])
-        self.assertEqual(self.tavut(self.div, "56"), [("2", "end", "ne,")])
+        self.assertEqual(self.tavut(self.div, "56"), [("1", "end", "ne,")])
 
-    def test_divisin_tavut_pysyvat_sanarivilla_kaksi(self):
-        # Viivastolla on kaksi ääntä eri rytmeissä: rivit erottavat ne.
-        rivit = {ly.get("number") for m in self.div.findall("measure")
-                 for n in m.findall("note") for ly in n.findall("lyric")}
-        self.assertEqual(rivit, {"2"})
+    def test_divisin_sanarivit_ovat_aanten_mukaisessa_jarjestyksessa(self):
+        """Ylä-ääni ylemmälle riville, ala-ääni alemmalle (t.54-56).
+
+        Naulattu siksi, että lähdetiedosto on tässä toisin päin: se on
+        kaksi erillistä osastoa, kumpikin numeroi omat tavunsa tietämättä
+        toisesta, ja niin ala-ääni päätyi riville 1 ja ylä-ääni riville 2.
+        Stemmassa ne osuvat samalle viivastolle, jolloin rivijärjestys
+        kertoo kummasta äänestä on kyse — ja laulaja luki sen väärin päin.
+        Lähdesivu 11 painaa ylä-äänen sanat viivaston yläpuolelle.
+        """
+        for tahti in ("54", "55", "56"):
+            with self.subTest(tahti=tahti):
+                self.assertEqual(
+                    {r for r, _, _ in self.tavut(self.div, tahti)}, {"1"})
+                self.assertEqual(
+                    {r for r, _, _ in self.tavut(self.b, tahti)}, {"2"})
+
+    def test_kuorobasso_on_muualla_sanarivilla_yksi(self):
+        # Rivi 2 on P8:lla vain divisin kolmessa tahdissa; muuten se laulaa
+        # yksin ja kuuluu ylimmälle riville.
+        poikkeus = {"54", "55", "56"}
+        rivit = {m.get("number"): {ly.get("number") for n in m.findall("note")
+                                   for ly in n.findall("lyric")}
+                 for m in self.b.findall("measure")}
+        for tahti, r in rivit.items():
+            if r and tahti not in poikkeus:
+                with self.subTest(tahti=tahti):
+                    self.assertEqual(r, {"1"})
 
     def test_lahdetiedostoa_ei_muuteta(self):
         # Lähde on CPDL:n koskematon vienti ja siinä on edelleen väärä teksti.
