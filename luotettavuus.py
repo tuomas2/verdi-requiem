@@ -11,8 +11,16 @@ solistiosat eivät tarvitse ylläpitoa lainkaan.
 
 Merkintä on lupaus lukijalle. Älä merkitse mitään varmistetuksi ilman että
 se on vertailtu riippumattomaan lähteeseen nuotti nuotilta tai tavu tavulta.
+
+Tämä tiedosto on taulukon lähde, mutta ei se muoto jota luetaan: sivusto ja
+README viittaavat tiedostoon LUOTETTAVUUS.md, jonka tämä skripti kirjoittaa.
+Muokkaa siis taulukkoa täällä ja aja `python3 luotettavuus.py` perässä; testi
+kaatuu jos md-tiedosto on jäänyt jälkeen.
+
+Käyttö:  python3 luotettavuus.py [--kuiva]
 """
 
+import sys
 from collections import namedtuple
 
 import yhdista
@@ -183,6 +191,123 @@ def taulukko():
             for _tiedosto, numero, otsikko in yhdista.MOVEMENTS]
 
 
-if __name__ == "__main__":
+# Merkkien selitteet lukijalle. Nämä ovat yleisiä kuvauksia merkinnän
+# tasosta; osakohtaiset perustelut tulevat POIKKEUKSISTA.
+MERKINNAT = [
+    ("✔", "varmistettu",
+     "Koko osa vertailtu riippumattomaan lähteeseen nuotti nuotilta ja tavu "
+     "tavulta."),
+    ("◑", "käyty läpi / osittain",
+     "Tehty oikeaa tarkistustyötä, mutta ei koko osaa järjestelmällisesti; "
+     "ks. osakohtainen perustelu."),
+    ("○", "tarkistamatta", TARKISTAMATTA.perustelu),
+    ("⚠", "puutteita", "Tiedetään virheellistä tai puuttuvaa sisältöä."),
+    ("–", "ei kuoroa", EI_KUOROA.perustelu),
+]
+
+# Repon juuressa, ei polut.py:n kautta: se reitittää nuottiaineistoa, ja
+# tämä on dokumentaatiota.
+MD_TIEDOSTO = "LUOTETTAVUUS.md"
+
+# Lyhenne otsikkoriville; koko nimi olisi taulukossa turhan leveä.
+_LYHENNE = {"Kuoro S": "S", "Kuoro A": "A", "Kuoro T": "T", "Kuoro B": "B"}
+
+
+def _rivit_perusteluihin(numero):
+    """Osan poikkeukset ryhmiteltyinä: (äänet, Tila) samalla perustelulla.
+
+    Sama perustelu koskee usein kolmea ylempää ääntä, ja kolme kertaa
+    toistettuna se olisi vain luettavan tekstin tiellä.
+    """
+    ryhmat = []
+    for aani in AANET:
+        poikkeus = POIKKEUKSET.get((numero, aani))
+        if not poikkeus or not on_kuoroa(numero, aani):
+            continue
+        if ryhmat and ryhmat[-1][1] == poikkeus:
+            ryhmat[-1][0].append(aani)
+        else:
+            ryhmat.append(([aani], poikkeus))
+    return ryhmat
+
+
+def markdown():
+    """LUOTETTAVUUS.md kokonaisuudessaan.
+
+    Sivusto ja README viittaavat tähän eivätkä lähdekoodiin: taulukon
+    lukijalla ei ole asiaa Pythonin sisään.
+    """
+    o = []
+    o.append("# Mikä stemmoissa on tarkistettu")
+    o.append("")
+    o.append("<!-- Generoitu tiedosto: `python3 luotettavuus.py`. "
+             "Muokkaa `luotettavuus.py`:tä, älä tätä. -->")
+    o.append("")
+    o.append("Tämä taulukko on ihmisen arvio eikä laskettu suure: sen lähde on "
+             "työhistoria")
+    o.append("[`CLAUDE.md`](CLAUDE.md):ssä, johon jokainen tarkistus on "
+             "kirjattu. Merkintä on lupaus")
+    o.append("lukijalle — mitään ei ole merkitty varmistetuksi ilman että se on "
+             "vertailtu")
+    o.append("riippumattomaan lähteeseen nuotti nuotilta tai tavu tavulta.")
+    o.append("")
+    o.append(f"Vertailunuotti on **{REFERENSSI}**, jota vasten kuorobasso on "
+             "käyty läpi ja jonka")
+    o.append("mukaiset stemmojen tahtinumerot ovat.")
+    o.append("")
+    o.append("**Kuorobasso on käyty läpi, muut äänet eivät.** Syy on "
+             "yksinkertainen: tekijä laulaa")
+    o.append("bassoa. Basso on siksi oletuksena ◑ ja muut äänet ○.")
+    o.append("")
+
+    o.append("## Merkinnät")
+    o.append("")
+    o.append("| Tila | Merkitys |")
+    o.append("|---|---|")
+    for merkki, nimi, selite in MERKINNAT:
+        o.append(f"| {merkki} {nimi} | {selite} |")
+    o.append("")
+
+    o.append("## Osa kerrallaan")
+    o.append("")
+    o.append("| Osa | Nimi | " + " | ".join(_LYHENNE[a] for a in AANET) + " |")
+    o.append("|---|---|" + "---|" * len(AANET))
     for numero, otsikko, tilat in taulukko():
-        print(f"{numero:6} {otsikko:24} " + "  ".join(t.merkki for t in tilat))
+        o.append(f"| {numero} | {otsikko} | "
+                 + " | ".join(t.merkki for t in tilat) + " |")
+    o.append("")
+
+    o.append("## Perustelut")
+    o.append("")
+    o.append("Vain ne kohdat, joissa on tehty oikeaa tarkistustyötä tai joissa "
+             "tiedetään olevan")
+    o.append("vikaa. Muut ovat oletuksia: kuorobasso ◑, muut äänet ○.")
+    o.append("")
+    o.append(f"**Kuorobasso, oletus ({KUORO_B_OLETUS.merkki} "
+             f"{KUORO_B_OLETUS.nimi}).** {KUORO_B_OLETUS.perustelu}")
+    o.append("")
+    for _tiedosto, numero, otsikko in yhdista.MOVEMENTS:
+        ryhmat = _rivit_perusteluihin(numero)
+        if not ryhmat:
+            continue
+        o.append(f"### {numero} {otsikko}")
+        o.append("")
+        for aanet, t in ryhmat:
+            aanet = ", ".join(_LYHENNE[a] for a in aanet)
+            o.append(f"- **{aanet} — {t.merkki} {t.nimi}:** {t.perustelu}")
+        o.append("")
+    return "\n".join(o).rstrip("\n") + "\n"
+
+
+def main(argv):
+    teksti = markdown()
+    if "--kuiva" in argv:
+        print(teksti, end="")
+        return
+    with open(MD_TIEDOSTO, "w", encoding="utf-8") as f:
+        f.write(teksti)
+    print(f"kirjoitettu {MD_TIEDOSTO}")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

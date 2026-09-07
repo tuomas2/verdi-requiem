@@ -44,8 +44,9 @@ ykkösestä.
 | ○ tarkistamatta | Ei tunnettuja virheitä, mutta ei myöskään tarkistettu |
 | ⚠ puutteita | Tiedetään virheellistä sisältöä |
 
-Osakohtainen taulukko on tiedostossa [`luotettavuus.py`](luotettavuus.py) ja
-luettavassa muodossa sivustolla.
+Osakohtainen taulukko perusteluineen on tiedostossa
+[`LUOTETTAVUUS.md`](LUOTETTAVUUS.md), jonka `luotettavuus.py` kirjoittaa
+taulukostaan.
 
 Kaksi asiaa kannattaa tietää tarkistustyöstä, koska ne toistuivat:
 

@@ -10,6 +10,7 @@ import os
 import tempfile
 import unittest
 
+import luotettavuus
 import sivusto
 import yhdista
 
@@ -88,9 +89,14 @@ class Luotettavuus(unittest.TestCase):
         self.assertIn("Agnus Dei", sivusto.luotettavuusteksti())
 
     def test_yksityiskohdat_ovat_linkin_takana_eivat_sivulla(self):
-        """Sivun pitää pysyä kevyenä: erittely on repossa."""
+        """Sivun pitää pysyä kevyenä: erittely on repossa.
+
+        Linkki menee generoituun md-tiedostoon eikä lähdekoodiin: lukija
+        haluaa taulukon, ei Pythonia.
+        """
         html = sivusto.stemmasivu()
-        self.assertIn("luotettavuus.py", html)
+        self.assertIn(luotettavuus.MD_TIEDOSTO, html)
+        self.assertNotIn("luotettavuus.py", html)
         # Ei osakohtaista merkkitaulukkoa eikä perusteluja sivulla.
         self.assertNotIn("✔", html)
         self.assertNotIn("melisma", html)

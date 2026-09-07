@@ -167,7 +167,12 @@ def puutteelliset_osat():
 
 
 def luotettavuusteksti():
-    """Lyhyt varoitus. Yksityiskohdat ovat repossa, josta ne on luettukin."""
+    """Lyhyt varoitus. Yksityiskohdat ovat repossa, josta ne on luettukin.
+
+    Linkki menee generoituun LUOTETTAVUUS.md:hen eikä luotettavuus.py:hyn:
+    taulukon lukijalla ei ole asiaa Pythonin sisään, ja GitHub näyttää
+    md-tiedoston valmiiksi taulukoituna.
+    """
     puutteet = [e(o) for o in puutteelliset_osat()]
     maininta = ""
     if puutteet:
@@ -183,7 +188,7 @@ tarkistettu käsin {e(luotettavuus.REFERENSSI)}in painosta vasten ja laulettu
 läpi harjoituksissa; sopraano, altto ja tenori ovat pääosin
 tarkistamatta.{maininta} Syy on yksinkertainen: tekijä laulaa bassoa.</p>
 <p class="perustelu">Osakohtainen erittely siitä mitä on tarkistettu ja
-miten: <a href="{GITHUB}/blob/main/luotettavuus.py">luotettavuus.py</a>.</p>
+miten: <a href="{GITHUB}/blob/main/{luotettavuus.MD_TIEDOSTO}">{e(luotettavuus.MD_TIEDOSTO)}</a>.</p>
 </div>
 """
 
