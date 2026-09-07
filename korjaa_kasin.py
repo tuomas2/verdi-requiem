@@ -48,6 +48,21 @@ class Osa:
     korjaukset: tuple   # (tahti, nuotti, toimenpide, argumentit...)
 
 
+@dataclass(frozen=True)
+class Savellaji:
+    """Sävellajin vaihdon siirto väärästä tahdista oikeaan.
+
+    Tämä ei ole yhden viivaston korjaus vaan koko tiedoston. Sävellaji on
+    merkitty jokaisen osaston omaan tahtiin erikseen, joten jos vaihto
+    siirretään vain kuorobassossa, partituurin viivastot vaihtavat
+    sävellajia eri tahdeissa — ja stemmat keskenään eri kohdassa.
+    """
+
+    mxl: str            # lähde, jota ei koskaan muokata
+    out: str            # tulos, jonka yhdista.py lukee
+    siirrot: tuple      # (väärä tahti, oikea tahti, fifths)
+
+
 # Toimenpiteet:
 #   ("poista", teksti)                  poista tavu, jonka teksti on tämä
 #   ("lisaa", syllabic, teksti)         lisää tavu nuotille jolla ei ole
@@ -66,6 +81,9 @@ class Osa:
 #                                       tahdin sisällöllä, sanat mukaan lukien
 # Nuotti on indeksi tahdin <note>-alkioissa, tauot mukaan luettuina, tai None
 # kun toimenpide koskee koko tahtia.
+#
+# Sävellajin vaihdon paikka ei ole yhden viivaston asia, joten se ei kulje
+# `korjaukset`-rivillä vaan `SAVELLAJIT`-taulukossa OSAT:n jäljessä.
 #
 # `kesto` muuttaa tahdin sisäistä jakoa, joten sovella() tarkistaa jokaisesta
 # tahdista jota se koskee, että äänen kestojen summa on jäljestäpäin sama kuin
@@ -487,6 +505,24 @@ OSAT = ([OSA_I, OSA_II1] + OSAT_II4
         + [OSA_VII_TENORI, OSA_VII])
 
 
+# Osan I sivu 3, 1. järjestelmä (tahdit 50–58): yhden b:n sävellaji puretaan
+# palautusmerkeillä tahdin 56 alussa. Konelukema ei nähnyt purkua vaan luki
+# sävellajin uudestaan vasta seuraavan järjestelmän alusta ja kirjasi vaihdon
+# tahtiin 59 — kolme tahtia myöhässä, keskelle bassostemman taukoa, mistä
+# laulaja sen huomasi ("tahdissa 59 on palautusmerkki, ja tahti on tyhjä").
+#
+# Mitattu PDF:n omasta tekstikerroksesta, ei silmällä: `mutool draw -F stext`
+# antaa nuottifontin (Mozart9) merkit koordinaatteineen, ja palautusmerkkejä
+# on kuusi peräkkäin samalla x:llä 368 — yksi kullakin kuudella viivastolla,
+# täsmälleen sävellajimerkinnän y-korkeuksilla. Tahti 56 alkaa x:llä 367
+# (leveydet lähteen omista <measure width>-arvoista, kerroin 0,306), tahti 59
+# vasta seuraavassa järjestelmässä. Sama menetelmä vahvistaa, että tahdin 67
+# kolme ristiä ovat oikeassa tahdissa, joten vain tämä yksi vaihto siirtyy.
+SAVELLAJIT = (
+    Savellaji(mxl=OSA_I.mxl, out=OSA_I.out, siirrot=(("59", "56", 0),)),
+)
+
+
 def lyriikat(note):
     return note.findall("lyric")
 
@@ -595,6 +631,54 @@ def aseta_korkeus(note, teksti):
         for e in note.findall(turha):
             note.remove(e)
     note.attrib.pop("default-y", None)
+
+
+def siirra_savellaji(root, mista, mihin, fifths):
+    """Siirrä sävellajin vaihto tahdista toiseen kaikissa osastoissa.
+
+    <key> siirretään, ei kopioida: vanhaan tahtiin jäävä vaihto merkitsisi
+    sävellajin vaihtuvan kahdesti. Muu <attributes>-sisältö jää paikalleen,
+    koska se kuvaa sitä tahtia eikä sävellajia.
+    """
+    selosteet = []
+    for part in root.findall("part"):
+        pid = part.get("id")
+        tahdit = {m.get("number"): m for m in part.findall("measure")}
+        vanha, uusi = tahdit.get(mista), tahdit.get(mihin)
+        assert vanha is not None, f"{pid}: tahtia {mista} ei ole"
+        assert uusi is not None, f"{pid}: tahtia {mihin} ei ole"
+
+        attrs = vanha.find("attributes")
+        key = None if attrs is None else attrs.find("key")
+        assert key is not None, f"{pid} t.{mista}: sävellajin vaihtoa ei ole"
+        assert key.findtext("fifths") == str(fifths), (
+            f"{pid} t.{mista}: odotettiin sävellajia {fifths}, "
+            f"on {key.findtext('fifths')}")
+        assert uusi.find("attributes/key") is None, (
+            f"{pid} t.{mihin}: sävellajin vaihto on jo")
+
+        attrs.remove(key)
+        if len(attrs) == 0:
+            vanha.remove(attrs)
+
+        kohde = uusi.find("attributes")
+        if kohde is None:
+            kohde = ET.Element("attributes")
+            # <attributes> vaikuttaa sitä seuraaviin nuotteihin, joten se
+            # menee ensimmäisen nuotin eteen mutta <print>:n jälkeen.
+            nuotit = uusi.findall("note")
+            kohta = list(uusi).index(nuotit[0]) if nuotit else len(uusi)
+            uusi.insert(kohta, kohde)
+            # Nämä tiedostot ovat sisennettyjä, ja sisennys on ET:llä
+            # alkioiden text- ja tail-kenttiä. Ilman tätä siirretty vaihto
+            # näkyisi diffissä yhtenä sotkuisena rivinä.
+            sisennys = uusi.text if uusi.text and uusi.text.startswith("\n") else "\n      "
+            kohde.text, kohde.tail, key.tail = sisennys + "  ", sisennys, sisennys
+        # MusicXML:ssä <key> tulee heti <divisions>:n jälkeen ja ennen muita.
+        kohde.insert(1 if kohde.find("divisions") is not None else 0, key)
+        selosteet.append(f"{pid}: sävellaji {fifths} siirretty "
+                         f"t.{mista} -> t.{mihin}")
+    return selosteet
 
 
 def sovella(part, osa):
@@ -782,13 +866,19 @@ def main(argv):
     # Sama tiedosto voi saada korjauksia useaan osastoon; luetaan ja
     # kirjoitetaan se kerran.
     tiedostoittain = OrderedDict()
-    for osa in OSAT:
+    for osa in list(OSAT) + list(SAVELLAJIT):
         tiedostoittain.setdefault((osa.mxl, osa.out), []).append(osa)
 
     for (mxl, out), osat in tiedostoittain.items():
         root = load(mxl)
         print(f"{mxl} -> {out}")
         for osa in osat:
+            if isinstance(osa, Savellaji):
+                print("  sävellajit (kaikki osastot)")
+                for mista, mihin, fifths in osa.siirrot:
+                    for s in siirra_savellaji(root, mista, mihin, fifths):
+                        print("    " + s)
+                continue
             selosteet = sovella(find_part(root, osa.osasto), osa)
             print(f"  {osa.osasto} ({osa.nimi})")
             for s in selosteet:

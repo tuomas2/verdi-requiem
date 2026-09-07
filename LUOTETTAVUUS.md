@@ -27,7 +27,7 @@ bassoa. Basso on siksi oletuksena ◑ ja muut äänet ○.
 
 | Osa | Nimi | S | A | T | B |
 |---|---|---|---|---|---|
-| I | Requiem & Kyrie | ○ | ○ | ○ | ◑ |
+| I | Requiem & Kyrie | ⚠ | ⚠ | ○ | ◑ |
 | II·1 | Dies irae | ○ | ○ | ○ | ◑ |
 | II·2 | Tuba mirum | ○ | ○ | ○ | ◑ |
 | II·3 | Mors stupebit | – | – | – | – |
@@ -54,8 +54,9 @@ vikaa. Muut ovat oletuksia: kuorobasso ◑, muut äänet ○.
 
 ### I Requiem & Kyrie
 
-- **S, A, T — ○ tarkistamatta:** Sanat korjattu koneellisesti lähde-PDF:ää vasten, peitto 83–91 %, mutta ei tarkistettu tavu tavulta. Nuotit konelukemisen tulosta.
-- **B — ◑ osittain:** Sanat korjattu lähde-PDF:ää vasten ja kahdeksan kohtaa varmistettu käsin, useimmat laulajan kuulohavainnon perusteella. Nuotit ovat konelukemisen tulosta eikä niitä ole tarkistettu.
+- **S, A — ⚠ puutteita:** Sanat korjattu koneellisesti lähde-PDF:ää vasten, peitto 83–91 %, mutta ei tarkistettu tavu tavulta. Nuoteissa on tiedossa oleva virhe: konelukema luuli kolmen ristin sävellajin jatkuvan tahdin 28 yli, ja luki tahdit 28–34 ("Te decet hymnus") ristillisinä — Fis4 ja Cis5 siellä missä tenori ja basso laulavat F-duuria.
+- **T — ○ tarkistamatta:** Sanat korjattu koneellisesti lähde-PDF:ää vasten, peitto 83–91 %, mutta ei tarkistettu tavu tavulta. Nuotit konelukemisen tulosta. Sopraanon ja alton sävellajivirhe tahdeissa 28–34 ei koske tenoria: sen sävellaji vaihtuu lähteessä jo oikeassa tahdissa.
+- **B — ◑ osittain:** Sanat korjattu lähde-PDF:ää vasten ja kahdeksan kohtaa varmistettu käsin, useimmat laulajan kuulohavainnon perusteella. Lisäksi yhden b:n purku siirretty tahtiin 56, jonne lähdesivu sen painaa; konelukema oli merkinnyt sen kolme tahtia myöhemmäksi. Nuotit ovat konelukemisen tulosta eikä niitä ole tarkistettu.
 
 ### II·1 Dies irae
 
