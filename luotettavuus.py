@@ -86,11 +86,21 @@ SAT = ("Kuoro S", "Kuoro A", "Kuoro T")
 _POIKKEUKSET = {
     ("I", ("Kuoro B",)): _osittain(
         "Sanat korjattu lähde-PDF:ää vasten ja kahdeksan kohtaa varmistettu "
-        "käsin, useimmat laulajan kuulohavainnon perusteella. Nuotit ovat "
+        "käsin, useimmat laulajan kuulohavainnon perusteella. Lisäksi yhden "
+        "b:n purku siirretty tahtiin 56, jonne lähdesivu sen painaa; "
+        "konelukema oli merkinnyt sen kolme tahtia myöhemmäksi. Nuotit ovat "
         "konelukemisen tulosta eikä niitä ole tarkistettu."),
-    ("I", SAT): _tarkistamatta(
+    ("I", ("Kuoro S", "Kuoro A")): _puutteita(
         "Sanat korjattu koneellisesti lähde-PDF:ää vasten, peitto 83–91 %, "
-        "mutta ei tarkistettu tavu tavulta. Nuotit konelukemisen tulosta."),
+        "mutta ei tarkistettu tavu tavulta. Nuoteissa on tiedossa oleva "
+        "virhe: konelukema luuli kolmen ristin sävellajin jatkuvan tahdin 28 "
+        "yli, ja luki tahdit 28–34 (\"Te decet hymnus\") ristillisinä — "
+        "Fis4 ja Cis5 siellä missä tenori ja basso laulavat F-duuria."),
+    ("I", ("Kuoro T",)): _tarkistamatta(
+        "Sanat korjattu koneellisesti lähde-PDF:ää vasten, peitto 83–91 %, "
+        "mutta ei tarkistettu tavu tavulta. Nuotit konelukemisen tulosta. "
+        "Sopraanon ja alton sävellajivirhe tahdeissa 28–34 ei koske tenoria: "
+        "sen sävellaji vaihtuu lähteessä jo oikeassa tahdissa."),
 
     ("II·1", ("Kuoro B",)): _osittain(
         "Nuotit vertailtu kuoron omaan tiedostoon koko 91 tahdin matkalta; "

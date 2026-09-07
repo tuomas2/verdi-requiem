@@ -9,9 +9,9 @@ import xml.etree.ElementTree as ET
 
 from korjaa_kasin import (OSA_I, OSA_II1, OSA_II6, OSA_II10_DIVISI,
                           OSA_II10_KUORO_B, OSA_VII, OSA_VII_TENORI,
-                          OSAT_II4, OSAT_IV, Osa, find_part, kuvaa,
-                          kuvaa_kesto, load, lue_korkeus, sovella,
-                          yksi_sanarivi)
+                          OSAT_II4, OSAT_IV, SAVELLAJIT, Osa, find_part,
+                          kuvaa, kuvaa_kesto, load, lue_korkeus,
+                          siirra_savellaji, sovella, yksi_sanarivi)
 
 
 OSA_IV = next(o for o in OSAT_IV if o.osasto == "P4")   # Kuoro B
@@ -716,6 +716,124 @@ class MuutOsatKokonaisuutena(unittest.TestCase):
                 self.assertEqual([ly.findtext("text")
                                   for n in tahdit[tahti].findall("note")
                                   for ly in n.findall("lyric")], odotus)
+
+
+def savellajipuu(*osastot):
+    """Puu, jossa jokaisella osastolla on tahdit 1-3 ja sävellaji annetussa.
+
+    osasto on (id, tahti tai None, fifths).
+    """
+    root = ET.Element("score-partwise")
+    for pid, tahti, fifths in osastot:
+        p = ET.SubElement(root, "part", {"id": pid})
+        for numero in ("1", "2", "3"):
+            m = ET.SubElement(p, "measure", {"number": numero})
+            if numero == tahti:
+                a = ET.SubElement(m, "attributes")
+                ET.SubElement(ET.SubElement(a, "key"), "fifths").text = str(fifths)
+                ET.SubElement(a, "staff-details")
+            ET.SubElement(ET.SubElement(m, "note"), "rest")
+    return root
+
+
+def savellajit(root):
+    return {(p.get("id"), m.get("number")): m.findtext("attributes/key/fifths")
+            for p in root.findall("part") for m in p.findall("measure")
+            if m.find("attributes/key") is not None}
+
+
+class SavellajinSiirto(unittest.TestCase):
+    """Sävellajin vaihto siirtyy koko tiedostossa tai ei ollenkaan."""
+
+    def test_siirtyy_kaikissa_osastoissa(self):
+        root = savellajipuu(("P1", "3", 0), ("P2", "3", 0))
+        siirra_savellaji(root, "3", "2", 0)
+        self.assertEqual(savellajit(root), {("P1", "2"): "0", ("P2", "2"): "0"})
+
+    def test_vanhaan_tahtiin_ei_jaa_vaihtoa_mutta_muu_jaa(self):
+        root = savellajipuu(("P1", "3", 0))
+        siirra_savellaji(root, "3", "2", 0)
+        vanha = root.findall("part/measure")[2]
+        self.assertIsNone(vanha.find("attributes/key"))
+        self.assertIsNotNone(vanha.find("attributes/staff-details"))
+
+    def test_attributes_menee_nuottien_edelle(self):
+        root = savellajipuu(("P1", "3", 0))
+        siirra_savellaji(root, "3", "2", 0)
+        uusi = root.findall("part/measure")[1]
+        self.assertEqual([c.tag for c in uusi], ["attributes", "note"])
+
+    def test_tyhjaksi_jaanyt_attributes_poistetaan(self):
+        root = savellajipuu(("P1", "3", 0))
+        vanha = root.findall("part/measure")[2]
+        vanha.find("attributes").remove(vanha.find("attributes/staff-details"))
+        siirra_savellaji(root, "3", "2", 0)
+        self.assertIsNone(vanha.find("attributes"))
+
+    def test_kaataa_jos_vaihtoa_ei_ole(self):
+        root = savellajipuu(("P1", "3", 0), ("P2", None, 0))
+        with self.assertRaises(AssertionError):
+            siirra_savellaji(root, "3", "2", 0)
+
+    def test_kaataa_jos_savellaji_on_eri(self):
+        root = savellajipuu(("P1", "3", -1))
+        with self.assertRaises(AssertionError):
+            siirra_savellaji(root, "3", "2", 0)
+
+    def test_kaataa_jos_kohteessa_on_jo_vaihto(self):
+        root = savellajipuu(("P1", "3", 0))
+        m = root.findall("part/measure")[1]
+        a = ET.SubElement(m, "attributes")
+        ET.SubElement(ET.SubElement(a, "key"), "fifths").text = "0"
+        with self.assertRaises(AssertionError):
+            siirra_savellaji(root, "3", "2", 0)
+
+    def test_kaataa_jos_tahtia_ei_ole(self):
+        root = savellajipuu(("P1", "3", 0))
+        with self.assertRaises(AssertionError):
+            siirra_savellaji(root, "3", "9", 0)
+
+
+class OsanISavellajit(unittest.TestCase):
+    """Osan I purku on tahdissa 56, ei 59, oikeaa lähdetiedostoa vasten.
+
+    Lähde-PDF:n sivu 3 painaa kuusi palautusmerkkiä x:llä 368, ja tahti 56
+    alkaa x:llä 367; tahti 59 on vasta seuraavan järjestelmän ensimmäinen.
+    Konelukema luki sävellajin uudestaan järjestelmän alusta ja kirjasi
+    vaihdon sinne. Naulattu siksi, että 59 on tiedoston oma lukema ja
+    näyttää siltä oikealta, ja koska laulaja luki purun tyhjästä tahdista.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        (cls.savellaji,) = [s for s in SAVELLAJIT if s.mxl == OSA_I.mxl]
+        cls.root = load(OSA_I.mxl)
+        for mista, mihin, fifths in cls.savellaji.siirrot:
+            siirra_savellaji(cls.root, mista, mihin, fifths)
+
+    def test_siirtoja_on_yksi(self):
+        self.assertEqual(self.savellaji.siirrot, (("59", "56", 0),))
+
+    def test_kaikki_seitsemantoista_osastoa_vaihtavat_tahdissa_56(self):
+        merkityt = savellajit(self.root)
+        osastot = [p.get("id") for p in self.root.findall("part")]
+        self.assertEqual(len(osastot), 17)
+        for pid in osastot:
+            with self.subTest(osasto=pid):
+                self.assertEqual(merkityt.get((pid, "56")), "0")
+                self.assertIsNone(merkityt.get((pid, "59")))
+
+    def test_muut_vaihdot_pysyvat_paikallaan(self):
+        # Sivu 1 antaa kolme ristiä tahtiin 17 ja sivu 3 tahtiin 67; kumpikin
+        # on mitattu samalla tavalla ja kumpikin oli jo oikein.
+        merkityt = savellajit(self.root)
+        self.assertEqual(merkityt[("P16", "17")], "3")
+        self.assertEqual(merkityt[("P16", "67")], "3")
+
+    def test_lahdetiedostoa_ei_muuteta(self):
+        merkityt = savellajit(load(OSA_I.mxl))
+        self.assertEqual(merkityt[("P16", "59")], "0")
+        self.assertNotIn(("P16", "56"), merkityt)
 
 
 if __name__ == "__main__":

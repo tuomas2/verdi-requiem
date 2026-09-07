@@ -26,7 +26,7 @@ komennot toimivat sekä nimellä että täydellä polulla.
 | `sivuotsikot.py` | Kirjoittaa käynnissä olevan osan nimen joka sivun ensimmäisen tahdin päälle |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
 | `korjaa_sanat.py` | Korjaa osien 01, 14 ja II·9b:n kuorosanat lähde-PDF:ää vasten |
-| `korjaa_kasin.py` | Käsin todennetut korjaukset (osat I, II·1, II·4, II·6, II·10, IV ja VII), taulukkona — tavut, korkeudet, rytmi |
+| `korjaa_kasin.py` | Käsin todennetut korjaukset (osat I, II·1, II·4, II·6, II·10, IV ja VII), taulukkona — tavut, korkeudet, rytmi, sanarivit, sävellajin paikka |
 | `nayta.py` | Näyttää viivaston nuotit, äänet ja sanarivit tahdeittain |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
 | `polut.py` | Kertoo mistä hakemistosta mikäkin nuottitiedosto löytyy |
@@ -424,6 +424,49 @@ kartoitukseen takaisin `"Piano": ["P17"]`.
 
 Soivuuden voi tarkistaa MIDI-viennillä: `mscore -o x.mid Verdi-Requiem-koko.mxl`.
 Nyt se ulottuu 1699 tahtiin; aiemmin 81:een.
+
+## Sävellajin vaihto väärässä tahdissa
+
+Osan I bassostemmassa oli **palautusmerkki tahdissa 59**, jossa basso on
+tauolla. Merkki ei ole turha — se purkaa yhden b:n sävellajin, ja purku
+piirretään aina, lauloipa tahdissa kukaan tai ei — mutta se oli **kolme tahtia
+liian myöhässä**: lähdesivu purkaa sävellajin tahdissa 56.
+
+Syy on konelukemisessa. Jokainen painettu järjestelmä toistaa sävellajin
+vasemmassa reunassaan, ja Audiveris lukee sen sieltä joka kerta. Osan I sivun 3
+järjestelmät alkavat tahdeista 50, 59 ja 66, ja jos vaihto tapahtuu kesken
+järjestelmän eikä konelukema huomaa sitä, se kirjautuu vasta seuraavan
+järjestelmän alkuun. Tiedostossa se ei näytä miltään: tahdin 59 merkintä on
+aivan tavallinen ja kaikki sen jälkeen on oikein. Vain tahdit 56–58 ovat
+väärässä sävellajissa.
+
+Paikka mitattiin PDF:n omasta tekstikerroksesta. Näissä lähteissä myös
+**nuottikuva on fonttia**, joten `mutool draw -F stext` antaa jokaiselle
+avaimelle, etumerkille ja tauolle tarkan koordinaatin; sivulla 3 on kuusi
+palautusmerkkiä samalla x:llä 368, yksi kutakin kuutta viivastoa kohti, ja
+tahti 56 alkaa x:llä 367. Mitään ei tarvinnut katsoa kuvasta. Sama mittaus
+vahvisti, että sivun 3 toinen vaihto (kolme ristiä, tahti 67) ja sivun 1
+vaihto (tahti 17) ovat tiedostossa jo oikein.
+
+Korjaus on `korjaa_kasin.py`:n `SAVELLAJIT`-taulukossa eikä `korjaukset`-
+rivinä, koska sävellaji on merkitty **jokaiseen osastoon erikseen**: jos se
+siirtyisi vain kuorobassossa, partituurin viivastot vaihtaisivat sävellajia eri
+tahdeissa. Siirto myös tarkistaa jokaisesta osastosta, että vanha tahti
+todella kantaa sen sävellajin ja uusi ei kanna mitään.
+
+Stemmassa näkyvä muutos: palautusmerkki on nyt tahdissa 56, siinä kohdassa
+missä "4 Soli" -jakso alkaa, ja tahdit 58–59 tiivistyvät yhdeksi
+`[58–59]`-taukoruuduksi, koska niiden välissä ei enää ole sävellajin vaihtoa.
+
+**Sama vika on korjaamatta sopraanolla ja altolla.** Osan I sivulla 2
+sävellaji vaihtuu yhteen b:hen tahdissa 28, ja niin tiedostossa on tenorilla ja
+bassolla — mutta muilla viisitoista osastolla vaihto on tahdissa 35, seuraavan
+järjestelmän alussa. Tätä ei voi korjata siirtämällä sävellajia, koska
+konelukema on lukenut *nuotit* uskomassaan sävellajissa: kuorosopraanon "Te
+decet hymnus" on tahdeissa 28–34 `Fis4 Fis4 Cis5 D5 E5` ja alton
+`Fis4 Gis4 A4 Gis4 Fis4 E4 A4`, kun tenori ja basso laulavat puhdasta
+F-duuria. Ristit ovat seurausta, ja korjaus vaatii nuottien lukemisen sivulta
+uudelleen. Merkitty `LUOTETTAVUUS.md`:hen.
 
 ## Sanarivien yhtenäistäminen
 
