@@ -468,9 +468,16 @@ mukaan.
 
 **Osa II·10 Lacrymosa**: P9 on kuorobasson divisi tahdeissa 54–56 (juoksevat
 677–679), ja se yhdistetään kuorobassoriville omaksi äänekseen. Stemmassa
-siinä on siksi kaksi sanariviä: ylä-äänen "Pi-e Je-su Do-mi-ne," ja
-ala-äänen "Pi-e Je-su". Niin lähde-PDF:kin sen painaa — ylä-äänen sanat
-viivaston yläpuolelle.
+siinä on siksi kaksi sanariviä: **ylemmällä** ylä-äänen "Pi-e Je-su
+Do-mi-ne," ja **alemmalla** ala-äänen "Pi-e Je-su". Niin lähde-PDF:kin sen
+painaa — ylä-äänen sanat viivaston yläpuolelle.
+
+Lähdetiedosto on tässä toisin päin, ja se on tarkoituksella korjattu
+`korjaa_kasin.py`:ssä (`sanarivi`-toimenpide): P8 ja P9 ovat lähteessä kaksi
+erillistä osastoa, jotka kumpikin numeroivat omat tavunsa toisesta tietämättä,
+joten ala-ääni päätyi riville 1 ja ylä-ääni riville 2. Yhdellä viivastolla
+rivijärjestys kertoo kummasta äänestä on kyse, ja väärin päin se johtaa
+laulajan harhaan — niin kävikin, ja siitä tämä korjaus alkoi.
 
 ## Sanojen korjaus
 
