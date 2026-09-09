@@ -7,7 +7,7 @@ jokaisen toimenpiteen pitää kaatua kun lähtötilanne ei ole odotettu.
 import unittest
 import xml.etree.ElementTree as ET
 
-from korjaa_kasin import (OSA_I, OSA_II1, OSA_II6, OSA_II10_DIVISI,
+from korjaa_kasin import (Osa, OSA_I, OSA_II1, OSA_II6, OSA_II10_DIVISI,
                           OSA_II10_KUORO_B, OSA_VII, OSA_VII_TENORI,
                           OSAT_II4, OSAT_IV, SAVELLAJIT, Osa, find_part,
                           kuvaa, kuvaa_kesto, load, lue_korkeus,
@@ -461,8 +461,39 @@ class LacrymosaKokonaisuutena(unittest.TestCase):
 
     def test_loppuu_amen_eika_parce(self):
         # Laulajan alkuperäinen havainto: stemma päättyi "par-ce".
-        self.assertEqual(self.tavut(self.b, "74"), [("1", "single", "A")])
+        # "A" on sanan "A-men." ensimmäinen tavu, siis `begin` — se oli
+        # `single`, jolloin stemmaan tulostui "A men." ilman väliviivaa.
+        self.assertEqual(self.tavut(self.b, "74"), [("1", "begin", "A")])
         self.assertEqual(self.tavut(self.b, "75"), [("1", "end", "men.")])
+
+    def test_tavuketju_on_ehja_koko_loppujaksossa(self):
+        """Tahdit 58-75: jokainen sana alkaa `begin`illä ja päättyy `end`iin.
+
+        Tämä oli rikki 2026-09-03 lähtien: `aseta`-rivit vaihtoivat sanat
+        mutta jättivät korvattujen sanojen ketjumerkinnät, joten stemmaan
+        tulostui "Do-na-e-is" ja "re qui em," ilman väliviivoja.
+        """
+        virta = [(s, t) for tahti in [str(n) for n in range(58, 76)]
+                 for _r, s, t in self.tavut(self.b, tahti)]
+        sanat, kesken = [], []
+        for syllabic, text in virta:
+            if syllabic == "single":
+                self.assertEqual(kesken, [], f"{text!r} katkaisi sanan")
+                sanat.append(text)
+            elif syllabic == "begin":
+                self.assertEqual(kesken, [], f"{text!r} katkaisi sanan")
+                kesken = [text]
+            else:
+                self.assertTrue(kesken, f"{text!r} ilman sanan alkua")
+                kesken.append(text)
+                if syllabic == "end":
+                    sanat.append("".join(kesken))
+                    kesken = []
+        self.assertEqual(kesken, [])
+        self.assertEqual(
+            " ".join(sanat),
+            "Dona eis requiem, dona eis, pie Jesu Domine, "
+            "dona eis requiem, requiem, requiem, dona eis requiem. Amen.")
 
     def test_huic_ergo_parce_deus_kolme_kertaa(self):
         """Tahdit 34-42 (juoksevat 657-665): sama teksti kolmesti.
@@ -569,6 +600,94 @@ class LacrymosaKokonaisuutena(unittest.TestCase):
         solisti = find_part(load(OSA_II10_KUORO_B.mxl), "P4")
         soolo = {m.get("number"): m for m in solisti.findall("measure")}
         self.assertEqual(kuvaa(soolo["30"].findall("note")[0]), "C3")
+
+
+class Tavutus(unittest.TestCase):
+    """`tavutus` korjaa ketjumerkinnät annetun sanajaon mukaisiksi.
+
+    Operaatio on olemassa siksi, että `aseta` kantaa korvatun sanan
+    ketjumerkinnän: kun Lacrymosan sanat vaihdettiin 2026-09-03,
+    "La-cry-mo-sa"-sanan `middle` jäi sanan "do-na" toiselle tavulle ja
+    stemmaan tulostui "Do-na-e-is" ja "re qui em," ilman väliviivoja.
+    """
+
+    @staticmethod
+    def osasto(*tavut):
+        """(tahti, syllabic, teksti) -> osasto, yksi nuotti per tavu."""
+        part = ET.Element("part", {"id": "P1"})
+        tahdit = {}
+        for tahti, syllabic, text in tavut:
+            m = tahdit.get(tahti)
+            if m is None:
+                m = tahdit[tahti] = ET.SubElement(part, "measure",
+                                                  {"number": tahti})
+            n = ET.SubElement(m, "note")
+            ly = ET.SubElement(n, "lyric", {"number": "1"})
+            if syllabic is not None:
+                ET.SubElement(ly, "syllabic").text = syllabic
+            if text is not None:
+                ET.SubElement(ly, "text").text = text
+        return part
+
+    @staticmethod
+    def ketju(part):
+        return [(ly.findtext("syllabic"), ly.findtext("text"))
+                for m in part.findall("measure") for n in m.findall("note")
+                for ly in n.findall("lyric")]
+
+    def aja(self, part, jako, tahti="1"):
+        osa = Osa(mxl="x", out="y", osasto="P1", nimi="X",
+                  yksi_sanarivi=False,
+                  korjaukset=((tahti, None, "tavutus", jako),))
+        return sovella(part, osa)
+
+    def test_ketju_korjautuu_sanajaon_mukaiseksi(self):
+        part = self.osasto(("1", "middle", "Do"), ("1", "single", "na"),
+                           ("2", "begin", "e"), ("2", "middle", "is"))
+        self.aja(part, "Do-na e-is")
+        self.assertEqual(self.ketju(part),
+                         [("begin", "Do"), ("end", "na"),
+                          ("begin", "e"), ("end", "is")])
+
+    def test_kolmitavuinen_saa_middlen(self):
+        part = self.osasto(("1", "single", "re"), ("1", "single", "qui"),
+                           ("1", "middle", "em,"))
+        self.aja(part, "re-qui-em,")
+        self.assertEqual([s for s, _t in self.ketju(part)],
+                         ["begin", "middle", "end"])
+
+    def test_yksitavuinen_on_single(self):
+        part = self.osasto(("1", "begin", "et"))
+        self.aja(part, "et")
+        self.assertEqual(self.ketju(part), [("single", "et")])
+
+    def test_tekstit_eivat_muutu(self):
+        part = self.osasto(("1", "middle", "Do"), ("1", "single", "na"))
+        self.aja(part, "Do-na")
+        self.assertEqual([t for _s, t in self.ketju(part)], ["Do", "na"])
+
+    def test_vaara_tavu_pysayttaa_ajon(self):
+        # Hiljaa väärään paikkaan osuva korjaus on pahempi kuin pysähtynyt
+        # ajo: rivi tarkistaa jokaisen tavun tekstin.
+        part = self.osasto(("1", "begin", "Do"), ("1", "end", "na"))
+        with self.assertRaises(AssertionError) as e:
+            self.aja(part, "e-is")
+        self.assertIn("odotettiin tavua", str(e.exception))
+
+    def test_liian_pitka_jako_pysayttaa_ajon(self):
+        part = self.osasto(("1", "begin", "Do"), ("1", "end", "na"))
+        with self.assertRaises(AssertionError) as e:
+            self.aja(part, "Do-na e-is")
+        self.assertIn("tavua annettu", str(e.exception))
+
+    def test_melisman_jatkoviiva_ohitetaan(self):
+        # Pelkän <extend/>:n sisältävä lyriikka ei ole tavu; jos se
+        # laskettaisiin, jako siirtyisi yhden askeleen väärään kohtaan.
+        part = self.osasto(("1", "middle", "Do"), ("1", None, None),
+                           ("1", "single", "na"))
+        self.aja(part, "Do-na")
+        self.assertEqual(self.ketju(part),
+                         [("begin", "Do"), (None, None), ("end", "na")])
 
 
 class DiesIraeJaLiberaMeSamaKuvio(unittest.TestCase):

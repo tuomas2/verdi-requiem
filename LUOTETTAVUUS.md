@@ -79,7 +79,7 @@ vikaa. Muut ovat oletuksia: kuorobasso ◑, muut äänet ○.
 ### II·10 Lacrymosa
 
 - **T — ⚠ puutteita:** Tekstiaukko tahdissa 688. Muuten tarkistamatta.
-- **B — ✔ varmistettu:** Jokainen nuotti vertailtu kuoron omaan tiedostoon ja jokainen tavu painettuun lähde-PDF:ään nuottitarkkuudella. Lisäksi tahdeissa 657–665 korjattiin teksti, joka on väärin myös painetussa editiossa: sen ratkaisi se, että sama aihe kantaa samassa imitaatiossa tekstiä "hu-ic er-go" tenorilla, altolla ja sopraanolla.
+- **B — ✔ varmistettu:** Jokainen nuotti vertailtu kuoron omaan tiedostoon ja jokainen tavu painettuun lähde-PDF:ään nuottitarkkuudella. Lisäksi tahdeissa 657–665 korjattiin teksti, joka on väärin myös painetussa editiossa: sen ratkaisi se, että sama aihe kantaa samassa imitaatiossa tekstiä "hu-ic er-go" tenorilla, altolla ja sopraanolla. Tahtien 681–698 tavuviivat olivat rikki 2026-09-03 lähtien — tavut ja niiden paikat oikein, mutta ketjumerkinnät korvattujen sanojen mukaiset, joten stemmassa luki "re qui em," erillisinä sanoina. Korjattu 2026-09-09.
 
 ### IV Sanctus
 

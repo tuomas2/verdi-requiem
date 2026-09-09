@@ -47,6 +47,34 @@ a{color:var(--rubric)}
 .johdanto{font-family:var(--serif);font-size:1.1rem;max-width:52ch;
           margin:1.8rem 0 0;color:var(--ink-soft)}
 
+h3{
+  font-family:var(--sans);font-weight:600;font-size:.78rem;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+  margin:2.4rem 0 .8rem;
+}
+
+/* ---------- ominaisuuslista ----------
+   Nimi ja selitys rinnakkain leveällä näytöllä, allekkain kapealla. */
+.ominaisuudet{
+  margin:0;display:grid;gap:.55rem 1.6rem;
+  grid-template-columns:minmax(11rem,15rem) minmax(0,44ch);
+}
+.ominaisuudet dt{
+  font-family:var(--serif);font-size:1.05rem;
+  grid-column:1;
+}
+.ominaisuudet dd{
+  margin:0;color:var(--ink-soft);font-size:.92rem;
+  grid-column:2;
+}
+.koodi{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85em}
+
+@media (max-width:640px){
+  .ominaisuudet{grid-template-columns:1fr;gap:.15rem}
+  .ominaisuudet dt{grid-column:1}
+  .ominaisuudet dd{grid-column:1;margin-bottom:.7rem}
+}
+
 /* ---------- luotettavuusvaroitus ---------- */
 .varoitus{
   border-left:3px solid var(--rubric);

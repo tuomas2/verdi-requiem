@@ -17,7 +17,7 @@ komennot toimivat sekä nimellä että täydellä polulla.
 | Tiedosto | Sisältö |
 |---|---|
 | `Verdi-Requiem-koko.mxl` | Koko teos, 15 viivastoa, 1807 tahtia |
-| `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, kaikki ajan tasalla (II·9b mukana, tahtinumerointi juoksee Dies iraen läpi, osan nimi joka sivun ylälaidassa) |
+| `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, kaikki ajan tasalla (II·9b mukana, tahtinumerointi juoksee Dies iraen läpi, osan nimi joka sivun ylälaidassa, latinan sanojen suomennos tavujen alla) |
 | `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa, ajan tasalla |
 | `sisallys.py` | Rakentaa tuon luettelon uudelleen valmiista stemma-PDF:istä |
 | `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys, tahtinumero joka tahtiin, väljyys rivien välissä |
@@ -26,7 +26,8 @@ komennot toimivat sekä nimellä että täydellä polulla.
 | `sivuotsikot.py` | Kirjoittaa käynnissä olevan osan nimen joka sivun ensimmäisen tahdin päälle |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
 | `korjaa_sanat.py` | Korjaa osien 01, 14 ja II·9b:n kuorosanat lähde-PDF:ää vasten |
-| `korjaa_kasin.py` | Käsin todennetut korjaukset (osat I, II·1, II·4, II·6, II·10, IV ja VII), taulukkona — tavut, korkeudet, rytmi, sanarivit, sävellajin paikka |
+| `korjaa_kasin.py` | Käsin todennetut korjaukset (osat I, II·1, II·4, II·6, II·10, IV ja VII), taulukkona — tavut, korkeudet, rytmi, sanarivit, tavutus, sävellajin paikka |
+| `suomennos.py` | Latinan sanojen suomennos tavujen alle, tavutuksen korjaus, ja `--teksti` tulostaa koko tekstin juoksevana proosana |
 | `nayta.py` | Näyttää viivaston nuotit, äänet ja sanarivit tahdeittain |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
 | `polut.py` | Kertoo mistä hakemistosta mikäkin nuottitiedosto löytyy |
@@ -89,6 +90,11 @@ Jos lähdeaineisto muuttuu, aja koko ketju **tässä järjestyksessä** —
         -S tiivistys.mss -o stemma-basso-1.pdf stemma-basso-1.mxl
     python3 harjoitus.py --stemma "Basso I"       # 6. harjoittelutiedosto
     python3 sisallys.py                           # 7. sisällysluettelo
+    python3 suomennos.py --teksti stemma-basso-1.mxl   # 8. lue teksti läpi
+
+Vaihe 8 on tarkistus eikä tuota mitään: se tulostaa stemman tekstin
+juoksevana proosana, ja väärä suomennos tai rikkinäinen tavutus näkyy siinä
+heti. Ks. *Latinan sanojen suomennos*.
 
 Vaiheet 4-6 toistetaan kullekin tarvittavalle äänelle; `sivuotsikot.py` ottaa
 monta tiedostoa kerralla (`python3 sivuotsikot.py stemma-*.mxl`). Yksittäiset
@@ -168,6 +174,82 @@ tilanhukkaa; nimi on otsikossa.
 Sisällysluettelon sivunumerot poimitaan valmiista PDF:istä, joten aja
 `python3 sisallys.py` aina kun stemmat on renderöity uudelleen — se kirjoittaa
 `stemmat-sisallys.txt`:n uudestaan.
+
+## Latinan sanojen suomennos
+
+`suomennos.py` kirjoittaa **jokaisen latinan sanan alle sen suomennoksen**
+pienemmällä fontilla (6,5 pt latinan 10 pt:n alla). Tarkoitus on latinan
+opiskelu laulamisen ohessa, eli sama idea kuin `sivusto/requiem.html`:n
+rinnakkaisessa suomennoksessa — mutta siinä kohdassa nuottia, jossa sana
+lauletaan:
+
+    ex  -  au  -  di        o - ra - ti - o - nem
+    kuule                   rukous
+
+Suomen sana ei tavutu eikä sitä tavuteta: koko sana tulee latinan sanan
+**ensimmäisen tavun alle**, myös silloin kun latinan sana venyy melisman yli
+usean tahdin matkalle. `yhdista.py` tekee tämän viimeisenä vaiheena, ja
+lipulla `--ei-suomennosta` se jää pois.
+
+Käännökset ovat samat kuin tekstisivulla, ja ne on poimittu siitä: sanasto on
+sanamuoto → suomennos, eli sama muoto käännetään koko teoksessa samoin. Se on
+tietoinen valinta. Apusanat joutuvat siksi kompromissiin — `in` on aina
+"-ssa", vaikka "in favilla" on "tuhkaan" — mutta taulukko pysyy yhtenä
+listana eikä paisu tahtikohtaisiksi poikkeuksiksi. Sanasto kattaa koko
+teoksen, myös solistien tekstit, joita mikään kahdeksasta stemmasta ei laula.
+
+**Sivumäärä ei kasvanut basson stemmoissa lainkaan** ja koko kahdeksan
+stemman joukossa kaksi sivua: suomennosrivi mahtuu pääosin tilaan, joka on jo
+varattu. Mitattu, ei arvattu — samoin kuin se, että fonttikoko on pakko
+kirjoittaa tavun omaan `<text font-size>`-määreeseen: MuseScoren tyyliavain
+`lyricsEvenFontSize` ei tee mitään.
+
+### Tekstin lukeminen läpi juoksevana proosana
+
+    python3 suomennos.py --teksti stemma-basso-1.mxl
+
+tulostaa stemman koko tekstin virkkeinä, suomennos latinan alla ja tavuviivat
+niin kuin ne painuvat:
+
+    t. 688  re-qui-em, re-qui-em, do-na e-is   re-qui-em. A-men.
+            lepo       lepo       anna  heille lepo       amen
+
+Tämä on tarkistus, jota nuottikuvasta ei voi tehdä. Kun koko teksti on
+luettavissa kerralla, väärä suomennos ja rikkinäinen tavutus näkyvät heti;
+nuottikuvasta ne pitää etsiä sivu kerrallaan. Tuntemattomat sanat tulostuvat
+kaarisulkeissa (`«per-pe-tll-a»`), ja ne ovat käytännössä aina konelukemisen
+virheitä. Ilman `--teksti`-lippua sama komento antaa pelkän
+kattavuusraportin.
+
+Bassostemmoissa kattavuus on 100 % — jokainen sana tunnistetaan ja saa
+suomennoksen. Sopraanossa, altossa ja tenorissa se on 95–96 %, ja koko
+puuttuva osa on osan I konelukemisen roskaa (`lg},`, `ux`, `per-pe-tll-a`),
+eli samaa vikaa jonka `LUOTETTAVUUS.md` jo kertoo.
+
+### Tavutuksen korjaus
+
+Sama sanasto korjaa myös **tavuviivat**, ja se on stemman virhe suomennoksesta
+riippumatta. Lacrymosan tahdissa 688 sana "requiem" oli kirjoitettu kolmeksi
+erilliseksi tavuksi, joten stemmassa luki `re qui em,` ilman väliviivoja. Kun
+sanasto tunnistaa, että kolme tavua ovat yksi sana, ketjumerkinnät
+(`syllabic`) korjataan sen mukaisiksi. Tuntemattoman sanan merkintöihin ei
+kosketa, koska mitään parempaa tietoa ei ole.
+
+Tämä löysi kolme oikeaa vikaa, jotka olivat painetussa stemmassa:
+
+- **Lacrymosan tahdit 681–698**: tavuviivat rikki, koska sanojen vaihdon
+  yhteydessä 2026-09-03 jokainen tavu peri korvatun sanan ketjumerkinnän.
+  Korjattu `korjaa_kasin.py`:n uudella `tavutus`-rivillä, joka kertoo koko
+  lauseen tavutuksen kerralla ja tarkistaa jokaisen tavun tekstin.
+- **Libera me, tahti 85**: `cal-la-mi-ta-tis`, oikein `ca-la-mi-ta-tis`.
+- **Sanctus, tahti 71, Kuoro II:n basso**: `in no-mi-ni`, oikein
+  `in no-mi-ne`.
+
+Ja neljäs, joka maksoi kolmelle stemmalle sivun jo ennen suomennosta: Dies
+iraen tahdissa 5 sopraanon, alton ja tenorin ylä-äänen tavu oli merkitty
+sanariville **6**, joten rivit 3–5 olivat tyhjiä mutta veivät silti tilan.
+`yhdista.py` tiivistää nyt tahdin käytössä olevat sanarivit järjestyksessä
+1..n.
 
 ## Viivastot
 

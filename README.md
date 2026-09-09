@@ -18,7 +18,7 @@ kuoron oman nuottikirjan kanssa**, ja stemman on oltava tiivis.
 
 | | |
 |---|---|
-| `stemmat/stemma-*.pdf` | Kahdeksan stemmaa: S/A/T/B × I/II. Tahtinumero joka tahdin päällä, käynnissä olevan osan nimi joka sivun yläreunassa |
+| `stemmat/stemma-*.pdf` | Kahdeksan stemmaa: S/A/T/B × I/II. Tahtinumero joka tahdin päällä, käynnissä olevan osan nimi joka sivun yläreunassa, latinan sanojen suomennos tavujen alla pienemmällä |
 | `johdetut/Verdi-Requiem-koko.mxl` | Koko teos yhtenä partituurina: 15 viivastoa, 1807 tahtia |
 | `stemmat/stemmat-sisallys.txt` | Miltä sivulta mikin osa alkaa kussakin kahdeksassa stemmassa |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston, jossa oma ääni soi trumpettina ja muut kuuluvat mutta eivät näy |
@@ -73,6 +73,16 @@ python3 sivuotsikot.py stemma-basso-1.mxl      # osan nimi joka sivulle
 mscore -S tiivistys.mss -o stemmat/stemma-basso-1.pdf stemmat/stemma-basso-1.mxl
 python3 sisallys.py                            # sisällysluettelo
 python3 -m unittest discover -s testit -t .
+```
+
+Tekstin voi lukea läpi juoksevana proosana, latina ja suomennos rinnakkain.
+Se on nopein tapa löytää rikkinäinen tavutus ja väärä suomennos, koska
+kumpikin näkyy virkkeessä heti — nuottikuvasta ne pitää etsiä sivu
+kerrallaan:
+
+```bash
+python3 suomennos.py --teksti stemma-basso-1.mxl
+python3 suomennos.py                           # kattavuusraportti
 ```
 
 Kaksi varoitusta, jotka ovat maksaneet aikaa:
