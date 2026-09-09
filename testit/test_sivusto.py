@@ -12,6 +12,7 @@ import unittest
 
 import luotettavuus
 import sivusto
+import suomennos
 import yhdista
 
 
@@ -121,6 +122,45 @@ class Luotettavuus(unittest.TestCase):
         for tekninen in ["oktaavivirhe", "konelukemisen", "OMR", "sanapeitto"]:
             with self.subTest(sana=tekninen):
                 self.assertNotIn(tekninen, html)
+
+
+class Ominaisuudet(unittest.TestCase):
+    """Stemmojen ominaisuuslista.
+
+    Luvut listalla ovat johdettuja: käsin kirjoitettu sivumäärä tai
+    tahtiväli jäisi jälkeen seuraavassa muutoksessa, ja sivu lupaa ne
+    lukijalle.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.html = sivusto.stemmasivu()
+
+    def test_lista_on_latauslistan_jalkeen_ja_partituurin_edella(self):
+        self.assertIn("Ominaisuudet", self.html)
+        self.assertLess(self.html.index('class="lataukset"'),
+                        self.html.index("Ominaisuudet"))
+        self.assertLess(self.html.index("Ominaisuudet"),
+                        self.html.index("Koko partituuri"))
+
+    def test_sivumaarat_luetaan_sisallystiedostosta(self):
+        sivut = sivusto.sivumaarat()
+        self.assertTrue(sivut)
+        self.assertIn(f"{min(sivut)}\u2013{max(sivut)} sivua", self.html)
+
+    def test_dies_iraen_tahtivali_lasketaan_lahteista(self):
+        alku, loppu = sivusto.dies_irae_vali()
+        self.assertEqual((alku, loppu), (1, 701))
+        self.assertIn(f"{alku}\u2013{loppu}", self.html)
+
+    def test_suomennoksen_fonttikoko_tulee_moduulista(self):
+        # Sivu ei saa kertoa eri kokoa kuin se, jolla suomennos ladotaan.
+        self.assertIn(suomennos.KOKO.replace(".", ",") + " pt", self.html)
+
+    def test_jokaisella_kohdalla_on_nimi_ja_selitys(self):
+        nimet = self.html.count("<dt>")
+        self.assertEqual(nimet, self.html.count("<dd>"))
+        self.assertGreaterEqual(nimet, 5)
 
 
 class Muotoilu(unittest.TestCase):

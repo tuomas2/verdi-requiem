@@ -67,6 +67,7 @@ class Savellaji:
 #   ("poista", teksti)                  poista tavu, jonka teksti on tämä
 #   ("lisaa", syllabic, teksti)         lisää tavu nuotille jolla ei ole
 #   ("aseta", vanha, syllabic, teksti)  korvaa tavu toisella
+#   ("tavutus", "Do-na e-is ...")        korjaa tavuketju tahdista eteenpäin
 #   ("jatka",)                          lisää tavuun melisman jatkoviiva
 #   ("korkeus", vanha, uusi)            vaihda nuotin korkeus, esim. "A3"->"A2"
 #   ("kesto", vanha, uusi)              vaihda nuottiarvo, esim.
@@ -193,6 +194,7 @@ OSA_II6 = Osa(
     yksi_sanarivi=False,
     korjaukset=(
         ("45", 0, "aseta", "le,", "single", "me,"),
+
     ),
 )
 
@@ -367,6 +369,26 @@ OSA_II10_KUORO_B = Osa(
         # --- sivu 16: kaikki kahdeksan ääntä laulavat "A - men." ---
         ("74", 0, "aseta", "par", "single", "A"),      # t.697
         ("75", 0, "aseta", "ce", "end", "men."),       # t.698
+
+        # --- tavuketju koko jaksolle 681-698 ---
+        #
+        # Yllä olevat `aseta`-rivit vaihtoivat sanat mutta jättivät kunkin
+        # tavun `syllabic`-merkinnän siltä sanalta, jonka ne korvasivat:
+        # "La-cry-mo-sa"-sanan `middle` jäi sanan "do-na" toiselle tavulle.
+        # Ketju hajosi, ja stemmaan tulostui "Do-na-e-is" ja "re qui em,"
+        # ilman väliviivoja. Vika oli painetussa stemmassa 2026-09-03
+        # lähtien; se löytyi kun suomennos ei tunnistanut sanoja (ks.
+        # suomennos.py).
+        #
+        # Tavujen tekstit ja paikat ovat lähdesivujen 12-16 mukaiset ja
+        # tarkistettu 2026-09-03 nuottitarkkuudella; tämä rivi ei muuta
+        # niitä, vaan tarkistaa ne ja korjaa vain ketjumerkinnät. Sana
+        # kerrallaan luettuna jakso on juuri se, mikä stemmasta luetaan
+        # takaisin.
+        ("58", None, "tavutus",
+         "Do-na e-is re-qui-em, do-na e-is, pi-e Je-su Do-mi-ne, "
+         "do-na e-is re-qui-em, re-qui-em, re-qui-em, "
+         "do-na e-is re-qui-em. A-men."),
     ),
 )
 
@@ -425,6 +447,22 @@ OSAT_IV = [
     for pid, nimi in (("P2", "Kuoro A"), ("P3", "Kuoro T"), ("P4", "Kuoro B"))
 ]
 
+
+# Kuoro II:n basso, Sanctus t.71: "in no-mi-ni" -> "in no-mi-ne". Lause on
+# "qui venit in nomine Domini", ja sama tiedosto kirjoittaa sen oikein sekä
+# Kuoro I:n bassossa (t.65) että tämän oman äänen jatkossa (t.72-73
+# "Do-mi-ni"). Löytyi kun suomennos ei tunnistanut sanaa; virhe näkyy Basso
+# II:n stemmassa painettuna. Tämä ei kuulu OSAT_IV:ään: se on niiden kolmen
+# äänen taulukko, joilta puuttui "coe", eikä Kuoro II laula sitä lausetta.
+OSA_IV_KUORO_B_II = Osa(
+    mxl="13-Verdi-Sanctus.mxl",
+    out="13-Verdi-Sanctus-kasin.mxl",
+    osasto="P8",
+    nimi="Kuoro B II",
+    yksi_sanarivi=False,
+    korjaukset=(("71", 3, "aseta", "ni", "end", "ne"),),
+)
+
 # Libera me (VII), kuorobasso. Kolme eri vikaa.
 #
 # 1. Tahti 72, toinen nuotti oktaavia alempi A. Sama kuvio ja sama vika kuin
@@ -479,6 +517,11 @@ OSA_VII = Osa(
         ("88", 4, "lisaa_aksentti"),
         ("98", 0, "lisaa", "begin", "di"),
         ("98", 2, "lisaa", "end", "es"),
+        # t.85: "cal-la-mi-ta-tis" -> "ca-la-mi-ta-tis". Sana on
+        # calamitatis yhdellä l:llä; lähteessä ensimmäinen tavu on "cal",
+        # joten stemmaan tulostui "callamitatis". Löytyi kun suomennos ei
+        # tunnistanut sanaa (ks. suomennos.py).
+        ("85", 2, "aseta", "cal", "begin", "ca"),
     ),
 )
 
@@ -502,6 +545,7 @@ OSA_VII_TENORI = Osa(
 # CLAUDE.md, *Recipe*-luvun viimeinen kappale.
 OSAT = ([OSA_I, OSA_II1] + OSAT_II4
         + [OSA_II6, OSA_II10_KUORO_B, OSA_II10_DIVISI] + OSAT_IV
+        + [OSA_IV_KUORO_B_II]
         + [OSA_VII_TENORI, OSA_VII])
 
 
@@ -812,6 +856,49 @@ def sovella(part, osa):
                 x.attrib.pop("default-y", None)
             selosteet.append(f"t.{tahti}: sanarivi {vanha} -> {uusi} "
                              f"({len(ly)} tavua)")
+
+        elif laji == "tavutus":
+            # Korjaa `syllabic`-merkinnät annetun sanajaon mukaisiksi
+            # tahdista eteenpäin. Tavujen tekstit tarkistetaan, mutta niitä
+            # ei muuteta.
+            #
+            # Tämä on olemassa siksi, että `aseta`-rivi kantaa sen sanan
+            # ketjumerkinnän, jonka se korvasi: kun 2026-09-03 Lacrymosan
+            # tahtien 681-694 sanat vaihdettiin, "La-cry-mo-sa"-sanan
+            # `middle` jäi sanan "do-na" toiseksi tavuksi. Ketju hajosi, ja
+            # stemmaan tulostui "Do-na-e-is" ja "re qui em," ilman
+            # väliviivoja. Rivi kertoo koko lauseen kerralla, joten se on
+            # luettavissa ja tarkistaa itse jokaisen tavun.
+            (jako,) = args
+            odotetut = [(sana, tavu, len(sana.split("-")), j)
+                        for sana in jako.split()
+                        for j, tavu in enumerate(sana.split("-"))]
+            # Melisman jatkoviiva on oma <lyric> ilman tekstiä; se ei ole
+            # tavu eikä kuulu virtaan.
+            virta = [(m, ly) for m in part.findall("measure")
+                     if int(m.get("number")) >= int(tahti)
+                     for n in m.findall("note") for ly in lyriikat(n)
+                     if teksti(ly) is not None]
+            assert len(virta) >= len(odotetut), (
+                f"t.{tahti}: {len(odotetut)} tavua annettu, "
+                f"tiedostossa {len(virta)}")
+            muutettu = 0
+            for (m, ly), (sana, tavu, montako, j) in zip(virta, odotetut):
+                assert teksti(ly) == tavu, (
+                    f"t.{m.get('number')}: odotettiin tavua {tavu!r} "
+                    f"(sanassa {sana!r}), on {teksti(ly)!r}")
+                oikea = ("single" if montako == 1 else
+                         "begin" if j == 0 else
+                         "end" if j == montako - 1 else "middle")
+                elem = ly.find("syllabic")
+                if elem is None:
+                    elem = ET.Element("syllabic")
+                    ly.insert(0, elem)
+                if elem.text != oikea:
+                    elem.text = oikea
+                    muutettu += 1
+            selosteet.append(f"t.{tahti}: tavutus, {muutettu} merkintää "
+                             f"korjattu ({len(odotetut)} tavua tarkistettu)")
 
         elif laji == "poista_nuotti":
             (odotettu,) = args

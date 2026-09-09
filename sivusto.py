@@ -17,6 +17,7 @@ import shutil
 import sys
 
 import luotettavuus
+import suomennos
 import polut
 import yhdista
 
@@ -195,6 +196,78 @@ miten: <a href="{GITHUB}/blob/main/{luotettavuus.MD_TIEDOSTO}">{e(luotettavuus.M
 
 # --------------------------------------------------------------- stemmat
 
+def sivumaarat():
+    """Stemmojen sivumäärät stemmat-sisallys.txt:n omalta viimeiseltä riviltä.
+
+    Luetaan eikä kirjoiteta käsin: sivumäärä muuttuu joka kerta kun jotain
+    lisätään stemmaan, ja käsin kirjoitettu luku jäisi jälkeen.
+    """
+    polku = os.path.join("stemmat", "stemmat-sisallys.txt")
+    if not os.path.exists(polku):
+        return []
+    for rivi in reversed(open(polku, encoding="utf-8").read().splitlines()):
+        if rivi.strip().startswith("sivuja"):
+            return [int(x) for x in rivi.split()[1:]]
+    return []
+
+
+def dies_irae_vali():
+    """Dies iraen tahtiväli, laskettuna eikä kirjoitettuna.
+
+    Alku on yhdista.DIES_IRAE_ALUT:n pienin luku ja loppu viimeisen
+    alaosan aloitus plus sen oman lähdetiedoston tahtimäärä. Numerot ovat
+    kuoron nuottikirjan omat, joten niitä ei arvata kahteen paikkaan.
+    """
+    alut = yhdista.DIES_IRAE_ALUT
+    viimeinen = max(alut, key=alut.get)
+    root = suomennos.load(viimeinen)
+    tahteja = max(len(p.findall("measure")) for p in root.findall("part"))
+    return min(alut.values()), alut[viimeinen] + tahteja - 1
+
+
+def ominaisuudet():
+    """Mitä stemmoissa on. Luvut johdetaan, jotta ne eivät jää jälkeen."""
+    sivut = sivumaarat()
+    laajuus = (f"{min(sivut)}–{max(sivut)} sivua" if sivut else "tiivis")
+    alku, loppu = dies_irae_vali()
+    kohdat = [
+        ("Tahtinumero joka tahdissa",
+         "Numero jokaisen tahdin päällä, ei vain rivin alussa, ja "
+         "tiivistetyn tauon päällä sen tahtiväli (<span "
+         "class=\"koodi\">[79–93]</span>). Kuoronjohtajan huutaman tahdin "
+         "löytää laskematta rivin alusta."),
+        ("Osan nimi joka sivulla",
+         "Käynnissä olevan osan nimi sivun ensimmäisen tahdin päällä, joten "
+         "keskeltä avattu sivu kertoo itse, missä osassa ollaan."),
+        (f"Tahtinumerot {e(luotettavuus.REFERENSSI)}in mukaan",
+         f"Dies irae numeroituu yhtenäisesti {alku}–{loppu} niin kuin "
+         "kuoron nuottikirjassa; muut osat alkavat ykkösestä. Tämä on koko "
+         "hankkeen tärkein yksittäinen vaatimus."),
+        ("Latinan sanojen suomennos",
+         "Jokaisen latinan sanan alla sen suomennos pienemmällä "
+         f"({e(suomennos.KOKO.replace('.', ','))} pt) — sanatarkka ja "
+         "latinan sanajärjestystä seuraava, sama käännös kuin tekstisivulla. "
+         "Suomen sana tulee kokonaisena latinan sanan ensimmäisen tavun "
+         "alle, myös silloin kun sana venyy monelle nuotille, eikä sitä "
+         "tavuteta."),
+        ("Vain oma ääni",
+         f"Muut äänet ja pianosäestys eivät ole mukana, ja useamman tahdin "
+         f"tauot ovat yhtenä palkkina, joten stemma on {laajuus} eikä "
+         "yli kolmesataa."),
+        ("Tilaa käsimerkinnöille",
+         "Nuottirivien väli on 29,3 mm ja marginaali 15 mm, eli "
+         "harjoituksissa tehdyille merkinnöille jää noin 22 mm kaistale "
+         "rivien väliin. Mitattu, ei arvattu."),
+        ("MusicXML PDF:n rinnalla",
+         "Sama sisältö lähdemuodossa: avautuu esimerkiksi MuseScorella, "
+         "sanat ja suomennokset mukana, joten stemmaa voi muokata itse tai "
+         "kuunnella sen läpi."),
+    ]
+    rivit = "".join("<dt>%s</dt><dd>%s</dd>" % (nimi, teksti)
+                    for nimi, teksti in kohdat)
+    return f'<h3>Ominaisuudet</h3>\n<dl class="ominaisuudet">{rivit}</dl>'
+
+
 def stemmasivu():
     """Stemmat ja lataukset — sivuston pääsivu."""
     pikkukuvat = os.path.isdir(os.path.join(POHJA, "pikkukuvat"))
@@ -224,6 +297,8 @@ kuoronjohtajan huudosta. <strong>Tahtinumerot täsmäävät
 
 <h2>Stemmat</h2>
 <ul class="lataukset">{linkit}</ul>
+
+{ominaisuudet()}
 
 <h2>Koko partituuri</h2>
 <p>Kaikki viisitoista viivastoa yhtenä tiedostona, 1807 tahtia:

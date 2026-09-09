@@ -7,6 +7,9 @@ samalla rivillä. Dies iraen (osa II) alaosien tahtinumerointi juoksee
 yhtenäisesti läpi koko osan; muualla numerointi alkaa joka osassa
 ykkösestä.
 
+Latinan sanojen suomennos tulee tavujen alle pienemmällä fontilla
+(suomennos.py); lipulla --ei-suomennosta se jää pois.
+
 Käyttö:  python3 yhdista.py [ulostulo.mxl]
 """
 
@@ -18,6 +21,7 @@ import xml.etree.ElementTree as ET
 from collections import OrderedDict
 
 import polut
+import suomennos
 
 # ---------------------------------------------------------------- kohdeviivastot
 # (nimi, lyhenne, viivastoja, oletusavain kun osasto vaikenee koko osan)
@@ -682,6 +686,37 @@ def normalise_lyrics(measure):
     shift = 1 not in numbers
     for lyric, number in zip(lyrics, numbers):
         lyric.set("number", str(1 if shift else number))
+    tiivista_sanarivit(measure)
+
+
+def tiivista_sanarivit(measure):
+    """Numeroi tahdin käytössä olevat sanarivit uudelleen 1..n järjestyksessä.
+
+    MuseScore varaa tilan riveille ykkösestä siihen korkeimpaan, tyhjät
+    mukaan lukien. Dies iraen tahdissa 5 kuoron sopraano, altto ja tenori
+    laulavat kahdella äänellä, ja lähde (Sibelius + Dolet) merkitsee
+    ylä-äänen tavun riville `part1verse6` — eli riville 6, jolloin rivit
+    3-5 ovat tyhjiä ja vievät silti tilan. Se maksoi kolmelle stemmalle
+    sivun jo ennen suomennosta, ja suomennos olisi mennyt riville 7.
+
+    Järjestys säilyy, joten ylä- ja ala-äänen tekstit pysyvät samassa
+    järjestyksessä keskenään — se on divisin kohdalla se, mikä ratkaisee
+    kummalle äänelle rivi kuuluu (ks. korjaa_kasin.py:n `sanarivi`).
+    """
+    kaytossa = sorted({verse_number(lyric.get("number"))
+                       for note in measure.findall("note")
+                       for lyric in note.findall("lyric")})
+    uusi = {vanha: i for i, vanha in enumerate(kaytossa, start=1)}
+    if all(vanha == numero for vanha, numero in uusi.items()):
+        return 0
+    muutettu = 0
+    for note in measure.findall("note"):
+        for lyric in note.findall("lyric"):
+            numero = str(uusi[verse_number(lyric.get("number"))])
+            if lyric.get("number") != numero:
+                lyric.set("number", numero)
+                muutettu += 1
+    return muutettu
 
 
 def merge_voices(base, extras, div, beats, btype, staff=None):
@@ -815,6 +850,9 @@ def title_direction(label):
 def main():
     args = sys.argv[1:]
     only = singer = None
+    suomenna = "--ei-suomennosta" not in args
+    if not suomenna:
+        args.remove("--ei-suomennosta")
     if "--vain" in args:
         i = args.index("--vain")
         only = [n.strip() for n in args[i + 1].split(",")]
@@ -983,6 +1021,16 @@ def main():
                 stats[name] += sum(1 for n in m.findall("note") if n.find("rest") is None)
                 target.append(m)
 
+    # Tavutuksen korjaus ja suomennos vasta tässä, koko partituuri koossa:
+    # sana voi ylittää tahtiviivan, ja normalise_lyrics (yllä, tahdeittain)
+    # nostaisi suomennoksen riville 1 luullen sitä eksyneeksi tavuksi.
+    #
+    # Tavutus korjataan aina, myös lipulla --ei-suomennosta: väärä syllabic
+    # tulostaa sanan ilman väliviivoja ("re qui em,") ja on siis stemman
+    # virhe riippumatta siitä, onko suomennos mukana.
+    tavutettu = suomennos.korjaa_tavutus(root)
+    suomennettu = suomennos.lisaa(root) if suomenna else None
+
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("META-INF/container.xml",
@@ -1007,6 +1055,12 @@ def main():
               f"(elisio, ks. merge_elisions)")
     if repaired:
         print(f"korjattu {repaired} kaksinkertaista nuottiarvoa (piano)")
+    if tavutettu:
+        print(f"korjattu {sum(tavutettu.values())} tavun syllabic-merkintä "
+              f"({len(tavutettu)} eri sanassa, ks. suomennos.korjaa_tavutus)")
+    if suomennettu is not None:
+        for rivi in suomennos.raportti(suomennettu):
+            print(rivi)
     for rivi in saumaraportti(alueet):
         print(rivi)
     for w in dict.fromkeys(warnings):

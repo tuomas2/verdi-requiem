@@ -139,7 +139,10 @@ _POIKKEUKSET = {
         "657–665 korjattiin teksti, joka on väärin myös painetussa "
         "editiossa: sen ratkaisi se, että sama aihe kantaa samassa "
         "imitaatiossa tekstiä \"hu-ic er-go\" tenorilla, altolla ja "
-        "sopraanolla."),
+        "sopraanolla. Tahtien 681–698 tavuviivat olivat rikki 2026-09-03 "
+        "lähtien — tavut ja niiden paikat oikein, mutta ketjumerkinnät "
+        "korvattujen sanojen mukaiset, joten stemmassa luki \"re qui em,\" "
+        "erillisinä sanoina. Korjattu 2026-09-09."),
     ("II·10", ("Kuoro T",)): _puutteita(
         "Tekstiaukko tahdissa 688. Muuten tarkistamatta."),
 
