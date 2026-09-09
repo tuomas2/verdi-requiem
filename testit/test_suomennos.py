@@ -219,6 +219,15 @@ class Suomennos(unittest.TestCase):
         lisaa(partituuri(part))
         self.assertEqual(suomennokset(part), [("1", 0, "2", "lepo")])
 
+    def test_suomennos_saa_vaakasiirron(self):
+        # Ilman siirtoa MuseScore keskittää suomennoksen nuotinpään
+        # kohdalle, jolloin tavuaan pidempi sana alkaa tavun vasemmalta
+        # puolelta.
+        part = osasto([[("single", "dies")]])
+        lisaa(partituuri(part))
+        ly = part.find("measure/note/lyric[@number='2']")
+        self.assertIsNotNone(ly.get("relative-x"))
+
     def test_suomennos_on_pienemmalla_fontilla(self):
         # MuseScoren tyyliavain lyricsEvenFontSize ei toimi (mitattu), joten
         # koko on tavun omassa <text>-alkiossa.
@@ -267,6 +276,62 @@ class Suomennos(unittest.TestCase):
         self.assertEqual(len(suomennokset(part)), 1)
 
 
+class Vaakatasaus(unittest.TestCase):
+    """Suomennos alkaa samasta kohdasta kuin latinan ensimmäinen tavu.
+
+    Siirto lasketaan mitatuista merkkileveyksistä, joten nämä tarkistavat
+    säännön eivätkä yksittäisiä pistemääriä: leveystaulukko on mittaustulos
+    ja saa muuttua, sääntö ei.
+    """
+
+    def test_siirto_asettaa_vasemmat_reunat_kohdakkain(self):
+        # Tämä on koko laskennan määritelmä. Tavun vasen reuna on
+        # keskitys(tavu) päässä nuotinpäästä ja suomennoksen
+        # keskitys(suomi, KOKO_PIENI); siirto vie jälkimmäisen edellisen
+        # kohdalle.
+        siirto = suomennos.tasaus("lu", "loistakoon")
+        self.assertAlmostEqual(
+            suomennos.keskitys("loistakoon", suomennos.KOKO_PIENI)
+            - siirto * suomennos.KYMMENYS,
+            suomennos.keskitys("lu"))
+
+    def test_pitka_suomennos_siirtyy_oikealle(self):
+        # "lu-ce-at" / "loistakoon": keskitettynä suomennos alkoi 10,6
+        # pistettä ennen tavuaan, edellisen sanan alta.
+        self.assertGreater(suomennos.tasaus("lu", "loistakoon"), 0)
+
+    def test_tavua_lyhyempi_suomennos_siirtyy_vasemmalle(self):
+        self.assertLess(suomennos.tasaus("et", "ja"), 0)
+
+    def test_loppuvalimerkki_ei_vaikuta_keskitykseen(self):
+        # MuseScore keskittää "nam," kuin "nam" — mitattu. Ilman tätä
+        # sääntöä pilkkuun päättyvä tavu menisi 1,4 pistettä vinoon.
+        self.assertAlmostEqual(suomennos.keskitys("nam,"),
+                               suomennos.keskitys("nam"))
+
+    def test_alkuvalimerkki_ei_ole_osa_keskitettavaa_sanaa(self):
+        # Sanaston yleisin apusana on "-ssa": yhdysviiva piirtyy sanan
+        # vasemmalle puolelle, mutta MuseScore keskittää vain "ssa"-osan.
+        self.assertGreater(suomennos.keskitys("-ssa"),
+                           suomennos.keskitys("ssa"))
+
+    def test_pelkka_valimerkki_keskitetaan_kokonaan(self):
+        self.assertIsNotNone(suomennos.keskitys("-"))
+
+    def test_tuntematon_merkki_jattaa_suomennoksen_keskitetyksi(self):
+        # Arvattu leveys siirtäisi sanan väärään paikkaan arvaamattomasti;
+        # keskitetty on väärässä paikassa ennustettavasti.
+        self.assertIsNone(suomennos.tasaus("na\u2020m", "lepo"))
+
+    def test_elisio_jattaa_suomennoksen_keskitetyksi(self):
+        # Elisiossa yhdessä <lyric>-alkiossa on kaksi tavua ja MuseScore
+        # piirtää väliin oman yhdysmerkkinsä, jota ei ole mitattu.
+        ly = ET.fromstring('<lyric number="1"><syllabic>end</syllabic>'
+                           '<text>te</text><elision> </elision>'
+                           '<syllabic>begin</syllabic><text>ae</text></lyric>')
+        self.assertIsNone(suomennos.tavun_teksti(ly))
+
+
 class KokoPartituuri(unittest.TestCase):
     """Kaksi muuttumatonta ehtoa valmiissa partituurissa.
 
@@ -282,6 +347,27 @@ class KokoPartituuri(unittest.TestCase):
     def test_jokainen_sana_on_joko_suomennettu_tai_tunnettu_rikkinaiseksi(self):
         self.assertEqual(dict(self.tulos.puuttuvat), {},
                          "lisää sana sanastoon tai RIKKI-listaan")
+
+    def test_jokainen_tavun_merkki_on_leveystaulukossa(self):
+        # Ilman leveyttä suomennos jää keskitetyksi. Uusi merkki tulee
+        # tavallisesti konelukemisen roskana, mutta se on silti mitattava,
+        # ei arvattava — mittaustapa on työpäiväkirjan merkinnässä
+        # 2026-09-09 (c).
+        root = suomennos.load("Verdi-Requiem-koko.mxl")
+        merkit = {m
+                  for ly in root.iter("lyric")
+                  for teksti in ly.findall("text")
+                  if not teksti.get("font-size")
+                  for m in (teksti.text or "")}
+        merkit |= {m for suomi in SANASTO.values() for m in suomi}
+        self.assertEqual(merkit - set(suomennos.LEVEYDET), set(),
+                         "mittaa puuttuvan merkin leveys, älä arvaa")
+
+    def test_tasaamatta_jaavat_vain_elisiot(self):
+        root = suomennos.load("Verdi-Requiem-koko.mxl")
+        elisiot = sum(1 for ly in root.iter("lyric")
+                      if len(ly.findall("text")) > 1)
+        self.assertEqual(self.tulos.tasaamatta, elisiot)
 
     def test_rikki_listalla_ei_ole_turhia_riveja(self):
         # Kun rikkinäinen tavutus korjataan lähteestä, rivi pitää poistaa —
