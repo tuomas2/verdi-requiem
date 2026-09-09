@@ -83,6 +83,28 @@ class Luotettavuus(unittest.TestCase):
     def test_kertoo_etta_vain_basso_on_varmistettu(self):
         self.assertIn("kuorobasso", sivusto.stemmasivu().lower())
 
+    def test_varaus_on_ominaisuuslistan_rivi(self):
+        """Ominaisuudet ja varaus samassa listassa, ei kahdessa paikassa.
+
+        Aiemmin sama asia sanottiin sekä omassa laatikossaan että
+        otsikkokappaleessa, ja kappale toisti muutenkin listan lupaukset.
+        """
+        html = sivusto.stemmasivu()
+        self.assertIn("<dt%s>%s</dt>" % (' class="huomio"', sivusto.VIRHEET),
+                      html)
+        self.assertIn(sivusto.luotettavuusteksti(), html)
+        self.assertNotIn('class="varoitus"', html)
+
+    def test_otsikkokappale_muistuttaa_mutta_ei_selita(self):
+        """Latauslinkit ovat listan yläpuolella, joten varauksesta pitää
+        näkyä lyhennetty muistutus jo ennen niitä — mutta vain se."""
+        html = sivusto.stemmasivu()
+        johdanto = html[html.index('class="johdanto"'):html.index("</header>")]
+        self.assertIn("muut äänet eivät", johdanto)
+        for listalta in ["tahdin päällä", "Dies irae", "suomennos"]:
+            with self.subTest(toisto=listalta):
+                self.assertNotIn(listalta, johdanto)
+
     def test_tunnetut_puutteet_johdetaan_taulukosta(self):
         """Maininta jäisi käsin kirjoitettuna jälkeen kun taulukko muuttuu."""
         self.assertEqual(sivusto.puutteelliset_osat(),

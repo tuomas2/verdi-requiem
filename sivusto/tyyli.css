@@ -75,14 +75,16 @@ h3{
   .ominaisuudet dd{grid-column:1;margin-bottom:.7rem}
 }
 
-/* ---------- luotettavuusvaroitus ---------- */
-.varoitus{
+/* ---------- luotettavuusvaraus ominaisuuslistalla ----------
+   Sama rivi kuin muut ominaisuudet, mutta nimi rubriikin värissä ja
+   pystyviivan takana: se on listan ainoa varaus, ja lupausten seassa se
+   muuten luettaisiin yhtenä lupauksena lisää. Pohjaväriä ei anneta, koska
+   nimi ja selitys ovat eri ruudukkosoluja: väli jäisi väliin. */
+.ominaisuudet dt.huomio{
+  color:var(--rubric);
   border-left:3px solid var(--rubric);
-  background:var(--paper-2);
-  padding:.9rem 1.1rem;
-  margin:2rem 0;
+  padding-left:.6rem;margin-left:-.6rem;
 }
-.varoitus p{margin:0;max-width:62ch}
 
 /* ---------- sisällystaulukko ---------- */
 th.aani,td.aani{text-align:center;font-variant-numeric:tabular-nums}
