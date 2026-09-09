@@ -269,7 +269,7 @@ def ominaisuudet():
         ("Vain oma ääni",
          f"Muut äänet ja pianosäestys eivät ole mukana, ja useamman tahdin "
          f"tauot ovat yhtenä palkkina, joten stemma on {laajuus} eikä "
-         "yli kolmesataa."),
+         f"noin 150 niin kuin koko {e(luotettavuus.REFERENSSI)}in nuotti."),
         ("Tilaa käsimerkinnöille",
          "Nuottirivien väli on 29,3 mm ja marginaali 15 mm, eli "
          "harjoituksissa tehdyille merkinnöille jää noin 22 mm kaistale "
