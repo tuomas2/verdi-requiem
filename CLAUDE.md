@@ -100,4 +100,4 @@ compare against the merged output.** Every row must match exactly. That habit
 found two silent data-loss bugs that looked fine on the page. Do not hand-add
 the numbers — an early hand sum was wrong.
 
-Tests, from the repo root: `python3 -m unittest discover -s testit -t .` (265).
+Tests, from the repo root: `python3 -m unittest discover -s testit -t .` (267).

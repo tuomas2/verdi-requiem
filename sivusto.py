@@ -168,7 +168,12 @@ def puutteelliset_osat():
 
 
 def luotettavuusteksti():
-    """Lyhyt varoitus. Yksityiskohdat ovat repossa, josta ne on luettukin.
+    """Mitä on tarkistettu ja mitä ei — ominaisuuslistan yksi selitys.
+
+    Tämä on ominaisuus muiden joukossa eikä oma laatikkonsa: laulaja lukee
+    listan läpi valitessaan stemmaa, ja lyhennetty muistutus on jo
+    otsikkokappaleessa latauslinkkien yläpuolella. Kaksi rinnakkaista
+    versiona samasta asiasta oli sivun ainoa toisteinen kohta.
 
     Linkki menee generoituun LUOTETTAVUUS.md:hen eikä luotettavuus.py:hyn:
     taulukon lukijalla ei ole asiaa Pythonin sisään, ja GitHub näyttää
@@ -182,16 +187,13 @@ def luotettavuusteksti():
                     else ", ".join(puutteet[:-1]) + " ja " + puutteet[-1])
         maininta = (" Erityisesti näissä osissa on ylemmissä äänissä "
                     "tiedettyjä virheitä: %s." % luettelo)
-    return f"""
-<div class="varoitus">
-<p><strong>Kuorobasso on käyty läpi, muut äänet eivät.</strong> Basso on
-tarkistettu käsin {e(luotettavuus.REFERENSSI)}in painosta vasten ja laulettu
-läpi harjoituksissa; sopraano, altto ja tenori ovat pääosin
-tarkistamatta.{maininta} Syy on yksinkertainen: tekijä laulaa bassoa.</p>
-<p class="perustelu">Osakohtainen erittely siitä mitä on tarkistettu ja
-miten: <a href="{GITHUB}/blob/main/{luotettavuus.MD_TIEDOSTO}">{e(luotettavuus.MD_TIEDOSTO)}</a>.</p>
-</div>
-"""
+    return (
+        f"Kuorobasso on tarkistettu käsin {e(luotettavuus.REFERENSSI)}in "
+        "painosta vasten ja laulettu läpi harjoituksissa; sopraano, altto ja "
+        f"tenori ovat pääosin tarkistamatta.{maininta} Syy on yksinkertainen: "
+        "tekijä laulaa bassoa. Osakohtainen erittely siitä mitä on "
+        f'tarkistettu ja miten: <a href="{GITHUB}/blob/main/'
+        f'{luotettavuus.MD_TIEDOSTO}">{e(luotettavuus.MD_TIEDOSTO)}</a>.')
 
 
 # --------------------------------------------------------------- stemmat
@@ -225,12 +227,20 @@ def dies_irae_vali():
     return min(alut.values()), alut[viimeinen] + tahteja - 1
 
 
+# Luotettavuusvarauksen otsikko ominaisuuslistalla. Vakiona siksi, että sekä
+# rivi että sen korostusluokka tunnistetaan samasta nimestä.
+VIRHEET = "Voi sisältää virheitä"
+
+
 def ominaisuudet():
     """Mitä stemmoissa on. Luvut johdetaan, jotta ne eivät jää jälkeen."""
     sivut = sivumaarat()
     laajuus = (f"{min(sivut)}–{max(sivut)} sivua" if sivut else "tiivis")
     alku, loppu = dies_irae_vali()
     kohdat = [
+        # Listan kärjessä eikä lopussa: se on stemman ominaisuus siinä missä
+        # muutkin, ja se joka lataa stemman saa tietää sen ensin.
+        (VIRHEET, luotettavuusteksti()),
         ("Tahtinumero joka tahdissa",
          "Numero jokaisen tahdin päällä, ei vain rivin alussa, ja "
          "tiivistetyn tauon päällä sen tahtiväli (<span "
@@ -263,8 +273,14 @@ def ominaisuudet():
          "sanat ja suomennokset mukana, joten stemmaa voi muokata itse tai "
          "kuunnella sen läpi."),
     ]
-    rivit = "".join("<dt>%s</dt><dd>%s</dd>" % (nimi, teksti)
-                    for nimi, teksti in kohdat)
+    # Virherivi on listan ainoa varaus, ja se erottuu värillä: muuten se
+    # hukkuisi kahdeksan lupauksen joukkoon juuri siksi että se on niiden
+    # seassa.
+    def rivi(nimi, teksti):
+        luokka = ' class="huomio"' if nimi == VIRHEET else ""
+        return "<dt%s>%s</dt><dd%s>%s</dd>" % (luokka, nimi, luokka, teksti)
+
+    rivit = "".join(rivi(nimi, teksti) for nimi, teksti in kohdat)
     return f'<h3>Ominaisuudet</h3>\n<dl class="ominaisuudet">{rivit}</dl>'
 
 
@@ -287,13 +303,9 @@ def stemmasivu():
 <header class="masthead">
 <h1>Messa da Requiem</h1>
 <p class="johdanto">Verdin <em>Messa da Requiem</em>, kahdeksan kuorostemmaa
-harjoittelua varten. Jokaisen tahdin päällä on tahtinumero ja jokaisen sivun
-yläreunassa käynnissä olevan osan nimi, jotta yksittäisen tahdin löytää
-kuoronjohtajan huudosta. <strong>Tahtinumerot täsmäävät
-{e(luotettavuus.REFERENSSI)}in painoksen kanssa.</strong></p>
+harjoittelua varten.
+<strong>Kuorobasso on käyty läpi, muut äänet eivät.</strong></p>
 </header>
-
-{luotettavuusteksti()}
 
 <h2>Stemmat</h2>
 <ul class="lataukset">{linkit}</ul>
