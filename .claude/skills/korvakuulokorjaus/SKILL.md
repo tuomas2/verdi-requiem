@@ -41,6 +41,7 @@ line the user reads, but nothing in it is bass-specific.
 | A **key signature** in the wrong bar (a stray natural or sharp over a rest) | whole-file table, **not** a `korjaukset` row — every staff carries the change | `korjaa_kasin.py`, `SAVELLAJIT` |
 | A word printed **without its hyphens** (`re qui em,`), or two words run together (`Do-na-e-is`) | the syllables are right and `syllabic` is wrong; one row gives the whole sentence's hyphenation | `korjaa_kasin.py`, a `tavutus` row |
 | A **wrong or missing Finnish gloss** | glossary, not score data | `suomennos.py`, `SANASTO` |
+| A gloss printed in the **wrong place** (not under its own syllable) | width table, measured not guessed — see *2026-09-09 (c)* | `suomennos.py`, `LEVEYDET` |
 
 A movement without a table yet is one `Osa` row away from having one: point
 `mxl` at the untouched source, `out` at a new `-kasin.mxl`, and add the file

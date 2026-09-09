@@ -26,6 +26,13 @@ Kolme asiaa, jotka piti mitata ennen kuin tämä toimi:
   pahin tapaus, jossa kaikki 708 sanaa saivat 11 merkin täytesanan: silti 16
   sivua. Rivi mahtuu tilaan, joka on jo varattu tahtinumeroille ja
   sanoille.
+- **Suomennos alkaa samasta kohdasta kuin latinan tavu**, ei keskitettynä
+  sen alle. MuseScore keskittää joka tavun nuotinpään kohdalle, joten
+  tavuaan pidempi suomennos alkoi edellisen sanan alta ja lukija joutui
+  arvaamaan, kumman sanan käännös se on: "lu-ce-at"-tavun alla oleva
+  "loistakoon" alkoi 10,6 pistettä ennen tavuaan. Siirto tehdään
+  MusicXML:n <lyric relative-x>:llä ja lasketaan mitatuista
+  merkkileveyksistä (LEVEYDET). Mediaanivirhe putosi 4,3 pisteestä 0,2:een.
 - **Sanarivi on yksi enemmän kuin tahdissa on käytössä**, ei kiinteä 2.
   Lacrymosan tahdeissa 677-679 kuoron basso on divisi ja sen kaksi ääntä
   laulavat eri tekstiä riveillä 1 ja 2 (ks. CLAUDE.md, 2026-09-07), joten
@@ -798,8 +805,134 @@ def sanarivi(measure):
     return max(kaytossa) + 1
 
 
-def uusi_lyric(numero, suomennos, koko=KOKO):
+# --- Suomennoksen vaakatasaus --------------------------------------------
+#
+# MuseScore keskittää joka tavun nuotinpään kohdalle, myös suomennoksen.
+# Suomen sana on melkein aina latinan tavua pidempi, joten keskitettynä se
+# alkaa tavun vasemmalta puolelta ja ryömii edellisen sanan alle:
+# "lu-ce-at"-tavun alla "loistakoon" alkoi 10,6 pistettä ennen tavua, ja
+# lukija joutui arvaamaan kumman sanan käännös se on. Laulaja pyysi, että
+# suomennos alkaa samasta kohdasta kuin ensimmäinen tavu. Siirto tehdään
+# MusicXML:n <lyric relative-x>:llä.
+#
+# Kolme mitattua vakiota. Kaikki kolme luettiin renderöidyn PDF:n
+# tekstikerroksesta (`mscore` + `mutool draw -F stext`), ei arvattu:
+#
+# - MuseScore ei tottele <lyric justify="left">:iä eikä <lyric default-x>:ää.
+#   `relative-x` toimii, ja sen yksikkö on 0,2835 pt = 0,1 mm — ei
+#   nuottiviivaväli, kuten MusicXML:n "tenths" antaisi olettaa. Mitattu
+#   arvoilla 10 ja 20 sekä koesuoritteessa että valmiissa stemmassa.
+# - Tavun renderöity koko on 10,02 pt ja suomennoksen 6,48 pt, vaikka
+#   pyydetyt koot ovat 10 ja 6,5.
+#
+# Nämä pätevät `tiivistys.mss`:n nuottikoolla. Jos tyylitiedosto joskus
+# muuttaa nuottiviivaväliä, luvut on mitattava uudelleen.
+KOKO_ISO = 10.02
+KOKO_PIENI = 6.48
+KYMMENYS = 0.2835
+
+# Edwin-kirjasimen merkkileveydet: merkki -> (etenemä, vasen sivulaakeri)
+# pisteinä koossa KOKO_ISO. Mitattu kalibrointipartituurista, jossa joka
+# riville tuli yksi merkkijono kahdesti — ylärivi latinan koossa, alarivi
+# suomennoksen — jolloin rivien vasempien reunojen erotus antaa keskityksen
+# ilman että kirjasintiedostoa tarvitsee lukea (MuseScore pitää Edwinin
+# omien resurssiensa sisällä, eikä koneessa ole fontToolsia). Etenemä tulee
+# jonosta "nXn" eikä "XX", koska "ff" on ligatuuri ja antaisi f:lle väärän
+# leveyden. Merkki "$" puuttuu tarkoituksella: MuseScore korvaa sen
+# nuottimerkillä eikä sitä voi mitata.
+LEVEYDET = {
+    'A': (7.133, -0.082), 'a': (5.265, -0.340), 'B': (7.133, +0.088),
+    'b': (5.265, +0.000), 'C': (7.133, +0.003), 'c': (4.416, -0.085),
+    'D': (7.642, +0.088), 'd': (5.604, -0.255), 'E': (7.133, +0.172),
+    'e': (4.925, -0.000), 'F': (6.454, -0.082), 'f': (3.227, -0.679),
+    'G': (7.642, -0.252), 'g': (5.265, -0.170), 'H': (8.322, +0.003),
+    'h': (6.114, -0.000), 'I': (3.906, -0.085), 'i': (3.057, -0.085),
+    'J': (5.265, -0.085), 'j': (2.547, +0.594), 'K': (7.642, -0.422),
+    'k': (5.944, -0.085), 'L': (6.454, -0.167), 'l': (3.057, -0.000),
+    'M': (9.341, +0.003), 'm': (8.831, +0.003), 'N': (8.152, +0.003),
+    'n': (6.114, -0.085), 'O': (7.642, -0.082), 'o': (4.925, -0.000),
+    'P': (6.454, -0.082), 'p': (5.435, -0.085), 'Q': (7.642, -0.252),
+    'q': (5.265, -0.340), 'R': (7.133, -0.252), 'r': (4.416, -0.085),
+    'S': (6.114, -0.170), 's': (4.585, -0.085), 'T': (6.114, -0.337),
+    't': (3.736, -0.170), 'U': (7.642, -0.252), 'u': (6.114, -0.000),
+    'V': (7.133, -0.082), 'v': (4.925, -0.255), 'W': (9.680, -0.082),
+    'w': (7.133, -0.337), 'X': (6.793, -0.167), 'x': (5.265, -0.085),
+    'Y': (6.793, -0.167), 'y': (4.755, -0.255), 'Z': (6.114, -0.000),
+    'z': (4.755, +0.000), 'Ä': (7.133, -0.082), 'ä': (5.265, -0.340),
+    'Å': (7.133, -0.082), 'å': (5.265, -0.340), 'æ': (7.812, -0.167),
+    'è': (4.925, -0.000), 'é': (4.925, -0.000), 'Ö': (7.642, -0.082),
+    'ö': (4.925, -0.000), 'ü': (6.114, -0.000), 'œ': (8.322, +0.003),
+    'ﬁ': (6.114, -0.000), 'ﬂ': (6.114, -0.000), ' ': (2.717, +0.000),
+    '!': (2.887, -0.085), '"': (3.736, -0.085), '#': (5.265, -0.170),
+    '%': (8.322, -0.082), '&': (8.152, -0.082), "'": (1.868, -0.085),
+    '(': (3.227, +0.000), ')': (3.227, -0.170), '*': (4.925, -0.000),
+    '+': (5.944, -0.085), ',': (2.717, -0.085), '-': (3.227, -0.085),
+    '.': (2.717, -0.085), '/': (2.717, -0.085), '0': (5.265, -0.170),
+    '1': (5.265, -0.340), '2': (5.265, -0.085), '3': (5.265, -0.170),
+    '4': (5.265, -0.170), '5': (5.265, -0.085), '6': (5.265, -0.255),
+    '7': (5.265, -0.170), '8': (5.265, -0.085), '9': (5.265, -0.085),
+    ':': (2.717, -0.170), ';': (2.717, -0.170), '<': (5.944, -0.085),
+    '=': (5.944, -0.085), '>': (5.944, -0.085), '?': (4.416, +0.000),
+    '@': (7.303, -0.082), '[': (3.227, -0.170), '\\': (5.944, -0.085),
+    ']': (3.227, +0.000), '^': (5.944, -0.085), '_': (4.925, -0.085),
+    '`': (3.227, +0.340), '{': (3.227, -0.170), '|': (5.944, -0.170),
+    '}': (3.227, +0.000), '~': (5.944, -0.085), '¢': (5.265, -0.085),
+    '–': (5.604, +0.085), '—': (10.020, -0.000), '‘': (1.868, -0.170),
+    '’': (1.698, -0.170), '“': (3.736, -0.085), '”': (3.736, -0.085),
+}
+
+
+def keskitys(teksti, koko=KOKO_ISO):
+    """Etäisyys nuotinpään keskeltä tekstin vasempaan reunaan, pisteinä.
+
+    MuseScore keskittää tavun ohittaen alku- ja loppuvälimerkit: "nam,"
+    asettuu kuin "nam", ja ",nam" kuin "nam" jonka eteen on työnnetty
+    pilkku. Mitattu; ilman tätä sääntöä pilkkuun päättyvä tavu menisi 1,4
+    pistettä vinoon.
+
+    Palauttaa None, jos jokin merkki puuttuu taulukosta. Silloin tasaus
+    jätetään tekemättä — keskitetty suomennos on väärässä paikassa, mutta
+    arvattu leveys olisi väärässä paikassa arvaamattomasti.
+    """
+    if not teksti or any(m not in LEVEYDET for m in teksti):
+        return None
+    alku, loppu = 0, len(teksti)
+    while alku < loppu and not teksti[alku].isalpha():
+        alku += 1
+    while loppu > alku and not teksti[loppu - 1].isalpha():
+        loppu -= 1
+    if alku == loppu:          # pelkkää välimerkkiä
+        alku, loppu = 0, len(teksti)
+    etu = sum(LEVEYDET[m][0] for m in teksti[:alku])
+    ydin = sum(LEVEYDET[m][0] for m in teksti[alku:loppu])
+    return (koko / KOKO_ISO) * (etu + ydin / 2 - LEVEYDET[teksti[0]][1])
+
+
+def tavun_teksti(lyric):
+    """Se teksti, jonka MuseScore keskittää: <lyric>-alkion koko sisältö.
+
+    Elisiossa alkiossa on kaksi tavua ja MuseScore piirtää niiden väliin
+    oman yhdysmerkkinsä, jonka leveyttä ei ole mitattu. Silloin palautetaan
+    None ja suomennos jää keskitetyksi. Koko partituurissa elisioita on
+    viisi, joten mittaaminen olisi työtä ilman näkyvää tulosta.
+    """
+    tekstit = lyric.findall("text")
+    return tekstit[0].text if len(tekstit) == 1 else None
+
+
+def tasaus(tavu, suomi):
+    """<lyric relative-x> kymmenyksinä, tai None jos leveyttä ei tiedetä."""
+    a = keskitys(suomi, KOKO_PIENI)
+    b = keskitys(tavu, KOKO_ISO)
+    if a is None or b is None:
+        return None
+    return (a - b) / KYMMENYS
+
+
+def uusi_lyric(numero, suomennos, koko=KOKO, siirto=None):
     lyric = ET.Element("lyric", {"number": str(numero), "placement": "below"})
+    if siirto is not None:
+        lyric.set("relative-x", f"{siirto:.2f}")
     ET.SubElement(lyric, "syllabic").text = "single"
     text = ET.SubElement(lyric, "text")
     text.set("font-size", koko)
@@ -862,8 +995,8 @@ def korjaa_tavutus(root, sanasto=None):
     return muutettu
 
 
-Tulos = collections.namedtuple("Tulos",
-                               "lisatty sanoja puuttuvat rikki kokoamatta")
+Tulos = collections.namedtuple(
+    "Tulos", "lisatty sanoja puuttuvat rikki kokoamatta tasaamatta")
 
 
 def lisaa(root, sanasto=SANASTO, koko=KOKO):
@@ -874,6 +1007,7 @@ def lisaa(root, sanasto=SANASTO, koko=KOKO):
     """
     lisatty = 0
     sanoja = 0
+    tasaamatta = 0
     puuttuvat = collections.Counter()
     rikki = collections.Counter()
     kokoamatta = collections.Counter()
@@ -899,15 +1033,20 @@ def lisaa(root, sanasto=SANASTO, koko=KOKO):
             varatut = {rivinumero(lyric) for lyric in note.findall("lyric")}
             while numero in varatut:
                 numero += 1
-            kiinnita(note, uusi_lyric(numero, suomi, koko))
+            siirto = tasaus(tavun_teksti(palat[0][2]), suomi)
+            tasaamatta += siirto is None
+            kiinnita(note, uusi_lyric(numero, suomi, koko, siirto))
             lisatty += 1
-    return Tulos(lisatty, sanoja, puuttuvat, rikki, kokoamatta)
+    return Tulos(lisatty, sanoja, puuttuvat, rikki, kokoamatta, tasaamatta)
 
 
 def raportti(tulos):
     """Rivit, jotka yhdista.py tulostaa ajon lopussa."""
     rivit = [f"suomennettu {tulos.lisatty}/{tulos.sanoja} sanaa "
              f"({100 * tulos.lisatty // max(1, tulos.sanoja)} %)"]
+    if tulos.tasaamatta:
+        rivit.append(f"  {tulos.tasaamatta} suomennosta jäi keskitetyksi "
+                     f"(elisio tai merkki, jota ei ole LEVEYDET-taulukossa)")
     if tulos.rikki:
         rivit.append(f"  {sum(tulos.rikki.values())} sanaa jäi ilman "
                      f"suomennosta rikkinäisen tavutuksen takia "

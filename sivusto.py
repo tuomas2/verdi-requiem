@@ -264,7 +264,8 @@ def ominaisuudet():
          "latinan sanajärjestystä seuraava, sama käännös kuin tekstisivulla. "
          "Suomen sana tulee kokonaisena latinan sanan ensimmäisen tavun "
          "alle, myös silloin kun sana venyy monelle nuotille, eikä sitä "
-         "tavuteta."),
+         "tavuteta. Se myös <i>alkaa</i> samasta kohdasta kuin tavu, ei "
+         "keskitettynä sen alle, jotta näkyy kumman sanan käännös se on."),
         ("Vain oma ääni",
          f"Muut äänet ja pianosäestys eivät ole mukana, ja useamman tahdin "
          f"tauot ovat yhtenä palkkina, joten stemma on {laajuus} eikä "
