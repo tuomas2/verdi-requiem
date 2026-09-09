@@ -31,17 +31,21 @@ line the user reads, but nothing in it is bass-specific.
 | Movement 02 (II·1 Dies irae) | hand-corrections table | `korjaa_kasin.py`, `OSA_II1` |
 | Liber scriptus (II·4), any voice | hand-corrections table | `korjaa_kasin.py`, `OSAT_II4` |
 | Movement 07 (II·6 Rex tremendae) | hand-corrections table | `korjaa_kasin.py`, `OSA_II6` |
+| Movement 10b (II·9b Dies irae recall) | hand-corrections table | `korjaa_kasin.py`, `OSA_II9B` |
 | Movement 11 (Lacrymosa), any voice | hand-corrections table | `korjaa_kasin.py`, `OSA_II10_KUORO_B` / `OSA_II10_DIVISI` |
 | Movement 13 (IV Sanctus) | hand-corrections table | `korjaa_kasin.py`, `OSA_IV` |
 | Movement 16 (VII Libera me) | hand-corrections table | `korjaa_kasin.py`, `OSA_VII` |
 | Any movement: the source file is right but the **part** is wrong | tool bug | `yhdista.py` + a test |
-| Movements 14/II·9b: wrong syllable | still baked into the source `.mxl` | see the last section below |
+| Movement 14: wrong syllable | still baked into the source `.mxl` | see the last section below |
 | A passage is **missing entirely** | copy it from `musescore/` if the figure already exists elsewhere in the part | `kopioi_tahti`, see *2026-09-03 (b)* |
 | Systematic OCR text error in an OMR movement | PDF-driven pass | `korjaa_sanat.py` |
 | A **key signature** in the wrong bar (a stray natural or sharp over a rest) | whole-file table, **not** a `korjaukset` row — every staff carries the change | `korjaa_kasin.py`, `SAVELLAJIT` |
 | A word printed **without its hyphens** (`re qui em,`), or two words run together (`Do-na-e-is`) | the syllables are right and `syllabic` is wrong; one row gives the whole sentence's hyphenation | `korjaa_kasin.py`, a `tavutus` row |
 | A **wrong or missing Finnish gloss** | glossary, not score data | `suomennos.py`, `SANASTO` |
 | A gloss printed in the **wrong place** (not under its own syllable) | width table, measured not guessed — see *2026-09-09 (c)* | `suomennos.py`, `LEVEYDET` |
+| A **missing dynamic** ("this entrance is quiet but the staff still says ff") | one row; look for the mark on the piano staff first — it is usually there — and say in the comment where it was found | `korjaa_kasin.py`, a `dynamiikka` row |
+| A **divisi's two texts the wrong way up**, or one of them above the staff | rows are content, not layout: upper voice on the upper row. Two `<part>`s → two `sanarivi` rows; one part, two voices → one `vaihda_sanarivit` row. See *2026-09-07*, *2026-09-09 (d)* | `korjaa_kasin.py` |
+| A **whole system with no note on it**, or a lone empty bar taking a full row | not a data fix: `yhdista.py` joins a movement's trailing rests to the next movement's title row. Already automatic; see *2026-09-09 (d)* | `yhdista.yhdista_taukohannat` |
 
 A movement without a table yet is one `Osa` row away from having one: point
 `mxl` at the untouched source, `out` at a new `-kasin.mxl`, and add the file
@@ -180,7 +184,7 @@ this shipped something. Checks that have caught real problems:
   Cheap, and it catches what the page cannot: a word missing its hyphens, two
   words run together, a gloss that makes no sense. It found four defects the
   first time it was run.
-- `python3 -m unittest discover -s testit -t .` — 265 tests.
+- `python3 -m unittest discover -s testit -t .` — 306 tests.
 
 ## The one movement not yet in the table
 
@@ -189,7 +193,15 @@ Movement 14 (Agnus Dei) still has its fixes written straight into
 only record of what was changed. Movements 01 and 11 were in the same state
 (01 until 2026-09-02, 11 until 2026-09-03) and both moved over. Movements 02,
 07, 13 and 16 never had hand edits at all — they got their first tables on
-2026-09-04, which needed no migration, only a new `Osa` row each.
+2026-09-04, which needed no migration, only a new `Osa` row each; movement 10b
+got its first one the same way on 2026-09-09.
+
+**Movement 14 is the only one at risk, and that is measured, not assumed.**
+This file used to warn that II·9b was in the same state. Backing up the three
+`-OMR-korjattu.mxl` files, running `korjaa_sanat.py` and comparing the XML:
+movements 01 and 10b come back identical, movement 14 does not (570 058 →
+604 055 bytes). Do that check before believing any similar claim here — it
+takes two minutes. See *2026-09-09 (d)*.
 
 **The method, twice proven.** Diff the hand-edited file against the file it was
 derived from — a throwaway script comparing pitch, duration and lyric per note,

@@ -69,7 +69,7 @@ vikaa. Muut ovat oletuksia: kuorobasso ◑, muut äänet ○.
 
 ### II·6 Rex tremendae
 
-- **B — ◑ käyty läpi:** Käyty läpi Edition Petersiä vasten ja laulettu harjoituksissa; yksi kuulemalla löytynyt sanavirhe korjattu tahdissa 366 ("sal-va le" → "sal-va me").
+- **B — ◑ käyty läpi:** Käyty läpi Edition Petersiä vasten ja laulettu harjoituksissa. Kolme kuulemalla löytynyttä sanavirhettä korjattu: tahti 366 ("sal-va le" → "sal-va me") sekä tahdit 340–341 ja 362–363, joissa säkeistön kolmesta säkeestä toistui yksi liikaa ja yksi puuttui. Divisin sanarivit tahdeissa 367–369 olivat päittäin ja ykkösbasson teksti viivaston yläpuolella; korjattu.
 
 ### II·9b Dies irae (kertaus)
 

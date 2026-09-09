@@ -63,6 +63,7 @@ the single most expensive mistake available here.
 | II·9b: Soprano/Alto/Tenor lyrics unchecked (its position is **settled**: 573–623, from the choir book) | [`docs/menetelmat/omr.md`](docs/menetelmat/omr.md), *The missing Dies irae recall* |
 | Lacrymosa's `Kuoro B` is **settled** — every note checked against the choir file, every syllable against the printed page at note resolution, plus one nine-bar stretch where the printed edition itself was wrong. Its **Soprano/Alto/Tenor and soloists are not**, and the chorus tenor already shows one text gap at bar 688 | [`2026-09-03-lacrymosan-kolmen-tahdin-siirtyma.md`](docs/tyopaivakirja/2026-09-03-lacrymosan-kolmen-tahdin-siirtyma.md) |
 | The "same figure must carry the same text in every voice" check found a defect the printed page could not, and the sharper version — "does this note fit what the other staves and the piano are doing on this beat" — reversed a wrong verdict. Neither is automated, and movement 11's S/A/T is the obvious first target | [`2026-09-03-lacrymosan…`](docs/tyopaivakirja/2026-09-03-lacrymosan-kolmen-tahdin-siirtyma.md), *The lesson*; [`2026-09-04-kahdeksan…`](docs/tyopaivakirja/2026-09-04-kahdeksan-korvakuulohavaintoa.md), *Lacrymosa 653* |
+| Movement 07 (II·6 Rex tremendae): its chorus bass had **one line of the stanza printed twice and the next one missing**, twice over (bars 340–341, 362–363) — found by ear, fixed. Its **notes** have never been compared against `musescore/03_rex_tremendae`, and its **S/A/T** were not looked at, so the same slip may sit in either | [`2026-09-09-rex-tremendaen-sakeet-ja-taukohannat.md`](docs/tyopaivakirja/2026-09-09-rex-tremendaen-sakeet-ja-taukohannat.md) |
 | Four Dies irae sub-movements (II·2, II·4, II·6, II·7 seams) may carry the same off-by-a-few numbering Lacrymosa had. Needs one bar number from **inside** each, not its heading | [`2026-09-03-lacrymosan…`](docs/tyopaivakirja/2026-09-03-lacrymosan-kolmen-tahdin-siirtyma.md), *The same trap* |
 | Liber scriptus: the "user recalls 6" half is **solved** (six one-bar interjections, three of which were missing — see [`2026-09-03-liber-scriptus-dies-irae.md`](docs/tyopaivakirja/2026-09-03-liber-scriptus-dies-irae.md)); the Soprano-vs-A/T/B text disagreement at bars 247–254 is still unresolved without the physical score | [`2026-08-31-kolme-korvakuulohavaintoa.md`](docs/tyopaivakirja/2026-08-31-kolme-korvakuulohavaintoa.md) |
 | Movement I's chorus S/A/T carry OMR garble the text dump now names exactly (`lg},`, `ux`, `per-pe-tll-a`, `In-ce-at`, the editor's name `Reutenauer` at bar 68). One `korjaa_kasin.py` row each once someone reads the source page | [`2026-09-09-suomennokset.md`](docs/tyopaivakirja/2026-09-09-suomennokset.md), *What is left here*; the list is `python3 suomennos.py`'s own output |
@@ -87,11 +88,13 @@ table speaks bare names. The full inventory is in
 
 ## Two things to know before running anything
 
-**`korjaa_sanat.py` can silently destroy work.** Its `Source` entries read the
-OMR *originals* and rewrite the `-OMR-korjattu.mxl` files **from scratch**.
-Movements 14 and II·9b still carry hand fixes that live only in those files, so
-a plain re-run loses them and the loss shows up only as old bugs reappearing in
-a reading part. Movement 01 is safe: its hand layer is a table in
+**`korjaa_sanat.py` can silently destroy work — in exactly one movement.** Its
+`Source` entries read the OMR *originals* and rewrite the `-OMR-korjattu.mxl`
+files **from scratch**. Movement 14 carries hand fixes that live only in that
+file, so a plain re-run loses them and the loss shows up only as old bugs
+reappearing in a reading part. Movements 01 and II·9b are safe, and that was
+measured on 2026-09-09 rather than assumed: a plain re-run reproduces their
+`-korjattu` files identically, and their hand layers are tables in
 `korjaa_kasin.py`. Details and the way out are in
 [`docs/menetelmat/omr.md`](docs/menetelmat/omr.md).
 
@@ -100,4 +103,4 @@ compare against the merged output.** Every row must match exactly. That habit
 found two silent data-loss bugs that looked fine on the page. Do not hand-add
 the numbers — an early hand sum was wrong.
 
-Tests, from the repo root: `python3 -m unittest discover -s testit -t .` (283).
+Tests, from the repo root: `python3 -m unittest discover -s testit -t .` (306).

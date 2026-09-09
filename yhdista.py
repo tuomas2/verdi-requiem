@@ -14,6 +14,7 @@ Käyttö:  python3 yhdista.py [ulostulo.mxl]
 """
 
 import copy
+import itertools
 import os
 import sys
 import zipfile
@@ -56,7 +57,7 @@ MOVEMENTS = [
     ("08-Verdi_Recordare.mxl",                      "II·7",  "Recordare"),
     ("09-Verdi_Ingemisco.mxl",                      "II·8",  "Ingemisco"),
     ("10-Verdi_Confutatis.mxl",                     "II·9",  "Confutatis"),
-    ("10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl",  "II·9b", "Dies irae (kertaus)"),
+    ("10b-Verdi_Dies_irae_paluu-kasin.mxl",         "II·9b", "Dies irae (kertaus)"),
     ("11-Verdi_Lacrymosa-kasin.mxl",                "II·10", "Lacrymosa"),
     ("12-Verdi_Offertorio.mxl",                     "III",   "Offertorio"),
     ("13-Verdi-Sanctus-kasin.mxl",                  "IV",    "Sanctus"),
@@ -119,7 +120,7 @@ MAPPING = {
     },
     "09-Verdi_Ingemisco.mxl": {"Solisti T": ["P1"], "Piano": ["P2"]},
     "10-Verdi_Confutatis.mxl": {"Solisti B": ["P1"], "Piano": ["P2"]},
-    "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": {
+    "10b-Verdi_Dies_irae_paluu-kasin.mxl": {
         # Confutatiksen ja Lacrymosan välissä puuttunut "Dies irae" -paluu,
         # konelukemisella talteen otettu erillisestä lähde-PDF:stä
         # (Verdi_10bDies_irae.pdf, tahdit 573-623 alkuperäisessä numeroinnissa).
@@ -173,7 +174,7 @@ TITLE_PARTS = ["Solisti S", "Kuoro B"]
 # Sanat on korjattu lähde-PDF:ää vasten, ks. korjaa_sanat.py.
 OMR_SOURCES = {"01-Verdi_Requiem-kasin.mxl",
                "14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl",
-               "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl"}
+               "10b-Verdi_Dies_irae_paluu-kasin.mxl"}
 
 SANCTUS = "13-Verdi-Sanctus-kasin.mxl"
 SINGER_PARTS = {
@@ -228,7 +229,7 @@ DIES_IRAE_ALUT = {
     "07-Verdi-Rex-kasin.mxl": 322,
     "08-Verdi_Recordare.mxl": 386, "09-Verdi_Ingemisco.mxl": 450,
     "10-Verdi_Confutatis.mxl": 507,
-    "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": 573,
+    "10b-Verdi_Dies_irae_paluu-kasin.mxl": 573,
     # 624, ei kirjan otsikon 621 — ks. selitys yllä.
     "11-Verdi_Lacrymosa-kasin.mxl": 624,
 }
@@ -442,6 +443,46 @@ def tag_staff(measure, staff):
 
 def has_notes(measure):
     return any(n.find("rest") is None for n in measure.findall("note"))
+
+
+def yhdista_taukohannat(part, alut):
+    """Poista osan alun pakotettu rivinvaihto, kun edellinen osa loppuu taukoon.
+
+    Jokainen osa aloittaa uuden rivin, jotta sen otsikko löytyy selaamalla.
+    Kun laulaja vaikenee osan lopussa, ne taukotahdit jäävät osien väliin
+    omalle rivilleen — kokonainen rivi, jolla ei ole yhtään nuottia. Osan
+    II·6 lopussa se on yksi tyhjä tahti (383) ja II·9b:n lopussa yksitoista
+    (613-623), ja kutakin niistä varten MuseScore varaa täyden rivin.
+
+    Rivinvaihdon poisto antaa MuseScoren pakata hännän seuraavan osan
+    otsikkorivin alkuun. Otsikko pysyy oman tahtinsa päällä, se vain ei enää
+    ole rivin ensimmäinen. **Mitattuna tämä ei koskaan lisää rivejä**: häntä
+    siirtyy joko riviltä, jolla se oli yksin (rivi säästyy), tai rivin
+    lopusta seuraavan alkuun (rivimäärä ei muutu).
+
+    Ehto "edellisessä osassa on nuotteja" pitää kokonaan vaikenevat osat
+    erillään. Ilman sitä peräkkäiset tacet-osat valuisivat samalle riville
+    otsikko toisensa perään: kuorolle II·7, II·8 ja II·9 ovat kaikki
+    kokonaan taukoa, ja niiden kolme otsikkoa mahtuisivat yhdelle riville.
+
+    `alut` on osien ensimmäisten tahtien indeksit osastossa.
+    """
+    hannat = []
+    tahdit = part.findall("measure")
+    for edellinen, alku in zip(alut, alut[1:]):
+        osa = tahdit[edellinen:alku]
+        if not any(has_notes(m) for m in osa) or has_notes(osa[-1]):
+            continue
+        hanta = list(itertools.takewhile(
+            lambda m: not has_notes(m), reversed(osa)))[::-1]
+        for pr in tahdit[alku].findall("print"):
+            if pr.get("new-system") != "yes":
+                continue
+            del pr.attrib["new-system"]
+            if not pr.attrib and len(pr) == 0:
+                tahdit[alku].remove(pr)
+            hannat.append((hanta[0].get("number"), hanta[-1].get("number")))
+    return hannat
 
 
 TYPE_QUARTERS = [
@@ -916,6 +957,8 @@ def main():
     stats = {name: 0 for name, *_ in TARGETS}
 
     alueet = []
+    osien_alut = []
+    kertyneet_tahdit = 0
     for filename, numero, otsikko in MOVEMENTS:
         src = load(filename)
         src_parts = {p.get("id"): p for p in src.findall("part")}
@@ -930,6 +973,11 @@ def main():
         if filename in DIES_IRAE_ALUT:
             alueet.append((numero, offset + int(numbers[0]),
                            offset + int(numbers[-1])))
+        # Kunkin osan ensimmäisen tahdin indeksi kohdeosastossa. Sama
+        # jokaiselle riville, koska vaikeneva rivi saa yhtä monta
+        # taukotahtia kuin osassa on tahteja.
+        osien_alut.append(kertyneet_tahdit)
+        kertyneet_tahdit += len(numbers)
 
         for name, abbr, staves, clef in TARGETS:
             target = parts[name]
@@ -1022,6 +1070,13 @@ def main():
                 stats[name] += sum(1 for n in m.findall("note") if n.find("rest") is None)
                 target.append(m)
 
+    # Taukohännät liitetään seuraavan osan otsikkoriviin vain yhden stemman
+    # tiedostossa. Partituurissa rivinvaihto koskee kaikkia viivastoja yhtä
+    # aikaa, joten ehdon pitäisi täyttyä niillä kaikilla samaan aikaan —
+    # eikä se täyty, koska piano soittaa osien yli.
+    liitetyt = yhdista_taukohannat(parts[TARGETS[0][0]], osien_alut) \
+        if len(TARGETS) == 1 else []
+
     # Tavutuksen korjaus ja suomennos vasta tässä, koko partituuri koossa:
     # sana voi ylittää tahtiviivan, ja normalise_lyrics (yllä, tahdeittain)
     # nostaisi suomennoksen riville 1 luullen sitä eksyneeksi tavuksi.
@@ -1051,6 +1106,9 @@ def main():
         print(f"täytetty {filled} sisällötöntä tahtia kokotahdin tauolla")
     if evened:
         print(f"tasattu {evened} vääränmittaista tahtia (konelukemisen osat)")
+    if liitetyt:
+        print(f"liitetty {len(liitetyt)} taukohäntää seuraavan osan riviin: "
+              + ", ".join(a if a == b else f"{a}-{b}" for a, b in liitetyt))
     if elisions:
         print(f"yhdistetty {elisions} samalle nuotille osunutta tavuparia "
               f"(elisio, ks. merge_elisions)")
