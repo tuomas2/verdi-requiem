@@ -16,6 +16,18 @@ import suomennos
 import yhdista
 
 
+def johdantoteksti(html):
+    """Otsikkokappaleen teksti ilman merkkausta ja rivinvaihtoja.
+
+    Kappale on ladottu lähteessä usealle riville, joten pelkkä assertIn
+    lauseeseen osuisi rivinvaihtoon eikä tekstiin.
+    """
+    import re
+    alku = html.index('class="standfirst"')
+    osa = html[html.index(">", alku) + 1:html.index("</header>")]
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", osa)).strip()
+
+
 class Runko(unittest.TestCase):
     def test_sivu_on_kokonainen_html(self):
         html = sivusto.sivu("Koe", "<p>sisältö</p>", "index.html")
@@ -95,15 +107,13 @@ class Luotettavuus(unittest.TestCase):
         self.assertIn(sivusto.luotettavuusteksti(), html)
         self.assertNotIn('class="varoitus"', html)
 
-    def test_otsikkokappale_muistuttaa_mutta_ei_selita(self):
-        """Latauslinkit ovat listan yläpuolella, joten varauksesta pitää
-        näkyä lyhennetty muistutus jo ennen niitä — mutta vain se."""
+    def test_johdanto_kertoo_varauksen_ennen_latauslinkkeja(self):
+        """Latauslista on ominaisuuslistan yläpuolella, joten varauksesta
+        pitää näkyä lyhennetty muistutus jo otsikkokappaleessa."""
         html = sivusto.stemmasivu()
-        johdanto = html[html.index('class="johdanto"'):html.index("</header>")]
-        self.assertIn("muut äänet eivät", johdanto)
-        for listalta in ["tahdin päällä", "Dies irae", "suomennos"]:
-            with self.subTest(toisto=listalta):
-                self.assertNotIn(listalta, johdanto)
+        self.assertIn("pääosin tarkistamatta", johdantoteksti(html))
+        self.assertLess(html.index("tarkistamatta"),
+                        html.index('class="lataukset"'))
 
     def test_tunnetut_puutteet_johdetaan_taulukosta(self):
         """Maininta jäisi käsin kirjoitettuna jälkeen kun taulukko muuttuu."""
@@ -185,6 +195,39 @@ class Ominaisuudet(unittest.TestCase):
         self.assertGreaterEqual(nimet, 5)
 
 
+class Johdantokappale(unittest.TestCase):
+    """Otsikkokappale on tiivistelmä sivun sisällöstä.
+
+    Se oli ennen yksi irrallinen lause, joka toisti ominaisuuslistan
+    lupaukset sanasta sanaan. Tiivistelmä kertoo saman asian ylemmältä
+    tasolta: mitä sivulta saa, mihin se on tehty ja missä kunnossa se on.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.teksti = johdantoteksti(sivusto.stemmasivu())
+
+    def test_on_muutaman_lauseen_mittainen(self):
+        lauseita = self.teksti.count(". ") + self.teksti.count(".\n")
+        self.assertGreaterEqual(lauseita, 2)
+        self.assertLessEqual(lauseita, 5)
+
+    def test_kertoo_mita_sivulta_saa(self):
+        for asia in ["PDF", "MusicXML", "partituuri"]:
+            with self.subTest(asia=asia):
+                self.assertIn(asia, self.teksti)
+
+    def test_ei_toista_listan_yksityiskohtia(self):
+        """Tiivistelmä pysyy ylemmällä tasolla: mitat, pistekoot ja
+        tahtivälit ovat ominaisuuslistan asia, eivät johdannon."""
+        for yksityiskohta in [" mm", " pt", "1–701", "29,3"]:
+            with self.subTest(yksityiskohta=yksityiskohta):
+                self.assertNotIn(yksityiskohta, self.teksti)
+
+    def test_referenssiedition_nimi_tulee_moduulista(self):
+        self.assertIn(luotettavuus.REFERENSSI, self.teksti)
+
+
 class Muotoilu(unittest.TestCase):
     def test_sivuille_ei_jaa_muotoilemattomia_paikkamerkkeja(self):
         """f-merkin unohtaminen mallipohjasta ei näy mitenkään ennen kuin
@@ -196,16 +239,33 @@ class Muotoilu(unittest.TestCase):
             with self.subTest(sivu=nimi):
                 self.assertEqual(jaljelle, [])
 
-    def test_otsikkotyyli_on_sama_kuin_tekstisivulla(self):
+    def test_otsikkotyylit_ovat_samat_kuin_tekstisivulla(self):
         """Tekstisivu on itsenäinen omine tyyleineen, joten yhteinen ulkoasu
-        on ylläpidettävä eikä se seuraa itsestään."""
+        on ylläpidettävä eikä se seuraa itsestään.
+
+        Molemmat otsikkotasot ovat mukana: h2 yhtenäistettiin tekstisivun
+        mittaan samalla kun stemmasivun sans-versaali h3 poistui.
+        """
         import re
-        def h1_koko(css):
-            osuma = re.search(r"h1\{[^}]*font-size:\s*([^;}]+)", css, re.S)
+        def koko(css, valitsin):
+            osuma = re.search(valitsin + r"\{[^}]*font-size:\s*([^;}]+)",
+                              css, re.S)
             return osuma.group(1).strip() if osuma else None
-        jaettu = open("sivusto/tyyli.css", encoding="utf-8").read()
-        oma = open("sivusto/requiem.html", encoding="utf-8").read()
-        self.assertEqual(h1_koko(jaettu), h1_koko(oma))
+        with open("sivusto/tyyli.css", encoding="utf-8") as f:
+            jaettu = f.read()
+        with open("sivusto/requiem.html", encoding="utf-8") as f:
+            oma = f.read()
+        for valitsin in ["h1", "h2"]:
+            with self.subTest(valitsin=valitsin):
+                self.assertIsNotNone(koko(jaettu, valitsin))
+                self.assertEqual(koko(jaettu, valitsin), koko(oma, valitsin))
+
+    def test_sivulla_on_yksi_otsikkotaso_luvuille(self):
+        """Ominaisuudet oli ainoa h3 ja ainoa sans-versaaliotsikko: se yksin
+        sai sivun näyttämään kahden tyylin sekoitukselta."""
+        html = sivusto.stemmasivu()
+        self.assertNotIn("<h3", html)
+        self.assertEqual(html.count("<h2>"), 4)
 
 
 class Rakennus(unittest.TestCase):
