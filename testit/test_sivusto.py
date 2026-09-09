@@ -265,7 +265,10 @@ class Muotoilu(unittest.TestCase):
         sai sivun näyttämään kahden tyylin sekoitukselta."""
         html = sivusto.stemmasivu()
         self.assertNotIn("<h3", html)
-        self.assertEqual(html.count("<h2>"), 4)
+        # Jokainen luku otsikoidaan samalla tasolla, eikä luvun sisälle
+        # tule toista otsikkoa: luku ja otsikko vastaavat toisiaan.
+        self.assertEqual(html.count("<h2>"), html.count('<section class="lohko"'))
+        self.assertGreaterEqual(html.count("<h2>"), 4)
 
 
 class Rakennus(unittest.TestCase):
@@ -322,6 +325,52 @@ class Stemmasivu(unittest.TestCase):
         html = sivusto.stemmasivu()
         self.assertNotIn("Mistä osa alkaa", html)
         self.assertNotIn("<table", html)
+
+
+class Korjauskutsu(unittest.TestCase):
+    """Kutsu ilmoittaa virheistä.
+
+    Sivuston ainoa kohta, jossa lukijalta pyydetään jotain, ja projektin
+    ainoa tie ylempien äänien tarkistamiseen: tekijä laulaa bassoa.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.html = sivusto.stemmasivu()
+
+    def test_luku_on_omalla_ankkurillaan_varauksen_ja_partituurin_valissa(self):
+        self.assertIn('id="%s"' % sivusto.ANKKURI, self.html)
+        self.assertLess(self.html.index("Ominaisuudet"),
+                        self.html.index('id="%s"' % sivusto.ANKKURI))
+        self.assertLess(self.html.index('id="%s"' % sivusto.ANKKURI),
+                        self.html.index("Koko partituuri"))
+
+    def test_varaus_linkittaa_kutsuun(self):
+        """Se joka lukee ettei stemmaa ole tarkistettu, on juuri se jonka
+        ilmoitusta tarvitaan — linkin pitää olla siinä kohdassa."""
+        self.assertIn('href="#%s"' % sivusto.ANKKURI,
+                      sivusto.luotettavuusteksti())
+
+    def test_pyytaa_nimenomaan_muita_aania_kuin_bassoa(self):
+        self.assertIn("muista äänistä kuin bassosta", self.html)
+
+    def test_ohjaa_githubin_tiketteihin(self):
+        for osoite in (sivusto.TIKETIT, sivusto.UUSI_TIKETTI):
+            with self.subTest(osoite=osoite):
+                self.assertIn('href="%s"' % osoite, self.html)
+        self.assertTrue(sivusto.TIKETIT.startswith(sivusto.GITHUB))
+        self.assertTrue(sivusto.UUSI_TIKETTI.startswith(sivusto.TIKETIT))
+
+    def test_kertoo_mita_raportissa_pitaa_olla(self):
+        """Ilman tahtinumeroa ja täsmällistä ohjetta raportti ei johda
+        korjaukseen: juuri ne kaksi on sanottava ääneen."""
+        nimet = [nimi for nimi, _teksti in sivusto.RAPORTIN_OSAT]
+        self.assertIn("Ääni ja tahtinumero", nimet)
+        self.assertIn("Täsmällinen ohje korjaukseen", nimet)
+        for nimi, teksti in sivusto.RAPORTIN_OSAT:
+            with self.subTest(nimi=nimi):
+                self.assertIn("<dt>%s</dt>" % nimi, self.html)
+                self.assertIn(teksti, self.html)
 
 
 class Tekstisivu(unittest.TestCase):

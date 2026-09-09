@@ -30,15 +30,22 @@ POHJA = "sivusto"
 VERKKOTUNNUS = "requiem.tuomasairaksinen.fi"
 
 GITHUB = "https://github.com/tuomas2/verdi-requiem"
+# Virheilmoitukset menevät tiketeiksi eivätkä sähköpostiin: tiketti säilyy,
+# näkyy muille lukijoille ja pysyy auki kunnes korjaus on tehty. Molemmat
+# osoitteet johdetaan GITHUBista, jottei repon siirto jätä puolta linkeistä
+# vanhaan paikkaan.
+TIKETIT = GITHUB + "/issues"
+UUSI_TIKETTI = TIKETIT + "/new"
 CPDL = "https://www.cpdl.org/wiki/index.php/Requiem_(Giuseppe_Verdi)"
 
 # Kaksi sivua riittää, ja stemmat on niistä se jota luetaan: se on etusivu.
 # Kun kohtia on näin vähän, jokainen mahtuu kertomaan mihin se vie.
 # GitHub on mukana siksi, että aineiston parantaminen on osa tämän projektin
-# tarkoitusta: kaikilla stemmoilla ei vielä ole luotettavia nuotteja.
+# tarkoitusta: kaikilla stemmoilla ei vielä ole luotettavia nuotteja, ja
+# tiketit ovat se kanava jota pitkin virheet tulevat tietoon.
 NAVI = [("index.html", "Stemmat", "kahdeksan ääntä, PDF ja MusicXML"),
         ("teksti.html", "Teksti", "mitä olet laulamassa, suomeksi"),
-        (GITHUB, "GitHub", "lähteet ja nuottien parantaminen")]
+        (GITHUB, "GitHub", "lähteet ja virheiden ilmoitus")]
 
 STEMMAT = [("S I", "stemma-sopraano-1.pdf"), ("S II", "stemma-sopraano-2.pdf"),
            ("A I", "stemma-altto-1.pdf"), ("A II", "stemma-altto-2.pdf"),
@@ -198,7 +205,74 @@ def luotettavuusteksti():
         f"tenori ovat pääosin tarkistamatta.{maininta} Syy on yksinkertainen: "
         "tekijä laulaa bassoa. Osakohtainen erittely siitä mitä on "
         f'tarkistettu ja miten: <a href="{GITHUB}/blob/main/'
-        f'{luotettavuus.MD_TIEDOSTO}">{e(luotettavuus.MD_TIEDOSTO)}</a>.')
+        f'{luotettavuus.MD_TIEDOSTO}">{e(luotettavuus.MD_TIEDOSTO)}</a>. '
+        f'Löytämäsi virheen voi ilmoittaa: <a href="#{ANKKURI}">'
+        'Löysitkö virheen?</a>')
+
+
+# ------------------------------------------------------------ korjaukset
+
+# Ankkuri on vakio, koska luotettavuusvaraus linkittää tähän lukuun: kaksi
+# käsin kirjoitettua tunnistetta ehtisi erkaantua toisistaan.
+ANKKURI = "virheet"
+
+# Mitä raportissa pitää olla, jotta sen perusteella voi tehdä korjauksen.
+# Järjestys on se, jossa korjaaja niitä tarvitsee: ensin mistä kohdasta on
+# kyse, sitten mikä siinä on vikana, ja lopuksi mistä sen tietää.
+RAPORTIN_OSAT = [
+    ("Ääni ja tahtinumero",
+     "Kumpi stemma (esimerkiksi <span class=\"koodi\">A II</span>) ja minkä "
+     "tahdin. Numero on jokaisen tahdin päällä, joten sitä ei tarvitse "
+     "laskea rivin alusta."),
+    ("Säe ja tavu",
+     "Sanavirheessä se latinan säe, jota kohta laulaa, ja tavu jonka "
+     "kohdalla vika on — <i>“qui salvandos salvas gratis”, sana "
+     "salvandos</i>. Pelkkä tahtinumero ei riitä, kun sama säe toistuu "
+     "osassa monta kertaa."),
+    ("Täsmällinen ohje korjaukseen",
+     "Mitä stemmassa lukee nyt ja mitä siinä pitäisi lukea: <i>“tahdin 653 "
+     "toinen nuotti on h, pitäisi olla c”</i> tai <i>“tahdeista 340–341 "
+     "puuttuu säe ja edellinen on kahteen kertaan”</i>. Tämä on raportin "
+     "tärkein kohta: sen varassa korjaus joko voidaan tehdä tai ei."),
+    ("Mistä tiedät",
+     "Mikä painos, kuoron nuottikirja tai äänite kertoo miten sen kuuluu "
+     "mennä. Muistikuvakin kelpaa, kunhan se on merkitty muistikuvaksi: "
+     "korjausta ei tehdä ennen kuin se on varmistettu jostain, ja tieto "
+     "siitä mistä tarkistaa säästää sen työn."),
+]
+
+
+def korjaukset():
+    """Kutsu ilmoittaa virheistä — ja miten ilmoitus kannattaa kirjoittaa.
+
+    Tämä on oma lukunsa eikä alaviitteen lause siksi, että se on ainoa
+    kohta koko sivustolla, jossa lukijalta pyydetään jotain. Ylemmät äänet
+    ovat tarkistamatta, eikä tekijä yksin bassoa laulaen niitä tarkista:
+    ainoa tie eteenpäin on se, että joku joka laulaa stemman ilmoittaa
+    mitä siinä on vikana.
+    """
+    osat = "".join("<dt>%s</dt><dd>%s</dd>" % (nimi, teksti)
+                   for nimi, teksti in RAPORTIN_OSAT)
+    return f"""
+<section class="lohko" id="{ANKKURI}">
+<h2>Löysitkö virheen?</h2>
+<p>Korjausilmoitukset ovat tervetulleita, ja
+<strong>erityisesti muista äänistä kuin bassosta</strong>: sopraano, altto
+ja tenori ovat pääosin tarkistamatta, ja virheen huomaa käytännössä vain
+se, joka laulaa stemman. Yksi ilmoitettu tahti auttaa tässä enemmän kuin
+mikään uusi ominaisuus.</p>
+<p>Ilmoitukset mieluiten GitHubiin tiketiksi:
+<a href="{UUSI_TIKETTI}">tee uusi tiketti</a> tai katso
+<a href="{TIKETIT}">jo ilmoitetut</a>. Tiketti on sähköpostia parempi
+siksi, että se säilyy, näkyy muillekin lukijoille ja pysyy auki siihen
+asti kun korjaus on tehty ja stemma rakennettu uudelleen.</p>
+<p>Mitä ilmoituksessa tarvitaan:</p>
+<dl class="ominaisuudet">{osat}</dl>
+<p class="tausta">Mieluiten yksi virhe per tiketti: ne korjataan ja
+suljetaan yksitellen. Jos GitHub-tunnusta ei ole, kelpaa yhtä hyvin
+sanallinen viesti harjoituksissa — samat tiedot siinäkin.</p>
+</section>
+"""
 
 
 # --------------------------------------------------------------- stemmat
@@ -328,6 +402,8 @@ tarkistamatta</strong>.</p>
 <section class="lohko">
 {ominaisuudet()}
 </section>
+
+{korjaukset()}
 
 <section class="lohko">
 <h2>Koko partituuri</h2>
