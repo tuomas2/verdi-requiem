@@ -1,0 +1,58 @@
+name: Testit
+
+# Testit ajetaan omana workflowna, jotta punainen rasti kertoo mikä
+# hajosi: ennen ne olivat askel "Julkaise sivusto" -workflowssa, joka
+# ei käynnistynyt muissa haaroissa lainkaan eikä nimellään kertonut
+# vikaa testeissä.
+
+on:
+  # main ja pull requestit tulevat sivusto.yml:n kautta, joka kutsuu tätä
+  # workflow_callilla ja odottaa tuloksen ennen julkaisua. Ilman
+  # branches-ignorea sama commit testattaisiin kahdesti.
+  push:
+    branches-ignore: [main]
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Uusi työntö samaan haaraan peruu keskeneräisen ajon — paitsi mainissa,
+# jossa tämä workflow ajetaan sivusto.yml:n kutsumana ja peruutus kaataisi
+# koko julkaisuajon. Se jonottaa peruuttamatta, ks. sivusto.yml:n
+# concurrency-lohko ja sen perustelu.
+concurrency:
+  group: testit-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  testit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      # Molemmat versiot ajetaan loppuun; kumpi hajosi on itse tulos.
+      fail-fast: false
+      matrix:
+        # 3.9 on README:n lupaama alaraja ja se versio jolla työ aloitettiin;
+        # 3.13 on se mitä uusi kehitysympäristö käyttää. Repo on puhdasta
+        # vakiokirjastoa, joten välissä ei ole mitään testattavaa.
+        python: ['3.9', '3.13']
+    name: testit (Python ${{ matrix.python }})
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      # 15 testiä lukee lähde-PDF:iä `mutool draw -F stext`:llä. Mitattu:
+      # ilman tätä ne 15 kaatuvat exit 127:ään, muut 241 menevät läpi.
+      # Sivuston rakennus ei tarvitse mutoolia, joten se on vain täällä.
+      - name: Asenna mutool
+        run: sudo apt-get update && sudo apt-get install -y mupdf-tools
+
+      # MuseScorea ei asenneta: yksikään testi ei kutsu sitä, ja stemmojen
+      # PDF:t tulevat reposta valmiina, koska niitä ei voi rakentaa ilman
+      # sitä. Ks. .jailbee/config.yaml, jossa kehityskontti pinnaa 4.7.4:n.
+      - name: Aja testit
+        run: python3 -m unittest discover -s testit -t .

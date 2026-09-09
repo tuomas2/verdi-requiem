@@ -274,8 +274,8 @@ uudelleenluonti. Jokainen korjaus tarkistaa lähtötilanteen ja kaatuu, jos
 lähde on muuttunut, joten korjaus ei voi hiljaa osua väärään tahtiin.
 
 Tarkempi menetelmä — miten kohta todennetaan lähde-PDF:stä ennen kirjaamista
-ja mistä tietää onko vika datassa vai skriptissä — on `CLAUDE.md`:n luvussa
-*Recipe: a singer reports a wrong syllable by ear*.
+ja mistä tietää onko vika datassa vai skriptissä — on skillissä
+`.claude/skills/korvakuulokorjaus/SKILL.md`.
 
 Jos kokonainen kohta puuttuu eikä kyse ole vain tavusta, sama taulukko osaa
 kopioida valmiin tahdin toisaalta samasta stemmasta (`kopioi_tahti`) — niin
@@ -374,8 +374,7 @@ nämä joka ajolla. Lacrymosan sauma oli aiemmin näiden joukossa ja on nyt
 jatkuva (623 → 624); on hyvin mahdollista että loput neljä päällekkäisyyttä
 ovat samaa vikaa, mutta se ratkeaa vain tahtinumerolla alaosan **sisältä**
 — osio-otsikon numero ei riitä. Lukustemmoissa se ei näy, koska kaikki toistuvat tahdit
-ovat kuorolle taukoa ja katoavat taukopalkkeihin. Ks. `CLAUDE.md`:
-**2026-09-02 (later): the book's own bar numbers for Dies irae**.
+ovat kuorolle taukoa ja katoavat taukopalkkeihin. Ks. `docs/tyopaivakirja/2026-09-02-dies-iraen-tahtinumerot.md`.
 
 Huom: jos vanhoissa muistiinpanoissa on Dies iraen tahtinumeroita ennen
 2026-09-02, ne ovat vanhassa numeroinnissa — Lacrymosasta vähennetään 8,
@@ -422,8 +421,8 @@ Lacrymosan välissä. Se puuttui aiemmin kokonaan — Verdin "Dies irae"
 missään tavallisessa osaluettelossa, joten se ei ollut minkään
 lähdetiedostomme mukana. Löytyi erillisestä PDF:stä ja luettiin koneellisesti
 samalla tavalla kuin osat I ja V. Kuorobasson sanat on tarkistettu; nuotit
-ja muut äänet eivät vielä ole. Ks. `CLAUDE.md`: **Fixing OMR lyrics** ja
-**The missing Dies irae recall (II·9b)** tekniselle taustalle.
+ja muut äänet eivät vielä ole. Ks. `docs/menetelmat/omr.md`, luvut **Fixing OMR
+lyrics** ja **The missing Dies irae recall (II·9b)**, tekniselle taustalle.
 
 ## Tunnetut rajoitukset
 
@@ -445,8 +444,8 @@ ja kahdesta tavu. Nyt stemma päättyy oikein sanoihin "do – na.".
 
 Muita ääniä (Sopraano/Altto/Tenori) samasta osasta **ei ole tarkistettu** — ne
 ovat yhä konelukemisen tuloksena, ja niiltä puuttuu mm. sama loppusointu
-tahdista 72. Tekninen tausta: `CLAUDE.md` -> **2026-08-31 (later): Agnus Dei's
-chorus bass, whole movement verified**.
+tahdista 72. Tekninen tausta:
+`docs/tyopaivakirja/2026-08-31-agnus-dei-kuorobasso.md`.
 
 **Poikkeus edelliseen: Lacrymosan (11) kuorobassolla oli aito virhe, ei
 OMR:stä johtuva.** Rivin loppupuolella (n. 30 tahtia) oli väärää tekstiä —
@@ -476,8 +475,9 @@ Kaksi aitoa virhettä löytyi ja korjattiin:
   tahdeissa 664–665 oli jo "er-go par-ce De-us,", eli korjauksen jälkeen
   kaikki neljä ääntä ovat samassa tekstissä.
 
-Tekninen tausta: `CLAUDE.md` -> **Lacrymosa's chorus bass** ja
-**2026-09-03 (c)**.
+Tekninen tausta:
+`docs/tyopaivakirja/2026-08-28-lacrymosan-kuorobasso.md` ja
+`docs/tyopaivakirja/2026-09-03-lacrymosan-kolmen-tahdin-siirtyma.md`.
 
 Muiden äänten (Sopraano/Altto/Tenori, solistit) samaa tiedostoa ei ole
 tarkistettu yhtä tarkasti — sama virhetyyppi voisi periaatteessa olla

@@ -2,8 +2,8 @@
 
 <!-- Generoitu tiedosto: `python3 luotettavuus.py`. Muokkaa `luotettavuus.py`:tä, älä tätä. -->
 
-Tämä taulukko on ihmisen arvio eikä laskettu suure: sen lähde on työhistoria
-[`CLAUDE.md`](CLAUDE.md):ssä, johon jokainen tarkistus on kirjattu. Merkintä on lupaus
+Tämä taulukko on ihmisen arvio eikä laskettu suure: sen lähde on työpäiväkirja
+[`docs/tyopaivakirja/`](docs/tyopaivakirja/), johon jokainen tarkistus on kirjattu. Merkintä on lupaus
 lukijalle — mitään ei ole merkitty varmistetuksi ilman että se on vertailtu
 riippumattomaan lähteeseen nuotti nuotilta tai tavu tavulta.
 
