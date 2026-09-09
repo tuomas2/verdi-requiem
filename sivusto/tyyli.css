@@ -24,40 +24,73 @@ body{
    upotetaan myös requiem.html:ään, joka ei lataa tätä tiedostoa. */
 :focus-visible{outline:2px solid var(--rubric);outline-offset:2px}
 
-/* ---------- sivun runko ---------- */
+/* ---------- sivun runko ----------
+   Yksi tekstileveys koko sivulle. Se on rem-mitta eikä ch: ch on fontin oma
+   merkkileveys, ja serif-kappale jäi kapeammaksi kuin sans-kappale samasta
+   luvusta — juuri se sai leveydet näyttämään satunnaisilta. Vain
+   latauslista ja viivat käyttävät koko 1100 pikselin palstan. */
+:root{--mitta:36rem}
 .wrap{max-width:1100px;margin:0 auto;padding:0 1.25rem 6rem}
-/* Otsikko on sama kuin requiem.html:ssä, joka on itsenäinen sivu omine
-   tyyleineen: sivujen pitää näyttää samalta. */
+
+/* Otsikko, kulmateksti ja alaotsikko ovat samat kuin requiem.html:ssä, joka
+   on itsenäinen sivu omine tyyleineen. Luokkien nimet ovat sielläkin
+   .eyebrow ja .standfirst: yksi sanasto, jotta sivut pysyvät verrattavina. */
 header.masthead{
   padding:4rem 0 2.5rem;
   border-bottom:2px solid var(--ink);
-  margin-bottom:2.5rem;
+}
+.eyebrow{
+  font-size:.7rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--rubric);margin:0 0 1.4rem;
 }
 h1{
   font-family:var(--serif);font-weight:500;
   font-size:clamp(2.6rem,7vw,5rem);line-height:.98;
   letter-spacing:-.015em;margin:0;
 }
-h2{
-  font-family:var(--serif);font-weight:500;font-size:1.6rem;
-  margin:2.8rem 0 .6rem;
+h1 em{
+  font-style:italic;display:block;color:var(--ink-soft);
+  font-size:.5em;letter-spacing:0;margin-top:.5rem;
 }
-p{max-width:62ch}
-a{color:var(--rubric)}
-.johdanto{font-family:var(--serif);font-size:1.1rem;max-width:52ch;
-          margin:1.8rem 0 0;color:var(--ink-soft)}
+/* Tiivistelmä on hitusen suurempi kuin tekstisivun vastaava, jotta rivi
+   pysyy alle 70 merkissä samalla --mitta-leveydellä kuin muu teksti:
+   serifin merkki on kapea, ja 1,1 rem venyi tällä leveydellä liian
+   pitkäksi riviksi. */
+.standfirst{
+  font-family:var(--serif);font-size:1.22rem;line-height:1.45;
+  max-width:var(--mitta);margin:1.8rem 0 0;color:var(--ink-soft);
+}
 
-h3{
-  font-family:var(--sans);font-weight:600;font-size:.78rem;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
-  margin:2.4rem 0 .8rem;
+/* Yksi otsikkotaso sisällölle: Stemmat, Ominaisuudet, Koko partituuri ja
+   lähdeluku ovat sivun rinnakkaisia lukuja, joten ne ladotaan samoin.
+   Aiemmin Ominaisuudet oli sans-versaali h3 muiden serif-h2:iden seassa,
+   ja se yksin teki sivusta kahden tyylin sekoituksen. Koko ja rytmi ovat
+   requiem.html:n h2:sta. */
+h2{
+  font-family:var(--serif);font-weight:500;
+  font-size:clamp(1.5rem,3.2vw,2rem);line-height:1.1;
+  margin:0 0 .9rem;
 }
+
+/* Luvut palstoina, ohut viiva väliin — sama rytmi kuin tekstisivun osilla. */
+section.lohko{padding:2.6rem 0 1.6rem;border-bottom:1px solid var(--rule)}
+section.lohko:last-child{border-bottom:0}
+
+p{max-width:var(--mitta)}
+a{color:var(--rubric)}
+
+/* Toissijainen leipäteksti: sama koko ja väri kuin ominaisuuslistan
+   selityksillä, jotta selittävä teksti näyttää kaikkialla selittävältä. */
+.tausta{font-size:.92rem;color:var(--ink-soft)}
+.tausta:last-child{margin-bottom:0}
 
 /* ---------- ominaisuuslista ----------
-   Nimi ja selitys rinnakkain leveällä näytöllä, allekkain kapealla. */
+   Nimi ja selitys rinnakkain leveällä näytöllä, allekkain kapealla.
+   Nimi + väli + selitys on tasan --mitta, joten lista loppuu samaan
+   reunaan kuin kappaleet sen ylä- ja alapuolella. */
 .ominaisuudet{
   margin:0;display:grid;gap:.55rem 1.6rem;
-  grid-template-columns:minmax(11rem,15rem) minmax(0,44ch);
+  grid-template-columns:11rem minmax(0,calc(var(--mitta) - 12.6rem));
 }
 .ominaisuudet dt{
   font-family:var(--serif);font-size:1.05rem;
@@ -67,7 +100,10 @@ h3{
   margin:0;color:var(--ink-soft);font-size:.92rem;
   grid-column:2;
 }
-.koodi{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85em}
+/* Tahtivälin merkintä niin kuin se on stemmassa. Ei omaa kirjainlajia:
+   kaksi fonttia riittää sivustolle, ja kolmas näkyi tilkkutäkkinä. */
+.koodi{font-variant-numeric:tabular-nums;background:var(--paper-2);
+       padding:.05em .3em;border-radius:2px}
 
 @media (max-width:640px){
   .ominaisuudet{grid-template-columns:1fr;gap:.15rem}
@@ -82,13 +118,9 @@ h3{
    nimi ja selitys ovat eri ruudukkosoluja: väli jäisi väliin. */
 .ominaisuudet dt.huomio{
   color:var(--rubric);
-  border-left:3px solid var(--rubric);
+  border-left:2px solid var(--rubric);
   padding-left:.6rem;margin-left:-.6rem;
 }
-
-/* ---------- sisällystaulukko ---------- */
-th.aani,td.aani{text-align:center;font-variant-numeric:tabular-nums}
-table.sisallys td:first-child{min-width:14ch}
 
 /* ---------- latauslista ---------- */
 .lataukset{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:1.2rem}
@@ -111,6 +143,6 @@ table.sisallys td:first-child{min-width:14ch}
 }
 
 @media (max-width:600px){
-  table{font-size:.8rem}
   h1{margin-top:2rem}
+  header.masthead{padding:2.5rem 0 2rem}
 }

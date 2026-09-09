@@ -135,19 +135,24 @@ def alaviite():
     ennen kuin pääsee siihen mitä sivustolta haetaan.
     """
     return f"""
+<section class="lohko">
 <h2>Mistä tämä on peräisin</h2>
-<p>Sävellys on public domainissa; Verdi kuoli 1901. Nuottiaineisto on peräisin
+<p class="tausta">Sävellys on public domainissa; Verdi kuoli 1901.
+Nuottiaineisto on peräisin
 <a href="{CPDL}">CPDL:n (Choral Public Domain Library) Requiem-sivulta</a>:
 sen editiot saa vapaasti levittää ja esittää. Kuusitoista erillistä
 osatiedostoa on yhdistetty yhdeksi partituuriksi, ja stemmat on tuotettu
-siitä. Tahtinumerointi on sovitettu Edition Petersin painokseen, jota vasten
-kuorobasso on myös käyty läpi.</p>
-<p>Lähtökohta on kuorolaisen käytännön tarve: lukea omaa stemmaa niin että muu
-kuoro ja pianosäestys kuuluvat, kantaa stemma mukana lukulaitteella, ja löytää
-yksittäinen tahti kun kuoronjohtaja huutaa numeron.</p>
-<p>Lähdekoodi, koko työn dokumentaatio ja ohjeet aineiston uudelleenluontiin:
-<a href="https://github.com/tuomas2/verdi-requiem">github.com/tuomas2/verdi-requiem</a>.
+siitä. Tahtinumerointi on sovitettu {e(luotettavuus.REFERENSSI)}in
+painokseen, jota vasten kuorobasso on myös käyty läpi.</p>
+<p class="tausta">Lähtökohta on kuorolaisen käytännön tarve: lukea omaa
+stemmaa niin että muu kuoro ja pianosäestys kuuluvat, kantaa stemma mukana
+lukulaitteella, ja löytää yksittäinen tahti kun kuoronjohtaja huutaa
+numeron.</p>
+<p class="tausta">Lähdekoodi, koko työn dokumentaatio ja ohjeet aineiston
+uudelleenluontiin:
+<a href="{GITHUB}">github.com/tuomas2/verdi-requiem</a>.
 Skriptit ja dokumentaatio ovat GPL-3.0-lisenssin alaisia.</p>
+</section>
 """
 
 
@@ -281,7 +286,8 @@ def ominaisuudet():
         return "<dt%s>%s</dt><dd%s>%s</dd>" % (luokka, nimi, luokka, teksti)
 
     rivit = "".join(rivi(nimi, teksti) for nimi, teksti in kohdat)
-    return f'<h3>Ominaisuudet</h3>\n<dl class="ominaisuudet">{rivit}</dl>'
+    return (f'<h2>Ominaisuudet</h2>\n'
+            f'<dl class="ominaisuudet">{rivit}</dl>')
 
 
 def stemmasivu():
@@ -301,20 +307,32 @@ def stemmasivu():
     koko = "Verdi-Requiem-koko.mxl"
     sisalto = f"""
 <header class="masthead">
-<h1>Messa da Requiem</h1>
-<p class="johdanto">Verdin <em>Messa da Requiem</em>, kahdeksan kuorostemmaa
-harjoittelua varten.
-<strong>Kuorobasso on käyty läpi, muut äänet eivät.</strong></p>
+<p class="eyebrow">Giuseppe Verdi · 1874</p>
+<h1>Messa da Requiem<em>kahdeksan kuorostemmaa harjoittelua varten</em></h1>
+<p class="standfirst">Jokainen kuoroääni omana tiedostonaan, PDF:nä
+luettavaksi ja MusicXML:nä muokattavaksi, ja niiden rinnalla koko partituuri.
+Stemmassa on vain oma ääni, tahtinumero joka tahdissa
+{e(luotettavuus.REFERENSSI)}in painoksen mukaan ja latinan sanojen suomennos
+nuottien alla — niin että harjoituksissa löytää huudetun tahdin ja tietää
+mitä on laulamassa. Nuottiaineisto on koottu CPDL:n vapaista editioista, ja
+siitä on käyty käsin läpi kuorobasso; <strong>muut äänet ovat pääosin
+tarkistamatta</strong>.</p>
 </header>
 
+<section class="lohko">
 <h2>Stemmat</h2>
 <ul class="lataukset">{linkit}</ul>
+</section>
 
+<section class="lohko">
 {ominaisuudet()}
+</section>
 
+<section class="lohko">
 <h2>Koko partituuri</h2>
 <p>Kaikki viisitoista viivastoa yhtenä tiedostona, 1807 tahtia:
 <a href="{koko}">{koko}</a> (MusicXML, avautuu esimerkiksi MuseScorella).</p>
+</section>
 
 {alaviite()}
 """
