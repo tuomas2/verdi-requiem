@@ -52,16 +52,16 @@ repeatable if the OMR is ever redone for the piano.
 > original OMR lives only in the `-korjattu` files — movement 14's chorus-bass
 > tacet spans and its 15 note/duration fixes — so a plain re-run **silently
 > destroys them** and the loss shows up only as the old bugs reappearing in
-> the reading part. **Movement 01 is the exception and no longer at risk**:
-> since 2026-09-02 its hand layer is a table in `korjaa_kasin.py`, so
-> `korjaa_sanat.py && korjaa_kasin.py` reproduces it exactly. Movements 14
-> and II·9b are still exposed. The script's own
-> "originals are never touched, so the pass is repeatable" design note was
-> written when the `-korjattu` files really were pure derivatives; they are
-> not any more, for 14 and II·9b. Before re-running: either diff the result
-> against the committed `-korjattu` file and re-apply the manual work, or
-> restore from git afterwards. Better, move that movement's hand layer into
-> `korjaa_kasin.py` the way movement 01's was — see *Recipe*, last section.
+> the reading part. **Movement 14 is the only one exposed, and that is now
+> measured.** Movement 01's hand layer has been a table in `korjaa_kasin.py`
+> since 2026-09-02; II·9b was listed here as exposed too, but it never was.
+> Backing up all three `-korjattu` files, running the script and comparing the
+> XML (2026-09-09): 01 and 10b come back **identical**, 14 does not — 570 058
+> → 604 055 bytes, i.e. its tacet spans and note fixes are gone. Before
+> re-running for movement 14: either diff the result against the committed
+> `-korjattu` file and re-apply the manual work, or restore from git
+> afterwards. Better, move its hand layer into `korjaa_kasin.py` the way
+> movements 01, 11 and 10b's were — see *Recipe*, last section.
 
 **Both source PDFs carry their lyrics as real text**, not as glyph images —
 `mutool draw -F stext` extracts them. This is the fact the whole approach

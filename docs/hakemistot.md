@@ -24,7 +24,7 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `Verdi_Lacymosa.pdf` | The printed source for movement 11, same CPDL edition as the `.mxl`. Not an `.mxl` source, but what the whole chorus bass was verified against — and it **prints its own bar numbers, 624–701**. Not an authority, though: it is wrong about the text at bars 657–665 and about one note at bar 653 |
 | `*.omr` | Audiveris projects, for manual correction |
 | `*-OMR-korjattu.mxl` | OMR'd sections with their chorus lyrics fixed from the PDFs |
-| `*-kasin.mxl` | **Generated**, not hand-edited: `korjaa_kasin.py`'s output, the file `yhdista.py` actually reads for movements 01, II·1, II·4, II·6, II·10, IV and VII |
+| `*-kasin.mxl` | **Generated**, not hand-edited: `korjaa_kasin.py`'s output, the file `yhdista.py` actually reads for movements 01, II·1, II·4, II·6, II·9b, II·10, IV and VII |
 | `Verdi-Requiem-koko.mxl` | Merged score, 15 staves, 1807 measures |
 | `stemma-*.mxl` / `.pdf` | Eight choir reading parts |
 | `stemmat-sisallys.txt` | Where each movement starts in all eight |

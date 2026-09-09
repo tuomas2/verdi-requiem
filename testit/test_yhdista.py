@@ -11,7 +11,8 @@ import xml.etree.ElementTree as ET
 
 from yhdista import (DIES_IRAE_ALUT, DIES_IRAE_SIIRTYMAT, ELISIO, MOVEMENTS,
                      OSAOTSIKOT, merge_elisions, normalise_lyrics,
-                     osaotsikko, saumaraportti, verse_number)
+                     osaotsikko, saumaraportti, verse_number,
+                     yhdista_taukohannat)
 
 
 def measure(*notes):
@@ -191,7 +192,7 @@ class DiesIraenNumerointi(unittest.TestCase):
              "06-Verdi-Quid_sum_miser.mxl": 271, "07-Verdi-Rex-kasin.mxl": 322,
              "08-Verdi_Recordare.mxl": 386, "09-Verdi_Ingemisco.mxl": 450,
              "10-Verdi_Confutatis.mxl": 507,
-             "10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl": 573,
+             "10b-Verdi_Dies_irae_paluu-kasin.mxl": 573,
              "11-Verdi_Lacrymosa-kasin.mxl": 624}
 
     def test_alut_ovat_kirjan_mukaiset(self):
@@ -208,7 +209,7 @@ class DiesIraenNumerointi(unittest.TestCase):
         tiedostossa väärin.
         """
         alku = DIES_IRAE_ALUT["11-Verdi_Lacrymosa-kasin.mxl"]
-        loppu10b = (DIES_IRAE_ALUT["10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl"]
+        loppu10b = (DIES_IRAE_ALUT["10b-Verdi_Dies_irae_paluu-kasin.mxl"]
                     + 51 - 1)
         self.assertEqual(loppu10b, 623)
         self.assertEqual(alku, loppu10b + 1)
@@ -240,6 +241,81 @@ class Saumaraportti(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def osasto(*osat):
+    """Osasto osista: osa on lista tahteja, tahti True kun siinä on nuotti.
+
+    Jokaisen osan ensimmäinen tahti saa pakotetun rivinvaihdon, kuten
+    yhdista.py sen kirjoittaa. Palauttaa (osasto, osien alkuindeksit).
+    """
+    p = ET.Element("part", {"id": "P1"})
+    alut, numero = [], 1
+    for osa in osat:
+        alut.append(numero - 1)
+        for slot, soi in enumerate(osa):
+            m = ET.SubElement(p, "measure", {"number": str(numero)})
+            numero += 1
+            if slot == 0:
+                m.append(ET.Element("print", {"new-system": "yes"}))
+            n = ET.SubElement(m, "note")
+            if not soi:
+                ET.SubElement(n, "rest")
+            else:
+                ET.SubElement(ET.SubElement(n, "pitch"), "step").text = "C"
+    return p, alut
+
+
+def rivinvaihdot(part):
+    return [m.get("number") for m in part.findall("measure")
+            if any(pr.get("new-system") == "yes" for pr in m.findall("print"))]
+
+
+class Taukohannat(unittest.TestCase):
+    """Osan lopun taukotahdit liitetään seuraavan osan otsikkoriviin.
+
+    Jokainen osa aloittaa uuden rivin, jotta otsikko löytyy selaamalla.
+    Vaikenevat lopputahdit jäivät siitä syystä omalle rivilleen: laulaja
+    raportoi 2026-09-09 kaksi niistä, yhden tyhjän tahdin (383) ja
+    yhdentoista tahdin lohkon (613-623), jotka kumpikin veivät koko rivin.
+    """
+
+    def test_taukohanta_liitetaan(self):
+        part, alut = osasto([True, True, False], [True, True])
+        self.assertEqual(yhdista_taukohannat(part, alut), [("3", "3")])
+        self.assertEqual(rivinvaihdot(part), ["1"])
+
+    def test_koko_hanta_raportoidaan_eika_vain_viimeinen_tahti(self):
+        part, alut = osasto([True, False, False, False], [True])
+        self.assertEqual(yhdista_taukohannat(part, alut), [("2", "4")])
+
+    def test_soiva_lopputahti_pitaa_rivinvaihdon(self):
+        part, alut = osasto([True, True], [True, True])
+        self.assertEqual(yhdista_taukohannat(part, alut), [])
+        self.assertEqual(rivinvaihdot(part), ["1", "3"])
+
+    def test_kokonaan_vaikeneva_osa_pitaa_rivinvaihdon(self):
+        """Muuten peräkkäiset tacet-osat valuisivat samalle riville.
+
+        Kuorolle II·7, II·8 ja II·9 ovat kaikki kokonaan taukoa, ja niiden
+        kolme otsikkoa mahtuisivat yhdelle riville — mikä on tiheämpää
+        mutta tekee osan alun löytämisestä vaikeaa.
+        """
+        part, alut = osasto([True, False], [False, False], [True])
+        # Soivan osan häntä liitetään, tacet-osan jälkeen rivinvaihto jää.
+        self.assertEqual(yhdista_taukohannat(part, alut), [("2", "2")])
+        self.assertEqual(rivinvaihdot(part), ["1", "5"])
+
+    def test_ensimmaisen_osan_rivinvaihto_jaa_aina(self):
+        part, alut = osasto([False, False], [True])
+        yhdista_taukohannat(part, alut)
+        self.assertEqual(rivinvaihdot(part)[0], "1")
+
+    def test_tyhja_print_siivotaan_pois(self):
+        # <print> jää tyhjäksi kun ainoa attribuutti poistetaan.
+        part, alut = osasto([True, False], [True])
+        yhdista_taukohannat(part, alut)
+        self.assertEqual(part.findall("measure")[2].findall("print"), [])
 
 
 class TahtinumerotValmiissaPartituurissa(unittest.TestCase):

@@ -25,6 +25,7 @@ sellainen on aina merkitty molempiin päihin.
 | *2026-09-09* | [`2026-09-09-suomennokset.md`](2026-09-09-suomennokset.md) | Suomennos joka latinan sanan alle, ja `--teksti`, joka löysi neljä päiviä painunutta virhettä |
 | *2026-09-09 (b)* | [`2026-09-09-dokumentaatio-ja-ci.md`](2026-09-09-dokumentaatio-ja-ci.md) | Muistiinpanot pilkottiin hakemistoksi ja skilliksi; testit omaksi CI-workflowksi, jota julkaisu kutsuu |
 | *2026-09-09 (c)* | [`2026-09-09-suomennoksen-tasaus.md`](2026-09-09-suomennoksen-tasaus.md) | Suomennos alkaa samasta kohdasta kuin latinan tavu eikä keskity sen alle: Edwinin merkkileveydet mitattiin ilman fonttitiedostoa |
+| *2026-09-09 (d)* | [`2026-09-09-rex-tremendaen-sakeet-ja-taukohannat.md`](2026-09-09-rex-tremendaen-sakeet-ja-taukohannat.md) | Rex tremendae toisti säkeistön yhtä säettä ja pudotti seuraavan (t.340-341, 362-363); divisin sanarivit t.367-369; p tahteihin 607 ja 677; osan 10b oma korjaustaulukko, ja mitattuna sen käsikerros ei koskaan ollut vaarassa; taukohännät liitetään seuraavan osan riviin, 3-5 riviä per stemma |
 
 ## Where things stand
 

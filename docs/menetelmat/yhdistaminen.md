@@ -45,6 +45,18 @@ MuseScore renders `<movement-title>` as the visible title and ignores
 - Validate against the schema when something is off:
   `xmllint --noout --schema musicxml.xsd score.xml`, with the two remote
   imports in the .xsd repointed to local copies.
+- **A movement's own forced `new-system` is worth one system of paper per
+  silent tail.** Every movement starts a new system so its title can be found
+  by flipping pages, and that is why a part's trailing rest bars end up on a
+  system of their own, stretched to full width — bar 383 alone, bars 613–623
+  alone. `yhdista_taukohannat` drops the break when the previous movement ends
+  in rest-only bars **and has at least one sounding note**; the second half is
+  what stops consecutive tacet movements from collapsing three titles onto one
+  row. It can only remove a break, never add one, so it cannot make a part
+  longer: measured across the eight parts, 3–5 systems saved each and one page
+  saved on Tenori II. Reading parts only — in the full score a break is shared
+  by fifteen staves and the piano plays across every seam. See
+  *2026-09-09 (d)*.
 
 ## The "corrupted file" warning — fixed, but know why it existed
 

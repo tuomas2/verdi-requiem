@@ -7,10 +7,10 @@ jokaisen toimenpiteen pitää kaatua kun lähtötilanne ei ole odotettu.
 import unittest
 import xml.etree.ElementTree as ET
 
-from korjaa_kasin import (Osa, OSA_I, OSA_II1, OSA_II6, OSA_II10_DIVISI,
-                          OSA_II10_KUORO_B, OSA_VII, OSA_VII_TENORI,
-                          OSAT_II4, OSAT_IV, SAVELLAJIT, Osa, find_part,
-                          kuvaa, kuvaa_kesto, load, lue_korkeus,
+from korjaa_kasin import (Osa, OSA_I, OSA_II1, OSA_II6, OSA_II9B,
+                          OSA_II10_DIVISI, OSA_II10_KUORO_B, OSA_VII,
+                          OSA_VII_TENORI, OSAT_II4, OSAT_IV, SAVELLAJIT, Osa,
+                          find_part, kuvaa, kuvaa_kesto, load, lue_korkeus,
                           siirra_savellaji, sovella, yksi_sanarivi)
 
 
@@ -350,6 +350,95 @@ class YksiSanarivi(unittest.TestCase):
             yksi_sanarivi(p)
 
 
+def dynamiikat(m):
+    return [(d.get("placement"), c.tag)
+            for d in m.findall("direction")
+            for dy in d.findall("direction-type/dynamics") for c in dy]
+
+
+class VaihdetutSanarivit(unittest.TestCase):
+    """`vaihda_sanarivit` on `sanarivi`:n divisiversio.
+
+    Kun molemmat äänet ovat samassa osastossa, rivejä ei voi siirtää
+    yksitellen: ensimmäinen siirto törmäisi toiseen riviin.
+    """
+
+    def puu(self):
+        return part([("C4", [("1", "begin", "sal")], "1"),
+                     ("G3", [("2", "single", "me,")], "2")])
+
+    def test_vaihtaa_rivit_keskenaan(self):
+        p = self.puu()
+        sovella(p, osa([("1", None, "vaihda_sanarivit", "1", "2")]))
+        self.assertEqual(rows(p), [("1", 0, "2", "begin", "sal"),
+                                   ("1", 1, "1", "single", "me,")])
+
+    def test_kirjoittaa_lahteen_oman_kirjoitusasun(self):
+        # Sekamuoto ("2" ja "part8verse2" samassa osastossa) sekoittaa
+        # MuseScoren rivilaskennan, joten vaihto käyttää sitä asua joka
+        # kohderivillä jo on.
+        p = part([("C4", [("part8verse1", "begin", "sal")], "1"),
+                  ("G3", [("part8verse2", "single", "me,")], "2")])
+        sovella(p, osa([("1", None, "vaihda_sanarivit", "1", "2")]))
+        self.assertEqual([r[2] for r in rows(p)],
+                         ["part8verse2", "part8verse1"])
+
+    def test_pudottaa_default_y_n(self):
+        # Arvo on laskettu sille riville jolta tavu lähtee — lähteessä
+        # ylä-äänen rivi 2 oli default-y="38" eli viivaston YLÄPUOLELLA.
+        p = self.puu()
+        for ly in p.findall("measure/note/lyric"):
+            ly.set("default-y", "38")
+        sovella(p, osa([("1", None, "vaihda_sanarivit", "1", "2")]))
+        for ly in p.findall("measure/note/lyric"):
+            self.assertNotIn("default-y", ly.attrib)
+
+    def test_kaataa_jos_toista_rivia_ei_ole(self):
+        p = part([("C4", [("1", "begin", "sal")], "1")])
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", None, "vaihda_sanarivit", "1", "2")]))
+
+    def test_kaataa_jos_tahdissa_on_kolmas_rivi(self):
+        p = part([("C4", [("1", "begin", "sal")], "1"),
+                  ("G3", [("2", "single", "me,")], "2"),
+                  ("E3", [("3", "single", "pelasta")], "2")])
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", None, "vaihda_sanarivit", "1", "2")]))
+
+
+class Dynamiikka(unittest.TestCase):
+    def test_lisaa_merkinnan_tahdin_alkuun(self):
+        p = part([("C4", [])])
+        sovella(p, osa([("1", None, "dynamiikka", "p")]))
+        m = p.find("measure")
+        self.assertEqual(dynamiikat(m), [("above", "p")])
+        # <direction> vaikuttaa sitä seuraaviin nuotteihin, joten se kuuluu
+        # ensimmäisen nuotin eteen.
+        self.assertEqual([c.tag for c in m], ["direction", "note"])
+
+    def test_yllapitaa_sisennyksen(self):
+        # Sisennys on ET:llä text- ja tail-kentissä; ilman sitä merkintä
+        # tulostuisi yhtenä rivinä keskelle diffiä.
+        p = part([("C4", [])])
+        m = p.find("measure")
+        m.text = "\n      "
+        sovella(p, osa([("1", None, "dynamiikka", "p")]))
+        d = m.find("direction")
+        self.assertEqual(d.tail, "\n      ")
+        self.assertEqual(d.text, "\n        ")
+
+    def test_kaataa_tuntemattomasta_merkista(self):
+        p = part([("C4", [])])
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", None, "dynamiikka", "piano")]))
+
+    def test_kaataa_jos_merkinta_on_jo(self):
+        p = part([("C4", [])])
+        sovella(p, osa([("1", None, "dynamiikka", "p")]))
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", None, "dynamiikka", "pp")]))
+
+
 class OsaIKokonaisuutena(unittest.TestCase):
     """Ajo oikeaa lähdetiedostoa vasten: laulajan raportoimat kohdat."""
 
@@ -555,6 +644,19 @@ class LacrymosaKokonaisuutena(unittest.TestCase):
                     {r for r, _, _ in self.tavut(self.div, tahti)}, {"1"})
                 self.assertEqual(
                     {r for r, _, _ in self.tavut(self.b, tahti)}, {"2"})
+
+    def test_tahti_677_saa_pianon(self):
+        """Laulajan pyyntö: yhdentoista tahdin tauon jälkeinen tulo on hiljaa.
+
+        Lähteessä merkintää ei ole tällä viivastolla, mutta sama jakso on
+        merkitty hiljaiseksi joka muualla: kuorosopraano pp t.678, solistit
+        ja piano t.679, ja kuoron oma seuraava merkintä on mf vasta t.681.
+        """
+        m = next(m for m in self.b.findall("measure") if m.get("number") == "54")
+        self.assertEqual(dynamiikat(m), [("above", "p")])
+        # Ennen ensimmäistä nuottia, mutta <print>:n jälkeen.
+        tagit = [c.tag for c in m]
+        self.assertLess(tagit.index("direction"), tagit.index("note"))
 
     def test_kuorobasso_on_muualla_sanarivilla_yksi(self):
         # Rivi 2 on P8:lla vain divisin kolmessa tahdissa; muuten se laulaa
@@ -953,6 +1055,116 @@ class OsanISavellajit(unittest.TestCase):
         merkityt = savellajit(load(OSA_I.mxl))
         self.assertEqual(merkityt[("P16", "59")], "0")
         self.assertNotIn(("P16", "56"), merkityt)
+
+
+class RexTremendaeKokonaisuutena(unittest.TestCase):
+    """Osa II·6 oikeaa lähdetiedostoa vasten. Juokseva numero on lokaali + 321."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.part = find_part(load(OSA_II6.mxl), OSA_II6.osasto)
+        sovella(cls.part, OSA_II6)
+
+    @staticmethod
+    def tavut(part, tahti):
+        m = next(m for m in part.findall("measure") if m.get("number") == tahti)
+        return [(ly.get("number"), ly.findtext("syllabic"), ly.findtext("text"))
+                for n in m.findall("note") for ly in n.findall("lyric")
+                if ly.findtext("text")]
+
+    def teksti(self, *tahdit):
+        return " ".join(t for tahti in tahdit
+                        for _, _, t in self.tavut(self.part, tahti))
+
+    def test_kumpikin_jakso_lukee_sakeiston_lapi(self):
+        """Säkeistö on kolme säettä, ja jokainen kuuluu jaksoon kertaalleen.
+
+        Ennen korjausta ensimmäinen säe oli t.336-341 kolmesti ja kolmas
+        säe puuttui, ja t.362-363 kertasi toisen säkeen. Naulattu siksi,
+        että lähdetiedostossa kaikki neljä paikkaa ovat samaa kuviota eikä
+        kuvio itse kerro kumpi säe siinä on.
+        """
+        # t.336-341: Rex ... Rex ... qui salvandos salvas gratis
+        self.assertEqual(self.teksti("15", "16"),
+                         "Rex tre men dae ma je sta tis,")
+        self.assertEqual(self.teksti("17", "18"),
+                         "Rex tre men dae ma je sta tis,")
+        self.assertEqual(self.teksti("19", "20"),
+                         "qui sal van dos sal vas gra tis,")
+        # t.356-363: rex ... rex ... qui salvandos ... salva me fons pietatis
+        self.assertEqual(self.teksti("35", "36"),
+                         "rex tre men dae ma je sta tis,")
+        self.assertEqual(self.teksti("39", "40"),
+                         "qui sal van dos sal vas gra tis,")
+        self.assertEqual(self.teksti("41", "42"),
+                         "sal va me, fons pi e ta tis,")
+
+    def test_tavutus_on_kopioitu_tiedoston_omista_paikoista(self):
+        # Kumpikin säe on jo tiedostossa tälle samalle kuviolle
+        # merkittynä; korjaus ei keksi tavutusta vaan toistaa sen.
+        for korjattu, malli in (("19", "39"), ("20", "40"),
+                                ("41", "23"), ("42", "24")):
+            with self.subTest(tahti=korjattu):
+                self.assertEqual(self.tavut(self.part, korjattu),
+                                 self.tavut(self.part, malli))
+
+    def test_divisin_sanarivit_ovat_aanten_mukaisessa_jarjestyksessa(self):
+        """Ylä-ääni (ykkösbasso) riville 1, ala-ääni riville 2 (t.367-369).
+
+        Lähde on toisin päin, ja sen lisäksi eri puolilla viivastoa: rivin 2
+        default-y="38" nosti ylä-äänen tavut viivaston yläpuolelle. Sama vika
+        kuin Lacrymosan t.677-679, mutta yhdessä osastossa kahden sijaan.
+        """
+        for tahti in ("46", "47", "48"):
+            with self.subTest(tahti=tahti):
+                m = next(m for m in self.part.findall("measure")
+                         if m.get("number") == tahti)
+                rivit = {n.findtext("voice"): {ly.get("number")
+                                               for ly in n.findall("lyric")}
+                         for n in m.findall("note") if n.findall("lyric")}
+                self.assertEqual(rivit["1"], {"part8verse1"})
+                self.assertEqual(rivit["2"], {"part8verse2"})
+                self.assertEqual(
+                    [ly.get("default-y") for ly in m.findall("note/lyric")],
+                    [None] * len(m.findall("note/lyric")))
+
+    def test_lahdetiedostoa_ei_muuteta(self):
+        alkuperainen = find_part(load(OSA_II6.mxl), OSA_II6.osasto)
+        self.assertEqual(self.tavut(alkuperainen, "19")[0],
+                         ("part8verse1", "single", "Rex"))
+
+
+class DiesIraenKertausKokonaisuutena(unittest.TestCase):
+    """Osa II·9b: yksi merkintä, mutta se avaa osalle oman korjauskerroksen.
+
+    Juokseva numero on lokaali + 572.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.part = find_part(load(OSA_II9B.mxl), OSA_II9B.osasto)
+        sovella(cls.part, OSA_II9B)
+
+    def tahti(self, numero):
+        return next(m for m in self.part.findall("measure")
+                    if m.get("number") == numero)
+
+    def test_tahti_607_saa_pianon(self):
+        self.assertEqual(dynamiikat(self.tahti("35")), [("above", "p")])
+
+    def test_viivastolla_lukee_muuten_yha_ff(self):
+        # Merkintä on tarpeen juuri siksi, ettei viivastolla ole mitään
+        # t.575:n ff:n jälkeen: laulaja lukee ff:ää ja laulaa hiljaa.
+        merkityt = [(m.get("number"), dynamiikat(m))
+                    for m in self.part.findall("measure") if dynamiikat(m)]
+        self.assertEqual(merkityt, [("3", [("above", "ff")]),
+                                    ("35", [("above", "p")])])
+
+    def test_lahdetiedostoa_ei_muuteta(self):
+        alkuperainen = find_part(load(OSA_II9B.mxl), OSA_II9B.osasto)
+        m = next(m for m in alkuperainen.findall("measure")
+                 if m.get("number") == "35")
+        self.assertEqual(dynamiikat(m), [])
 
 
 if __name__ == "__main__":

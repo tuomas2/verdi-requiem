@@ -34,6 +34,9 @@ from collections import OrderedDict
 from dataclasses import dataclass
 
 from korjaa_sanat import find_part, load, save
+# Sanarivin numero luetaan ennen yhdista.py:n normalisointia, joten
+# lähteen oma kirjoitusasu ("2" tai "part8verse2") on vielä näkyvissä.
+from suomennos import rivinumero
 
 
 @dataclass(frozen=True)
@@ -78,6 +81,10 @@ class Savellaji:
 #   ("poista_nuotti", kuvaus)           poista nuotti tai tauko
 #   ("sanarivi", vanha, uusi)           siirrä tahdin tavut toiselle
 #                                       sanariville, esim. "2" -> "1"
+#   ("vaihda_sanarivit", a, b)          vaihda kahden sanarivin tavut
+#                                       keskenään, esim. "1" <-> "2"
+#   ("dynamiikka", merkki)              lisää dynamiikkamerkintä tahdin
+#                                       alkuun, esim. "p"
 #   ("kopioi_tahti", lähdetahti)        korvaa tauolla oleva tahti toisen
 #                                       tahdin sisällöllä, sanat mukaan lukien
 # Nuotti on indeksi tahdin <note>-alkioissa, tauot mukaan luettuina, tai None
@@ -181,11 +188,46 @@ OSAT_II4 = [
                       ("P4", "Kuoro T"), ("P5", "Kuoro B"))
 ]
 
-# Rex tremendae (II·6), paikallinen tahti 45 = juokseva 366. Laulaja raportoi,
-# että tahdin ensimmäisellä nuotilla pitää olla "me" eikä "le" — teksti on
-# "sal-va me". Kirjoitusvirhe lähdetiedostossa, ja se näkyy siitä että
-# kuorosopraano (P5) laulaa samassa tahdissa samalla iskulla "me,". Basson
-# ympäristö on jo oikein: t.44 "sal-va", t.45 "sal-va", t.46 "me,".
+# Rex tremendae (II·6). Paikalliset tahdit ovat juokseva miinus 321.
+#
+# 1. Tahti 45 (juokseva 366). Laulaja raportoi, että tahdin ensimmäisellä
+#    nuotilla pitää olla "me" eikä "le" — teksti on "sal-va me".
+#    Kirjoitusvirhe lähdetiedostossa, ja se näkyy siitä että kuorosopraano
+#    (P5) laulaa samassa tahdissa samalla iskulla "me,". Basson ympäristö on
+#    jo oikein: t.44 "sal-va", t.45 "sal-va", t.46 "me,".
+#
+# 2. Tahdit 19-20 ja 41-42 (juoksevat 340-341 ja 362-363). Laulaja raportoi
+#    2026-09-09, että kuorobasso laulaa t.340-341 "qui sal-van-dos sal-vas
+#    gra-tis" eikä kolmatta kertaa "Rex tre-men-dae ma-je-sta-tis", ja
+#    t.362-363 "sal-va me fons pi-e-ta-tis" eikä toista kertaa "qui
+#    sal-van-dos sal-vas gra-tis". Kumpikin on säkeistön oma järjestys:
+#    "Rex tremendae majestatis, qui salvandos salvas gratis, salva me fons
+#    pietatis."
+#
+#    Osalla 07 ei ole lähde-PDF:ää, joten silmällä tarkistettavaa sivua ei
+#    ole. Tiedosto todistaa kumpaakin kohtaa itse:
+#
+#      * Kuvio on kaikissa neljässä paikassa sama — kuusi nuottia tahdissa,
+#        kaksi seuraavassa — ja kumpikin säe on kahdeksan tavua. Sekä
+#        tavutus että välimerkit kopioidaan tiedoston omista paikoista,
+#        joissa juuri nämä säkeet ovat jo tälle kuviolle merkittyinä:
+#        t.360-361 "qui sal-van-dos sal-vas gra-tis," ja t.344-345 "sal-va
+#        me, fons pi-e-ta-tis,". Mitään ei siis keksitä.
+#      * Korjattuna kumpikin jakso lukee säkeistön läpi kertaamatta yhtä
+#        säettä kolmesti: t.336-341 "Rex ... Rex ... qui salvandos salvas
+#        gratis" ja t.356-363 "rex ... rex ... qui salvandos salvas gratis
+#        ... salva me fons pietatis". Ennen korjausta ensimmäinen säe oli
+#        kolmesti ja toinen kahdesti, ja kolmas säe puuttui ensimmäisestä
+#        jaksosta kokonaan.
+#      * Muut kuoroäänet eivät laula näitä säkeitä lainkaan — ne ovat samaan
+#        aikaan "sal-va me" -huudoissa — joten äänten välinen vertailu ei
+#        tähän päde. Vertailukohta on osan sisällä.
+#
+#    Kummankin säkeen viimeinen tavu jää ilman riviä: se on molemmissa
+#    säkeissä jo "tis," ja syllabic "end".
+#
+# 3. Tahdit 46-48 (juoksevat 367-369), divisin sanarivit. Ks. rivien oma
+#    kommentti taulukossa.
 OSA_II6 = Osa(
     mxl="07-Verdi-Rex.mxl",
     out="07-Verdi-Rex-kasin.mxl",
@@ -193,8 +235,86 @@ OSA_II6 = Osa(
     nimi="Kuoro B",
     yksi_sanarivi=False,
     korjaukset=(
+        # t.340-341: "Rex tremendae majestatis" -> "qui salvandos salvas
+        # gratis" (tavutus t.360-361:stä).
+        ("19", 0, "aseta", "Rex", "single", "qui"),
+        ("19", 1, "aseta", "tre", "begin", "sal"),
+        ("19", 2, "aseta", "men", "middle", "van"),
+        ("19", 3, "aseta", "dae", "end", "dos"),
+        ("19", 4, "aseta", "ma", "begin", "sal"),
+        ("19", 5, "aseta", "je", "end", "vas"),
+        ("20", 0, "aseta", "sta", "begin", "gra"),
+
+        # t.362-363: "qui salvandos salvas gratis" -> "salva me fons
+        # pietatis" (tavutus t.344-345:stä).
+        ("41", 0, "aseta", "qui", "begin", "sal"),
+        ("41", 1, "aseta", "sal", "end", "va"),
+        ("41", 2, "aseta", "van", "single", "me,"),
+        ("41", 3, "aseta", "dos", "single", "fons"),
+        ("41", 4, "aseta", "sal", "begin", "pi"),
+        ("41", 5, "aseta", "vas", "middle", "e"),
+        ("42", 0, "aseta", "gra", "middle", "ta"),
+
         ("45", 0, "aseta", "le,", "single", "me,"),
 
+        # Divisi t.367-369 (paikalliset 46-48): sanarivit olivat päittäin,
+        # ja tässä ne olivat sen lisäksi eri puolilla viivastoa. Ylä-ääni
+        # (ykkösbasso, tahdin ääni 1) oli rivillä 2, ja lähteen oma
+        # default-y="38" nosti sen tavut viivaston YLÄPUOLELLE; ala-äänen
+        # (kakkosbasso) rivi 1 jäi default-y="-79":llä alapuolelle. Laulaja
+        # raportoi 2026-09-09, että ykkösbasson osuus on viivaston
+        # yläpuolella ja kuuluisi johdonmukaisesti alapuolelle,
+        # kakkosbasson tekstin yläpuolelle.
+        #
+        # Sama vika ja sama ratkaisu kuin Lacrymosan t.677-679 (2026-09-07,
+        # ks. OSA_II10_DIVISI): rivi kertoo kummasta äänestä on kyse, joten
+        # se on sisältöä eikä asettelua, ja ylä-ääni kuuluu ylemmälle
+        # riville. Erona on että tässä molemmat äänet ovat samassa
+        # osastossa, joten rivit vaihdetaan yhdellä rivillä eikä kahden
+        # osaston `sanarivi`-siirroilla.
+        #
+        # T.369 on mukana, vaikka laulaja mainitsi 367-368: siinä molempien
+        # äänten tavu on sama "me,", joten järjestys ei näy — mutta rivin 2
+        # default-y nostaisi ykkösbasson "me,":n yhä viivaston yläpuolelle
+        # kahden alapuolisen tahdin jälkeen.
+        ("46", None, "vaihda_sanarivit", "1", "2"),    # t.367
+        ("47", None, "vaihda_sanarivit", "1", "2"),    # t.368
+        ("48", None, "vaihda_sanarivit", "1", "2"),    # t.369
+    ),
+)
+
+# Dies irae (kertaus) (II·9b), paikallinen tahti 35 = juokseva 607. Laulaja
+# pyysi 2026-09-09 tahdin alkuun p:n. Kuorobasson viivastolla lukee tässä
+# vaiheessa yhä ff, joka on merkitty t.575:een eikä vaihdu koko osassa
+# kertaakaan — ja juuri niin laulaja sen kuvasikin ("se tulee aika fortella
+# sitä ennen mut se on hiljaa").
+#
+# Vaihdos on lähteessä olemassa, mutta väärällä viivastolla laulajan
+# kannalta: piano (P5) saa ff:n t.604 ja p:n t.606. Kuoro on t.606 tauolla,
+# joten sen oma merkintä kuuluu tuloon eli tahtiin 607. Kuoroäänten
+# dynamiikka on tässä osassa muutenkin konelukemisen varassa ja vaillinainen
+# — S/T/piano saavat f:n t.593, kuorobasso ei — joten puuttuva merkki on
+# odotettava eikä yllättävä.
+#
+# Tämä on osan 10b ensimmäinen käsin todennettu korjaus, ja se tarvitsi
+# osalle oman kerroksen: aiemmin sen ainoa johdettu tiedosto oli
+# -OMR-korjattu.mxl, jonka `korjaa_sanat.py` kirjoittaa alusta joka ajolla.
+# Nyt ketju on 10b-...-OMR.mxl -> -OMR-korjattu.mxl -> -kasin.mxl, sama kuin
+# osalla I, ja tämä merkintä säilyy korjaa_sanat-ajon yli.
+#
+# Sivuhavainto samasta työstä, mitattuna: osan 10b -OMR-korjattu.mxl on
+# puhdas johdannainen. `korjaa_sanat.py`-ajo tuottaa sen tavulleen samana,
+# joten toisin kuin dokumentaatio on kuukauden sanonut, siinä ei ole
+# käsimuokkauksia hukattavana — vaarassa on vain osa 14. Ks.
+# docs/menetelmat/omr.md.
+OSA_II9B = Osa(
+    mxl="10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl",
+    out="10b-Verdi_Dies_irae_paluu-kasin.mxl",
+    osasto="P4",
+    nimi="Kuoro B",
+    yksi_sanarivi=False,
+    korjaukset=(
+        ("35", None, "dynamiikka", "p"),               # t.607
     ),
 )
 
@@ -316,6 +436,16 @@ OSA_II10_KUORO_B = Osa(
         ("54", None, "sanarivi", "1", "2"),            # t.677
         ("55", None, "sanarivi", "1", "2"),            # t.678
         ("56", None, "sanarivi", "1", "2"),            # t.679
+
+        # Laulaja pyysi 2026-09-09 tahdin 677 alkuun p:n: kuorobasso tulee
+        # sisään yhdentoista tahdin tauon jälkeen (666-676), ja tulo on
+        # hiljainen. Lähteessä sitä ei ole tällä viivastolla, mutta sama
+        # jakso on merkitty hiljaiseksi joka muualla: kuorosopraano (P5) saa
+        # pp:n t.678, neljä solistia t.679 ja piano p:n t.679; kuoron oma
+        # seuraava merkintä on mf vasta t.681, eli tämä jakso on sitä
+        # hiljaisempi. Merkki on laulajan pyytämä p eikä naapureiden pp;
+        # jos kuoron nuottikirja sanoo pp, tämä rivi vaihtaa merkin.
+        ("54", None, "dynamiikka", "p"),               # t.677
 
         # --- sivu 12 ---
         ("58", 1, "aseta", "La", "begin", "Do"),       # t.681
@@ -544,7 +674,7 @@ OSA_VII_TENORI = Osa(
 # joten sillä ei ole omaa Osa-riviä. Jos se joskus puretaan tänne, ks.
 # CLAUDE.md, *Recipe*-luvun viimeinen kappale.
 OSAT = ([OSA_I, OSA_II1] + OSAT_II4
-        + [OSA_II6, OSA_II10_KUORO_B, OSA_II10_DIVISI] + OSAT_IV
+        + [OSA_II6, OSA_II9B, OSA_II10_KUORO_B, OSA_II10_DIVISI] + OSAT_IV
         + [OSA_IV_KUORO_B_II]
         + [OSA_VII_TENORI, OSA_VII])
 
@@ -580,6 +710,48 @@ def uusi_lyric(syllabic, text):
     ET.SubElement(ly, "syllabic").text = syllabic
     ET.SubElement(ly, "text").text = text
     return ly
+
+
+# Dynamiikan kirjoitusasu on MusicXML:n oma elementin nimi. Lista on
+# tarkoituksella lyhyt: kirjoitusvirhe taulukossa tuottaisi elementin, jota
+# MuseScore ei tunne, ja merkintä katoaisi hiljaa.
+DYNAMIIKAT = ("ppp", "pp", "p", "mp", "mf", "f", "ff", "fff")
+
+
+def uusi_dynamiikka(merkki, sisennys):
+    """<direction>, joka painaa dynamiikkamerkin viivaston yläpuolelle.
+
+    Lauluviivastolla sanat ovat viivaston alla, joten merkintä kuuluu
+    yläpuolelle — niin lähteet itse tekevät (11-Verdi_Lacrymosa P8 t.58).
+    `default-y` jätetään pois, jotta MuseScore asemoi sen itse, samasta
+    syystä kuin `korkeus` ja `sanarivi` pudottavat omansa.
+
+    `sisennys` on tahdin lasten sisennys ("\n" + välilyönnit). Näissä
+    tiedostoissa sisennys on ET:llä alkioiden text- ja tail-kentissä, ja
+    ilman sitä lisätty merkintä tulostuisi yhtenä rivinä keskelle diffiä.
+    """
+    d = ET.Element("direction", {"placement": "above"})
+    dt = ET.SubElement(d, "direction-type")
+    ET.SubElement(ET.SubElement(dt, "dynamics"), merkki)
+    ET.indent(d, space="  ", level=len(sisennys.lstrip("\n")) // 2)
+    d.tail = sisennys
+    return d
+
+
+def lasten_sisennys(measure):
+    """Tahdin lasten sisennys, tai järkevä oletus jos tiedosto on tiivis."""
+    return (measure.text if measure.text and measure.text.startswith("\n")
+            else "\n      ")
+
+
+def ennen_nuotteja(measure):
+    """Kohta, johon tahtiin lisättävä <direction> kuuluu.
+
+    <direction> vaikuttaa sitä seuraaviin nuotteihin, joten se menee
+    ensimmäisen nuotin eteen — mutta <print>:n ja <attributes>:n jälkeen.
+    """
+    nuotit = measure.findall("note")
+    return list(measure).index(nuotit[0]) if nuotit else len(measure)
 
 
 # Korkeuden kirjoitusasu on sama kuin nayta.py:n tulosteessa, jotta laulajan
@@ -856,6 +1028,45 @@ def sovella(part, osa):
                 x.attrib.pop("default-y", None)
             selosteet.append(f"t.{tahti}: sanarivi {vanha} -> {uusi} "
                              f"({len(ly)} tavua)")
+
+        elif laji == "vaihda_sanarivit":
+            # Kaksi sanariviä vaihtaa keskenään koko tahdin verran. Tämä on
+            # `sanarivi`:n divisiversio: kun molemmat äänet ovat samassa
+            # osastossa, rivejä ei voi siirtää yksitellen — ensimmäinen
+            # siirto törmäisi toiseen riviin.
+            #
+            # Numerot luetaan normalisoituina, mutta kirjoitetaan takaisin
+            # lähteen omassa kirjoitusasussa ("part8verse1"): sekamuoto
+            # samassa osastossa sekoittaa MuseScoren rivilaskennan.
+            a, b = args
+            ryhmat = {}
+            for x in (x for n in notes for x in lyriikat(n)):
+                ryhmat.setdefault(str(rivinumero(x)), []).append(x)
+            assert sorted(ryhmat) == sorted([a, b]), (
+                f"t.{tahti}: odotettiin sanarivit {sorted([a, b])}, "
+                f"on {sorted(ryhmat)}")
+            raaka = {rivi: xs[0].get("number") for rivi, xs in ryhmat.items()}
+            for rivi, toinen in ((a, b), (b, a)):
+                for x in ryhmat[rivi]:
+                    x.set("number", raaka[toinen])
+                    x.attrib.pop("default-y", None)
+            selosteet.append(
+                f"t.{tahti}: sanarivit {a} <-> {b} "
+                f"({len(ryhmat[a])} + {len(ryhmat[b])} tavua)")
+
+        elif laji == "dynamiikka":
+            # Dynamiikkamerkintä tahdin alkuun. Tämä ei korjaa lähdettä vaan
+            # lisää siihen jotain, jota siinä ei ole, joten se kuuluu
+            # perustella kommentissa yhtä tarkasti kuin tavukorjaus.
+            (merkki,) = args
+            assert merkki in DYNAMIIKAT, (
+                f"tuntematon dynamiikka {merkki!r}, ei ole {DYNAMIIKAT}")
+            on = [c.tag for d in measure.findall("direction")
+                  for dy in d.findall("direction-type/dynamics") for c in dy]
+            assert not on, f"t.{tahti}: dynamiikka on jo ({on})"
+            measure.insert(ennen_nuotteja(measure),
+                           uusi_dynamiikka(merkki, lasten_sisennys(measure)))
+            selosteet.append(f"t.{tahti}: lisätty dynamiikka {merkki}")
 
         elif laji == "tavutus":
             # Korjaa `syllabic`-merkinnät annetun sanajaon mukaisiksi

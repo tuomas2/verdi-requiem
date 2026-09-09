@@ -121,8 +121,12 @@ _POIKKEUKSET = {
 
     ("II·6", ("Kuoro B",)): Tila(
         "◑", "käyty läpi",
-        "Käyty läpi Edition Petersiä vasten ja laulettu harjoituksissa; yksi kuulemalla löytynyt sanavirhe "
-        "korjattu tahdissa 366 (\"sal-va le\" → \"sal-va me\")."),
+        "Käyty läpi Edition Petersiä vasten ja laulettu harjoituksissa. "
+        "Kolme kuulemalla löytynyttä sanavirhettä korjattu: tahti 366 "
+        "(\"sal-va le\" → \"sal-va me\") sekä tahdit 340–341 ja 362–363, "
+        "joissa säkeistön kolmesta säkeestä toistui yksi liikaa ja yksi "
+        "puuttui. Divisin sanarivit tahdeissa 367–369 olivat päittäin ja "
+        "ykkösbasson teksti viivaston yläpuolella; korjattu."),
 
     ("II·9b", ("Kuoro B",)): _osittain(
         "Sanat tarkistettu lähde-PDF:ää vasten nuotti nuotilta. Nuotit ovat "
