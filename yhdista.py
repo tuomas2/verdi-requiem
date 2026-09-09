@@ -207,7 +207,8 @@ SINGER_PARTS = {
 # päällekkäisiksi: päällekkäisyys katoaa jos seuraava tiedosto alkaakin vasta
 # kirjan otsikon jälkeen, kuten Lacrymosassa. Sitä ei voi ratkaista ilman
 # kirjaa tai kyseisen osan PDF:ää — tarvitaan tahtinumero alaosan SISÄLTÄ,
-# ei sen otsikosta. Ks. CLAUDE.md, *Lacrymosa: kolmen tahdin siirtymä*.
+# ei sen otsikosta. Ks. docs/tyopaivakirja/
+# 2026-09-03-lacrymosan-kolmen-tahdin-siirtyma.md.
 #
 # Aiemmin nämä laskettiin lähdetiedostojen omista tahtimääristä (alut 1, 92,
 # 141, 163, 271, 324, 386, 450, 507, 578, 629), mikä oli kuudessa kohdassa
@@ -216,8 +217,8 @@ SINGER_PARTS = {
 # meillä on tahteja, joita kirja laskee jo seuraavaan alaosaan, ja kolmessa
 # saumassa kirjassa on tahteja, joita lähteissä ei ole lainkaan (tarkistettu
 # vertaamalla saumojen musiikkia — kyse ei ole kahdennuksista). Siksi numerot
-# eivät jatku saumojen yli aukottomasti; ks. `saumat()` alempana ja CLAUDE.md
-# luku *2026-09-02 (later): the book's own bar numbers for Dies irae*.
+# eivät jatku saumojen yli aukottomasti; ks. `saumat()` alempana ja
+# docs/tyopaivakirja/2026-09-02-dies-iraen-tahtinumerot.md.
 NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False
 DIES_IRAE_ALUT = {
     "02-Verdi-Dies_irae-kasin.mxl": 1, "03-Verdi-Tuba_mirum.mxl": 91,

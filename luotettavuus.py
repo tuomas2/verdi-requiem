@@ -2,7 +2,7 @@
 """Mikä stemmoissa on tarkistettu ja mikä ei.
 
 Tämä on ihmisen arvio eikä laskettu suure, joten se ylläpidetään käsin.
-Lähde on CLAUDE.md:n työhistoria, johon jokainen tarkistus on kirjattu.
+Lähde on docs/tyopaivakirja/, johon jokainen tarkistus on kirjattu.
 
 Rakenne on oletus plus poikkeukset: valtaosa on tarkistamatta, ja jokainen
 poikkeus on kohta jossa on tehty oikeaa työtä tai jossa tiedetään olevan
@@ -257,9 +257,9 @@ def markdown():
              "Muokkaa `luotettavuus.py`:tä, älä tätä. -->")
     o.append("")
     o.append("Tämä taulukko on ihmisen arvio eikä laskettu suure: sen lähde on "
-             "työhistoria")
-    o.append("[`CLAUDE.md`](CLAUDE.md):ssä, johon jokainen tarkistus on "
-             "kirjattu. Merkintä on lupaus")
+             "työpäiväkirja")
+    o.append("[`docs/tyopaivakirja/`](docs/tyopaivakirja/), johon jokainen "
+             "tarkistus on kirjattu. Merkintä on lupaus")
     o.append("lukijalle — mitään ei ole merkitty varmistetuksi ilman että se on "
              "vertailtu")
     o.append("riippumattomaan lähteeseen nuotti nuotilta tai tavu tavulta.")

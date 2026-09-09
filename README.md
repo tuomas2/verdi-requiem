@@ -149,6 +149,10 @@ käytetty tarkistuslähteenä, ja `korjaa_kasin.py`:n kommentit kertovat missä.
 
 - [`YHDISTAMINEN.md`](YHDISTAMINEN.md) — miten yhdistäminen toimii, mitä
   oletuksia siinä on tehty ja miten ne muutetaan
-- [`CLAUDE.md`](CLAUDE.md) — täydellinen tekninen työpäiväkirja: jokainen
-  löydetty virhe, miten se löytyi, ja mitkä menetelmät kokeiltiin ja
-  hylättiin. Englanniksi
+- [`CLAUDE.md`](CLAUDE.md) — teknisten muistiinpanojen hakemisto: mitä on
+  kesken ja mistä tiedostosta mikä luku löytyy. Englanniksi
+- [`docs/tyopaivakirja/`](docs/tyopaivakirja/) — täydellinen työpäiväkirja,
+  yksi tiedosto per istunto: jokainen löydetty virhe, miten se löytyi, ja
+  mitkä menetelmät kokeiltiin ja hylättiin. Englanniksi
+- [`docs/menetelmat/`](docs/menetelmat/) — konelukeminen, yhdistäminen,
+  kuoron omat tiedostot ja harjoitustiedosto. Englanniksi
