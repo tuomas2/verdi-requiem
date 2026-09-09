@@ -26,6 +26,7 @@ sellainen on aina merkitty molempiin päihin.
 | *2026-09-09 (b)* | [`2026-09-09-dokumentaatio-ja-ci.md`](2026-09-09-dokumentaatio-ja-ci.md) | Muistiinpanot pilkottiin hakemistoksi ja skilliksi; testit omaksi CI-workflowksi, jota julkaisu kutsuu |
 | *2026-09-09 (c)* | [`2026-09-09-suomennoksen-tasaus.md`](2026-09-09-suomennoksen-tasaus.md) | Suomennos alkaa samasta kohdasta kuin latinan tavu eikä keskity sen alle: Edwinin merkkileveydet mitattiin ilman fonttitiedostoa |
 | *2026-09-09 (d)* | [`2026-09-09-rex-tremendaen-sakeet-ja-taukohannat.md`](2026-09-09-rex-tremendaen-sakeet-ja-taukohannat.md) | Rex tremendae toisti säkeistön yhtä säettä ja pudotti seuraavan (t.340-341, 362-363); divisin sanarivit t.367-369; p tahteihin 607 ja 677; osan 10b oma korjaustaulukko, ja mitattuna sen käsikerros ei koskaan ollut vaarassa; taukohännät liitetään seuraavan osan riviin, 3-5 riviä per stemma |
+| *2026-09-10* | [`2026-09-10-kuorotiedostot-ja-osan-i-savelet.md`](2026-09-10-kuorotiedostot-ja-osan-i-savelet.md) | Kuoron omat tiedostot takaisin koneelle `.local/musescore/`:een; osan I sopraanon ja alton sävellajivahinko korjattu, ja nuottipään korkeus luetaan nyt lähdesivun fontista säveleksi — yksitoista säveltä, neljätoista tavua, kaksi Rex tremendaen sävelvirhettä ja "Sy-bil-la" |
 
 ## Where things stand
 
@@ -133,10 +134,11 @@ system. That is a whole-file property, not one staff's, so it needed a table of
 its own — `SAVELLAJIT` in `korjaa_kasin.py`. The measurement that settled it
 reads the **music font's own glyphs** out of the PDF text layer, which is a new
 tool in this project and cheap; the same measurement found a second, bigger
-instance of the identical OMR failure that is **not** fixed: movement I's
+instance of the identical OMR failure that was **not** fixed then: movement I's
 chorus soprano and alto carry the three-sharp key seven bars too long, so their
 notes in bars 28–34 are read with sharps that are not there. See
-*2026-09-07 (b)*.
+*2026-09-07 (b)*. (Fixed 2026-09-10, once the choir files were back — see the
+last paragraph.)
 
 And newest, 2026-09-09: **every Latin word now carries its Finnish
 translation under it**, in a smaller font, for learning Latin while singing —
@@ -152,3 +154,22 @@ notation, and the one that found **four defects that had been printing for
 days or years**: Lacrymosa's hyphens broken by the 2026-09-03 word rewrite,
 `callamitatis`, `no-mi-ni`, and a syllable stranded on lyric row 6 in three
 parts. See *2026-09-09*.
+
+And newest, 2026-09-10: the choir's own MuseScore files came back onto the
+machine (`.local/musescore/`), and with them a **second source for notes** in
+the movements they cover. Movement I's chorus soprano and alto had the
+sharps that the wrong key signature made Audiveris write, and the signature
+itself was seven bars late in fifteen of the seventeen parts; both are fixed,
+and the two files now agree on **every note of all four chorus voices in bars
+1–78**. Movement 07's chorus bass turned out to differ from the choir file in
+exactly one note out of 174 — a lower neighbour a major third below instead of
+a semitone — and its tenor in one, an octave too high in a passage where
+tenor and bass are in unison; both fixed, and its soprano and alto came out
+clean. The upper voices of movement I also got their first text work: the line
+"et lux per-pe-tu-a" was garbled in all three, and the soprano's whole "Te
+decet hymnus" was printing on the second lyric row. What makes the
+disagreements decidable is a new use of an old measurement: the **notehead's y
+in the PDF's music font is now read as a pitch** (treble clef baseline = B4,
+bass = D3, one step = 1.5625 pt), so a single note can be checked against the
+printed page without rendering anything — and it defended our reading against
+the choir file eight times out of ten. See *2026-09-10*.

@@ -118,8 +118,7 @@ class Luotettavuus(unittest.TestCase):
     def test_tunnetut_puutteet_johdetaan_taulukosta(self):
         """Maininta jäisi käsin kirjoitettuna jälkeen kun taulukko muuttuu."""
         self.assertEqual(sivusto.puutteelliset_osat(),
-                         ["Requiem & Kyrie", "Liber scriptus", "Lacrymosa",
-                          "Agnus Dei"])
+                         ["Liber scriptus", "Lacrymosa", "Agnus Dei"])
         self.assertIn("Agnus Dei", sivusto.luotettavuusteksti())
 
     def test_yksityiskohdat_ovat_linkin_takana_eivat_sivulla(self):

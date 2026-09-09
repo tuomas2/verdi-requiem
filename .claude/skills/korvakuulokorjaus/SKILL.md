@@ -33,13 +33,18 @@ line the user reads, but nothing in it is bass-specific.
 | Movement 07 (II·6 Rex tremendae) | hand-corrections table | `korjaa_kasin.py`, `OSA_II6` |
 | Movement 10b (II·9b Dies irae recall) | hand-corrections table | `korjaa_kasin.py`, `OSA_II9B` |
 | Movement 11 (Lacrymosa), any voice | hand-corrections table | `korjaa_kasin.py`, `OSA_II10_KUORO_B` / `OSA_II10_DIVISI` |
+| Movement I (Requiem & Kyrie), chorus S/A/T | hand-corrections table | `korjaa_kasin.py`, `OSA_I_SOPRAANO` / `OSA_I_ALTTO` / `OSA_I_TENORI` |
+| Movement 14 (Agnus Dei), **new** fixes | hand-corrections table since 2026-09-10 | `korjaa_kasin.py`, `OSAT_V` |
 | Movement 13 (IV Sanctus) | hand-corrections table | `korjaa_kasin.py`, `OSA_IV` |
 | Movement 16 (VII Libera me) | hand-corrections table | `korjaa_kasin.py`, `OSA_VII` |
 | Any movement: the source file is right but the **part** is wrong | tool bug | `yhdista.py` + a test |
-| Movement 14: wrong syllable | still baked into the source `.mxl` | see the last section below |
+| Movement 14: a fix the older hand edits already touched | still baked into `14-…-OMR-korjattu.mxl` | see the last section below |
 | A passage is **missing entirely** | copy it from `musescore/` if the figure already exists elsewhere in the part | `kopioi_tahti`, see *2026-09-03 (b)* |
 | Systematic OCR text error in an OMR movement | PDF-driven pass | `korjaa_sanat.py` |
-| A **key signature** in the wrong bar (a stray natural or sharp over a rest) | whole-file table, **not** a `korjaukset` row — every staff carries the change | `korjaa_kasin.py`, `SAVELLAJIT` |
+| A **key signature** in the wrong bar (a stray natural or sharp over a rest) | whole-file table, **not** a `korjaukset` row — every staff carries the change. Where the OMR happened to get it right in some parts, name those in `valmiit`: they are asserted to be right, not skipped silently | `korjaa_kasin.py`, `SAVELLAJIT` |
+| **Pitches read under a wrong key signature.** Moving the signature fixes nothing by itself: `alter` is absolute, so Audiveris's F♯ stays an F♯. The signature is the cause and the pitches are the damage, and they are separate rows | `korjaa_kasin.py`, a `korkeus` row per note |
+| A syllable **alone on lyric row 2** in the middle of a word, so the word prints across two text lines | `sanarivi` with a **note index**; the whole-bar form refuses a bar whose rows are mixed, and rightly | `korjaa_kasin.py`, e.g. `("59", 2, "sanarivi", "2", "1")` |
+| A **dynamic mark or the engraver's name** read as a syllable (`PPP`, `A. Reutenauer`) | one `poista` row per syllable; look for it on a staff that has no words at all, like the piano | `korjaa_kasin.py` |
 | A word printed **without its hyphens** (`re qui em,`), or two words run together (`Do-na-e-is`) | the syllables are right and `syllabic` is wrong; one row gives the whole sentence's hyphenation | `korjaa_kasin.py`, a `tavutus` row |
 | A **wrong or missing Finnish gloss** | glossary, not score data | `suomennos.py`, `SANASTO` |
 | A gloss printed in the **wrong place** (not under its own syllable) | width table, measured not guessed — see *2026-09-09 (c)* | `suomennos.py`, `LEVEYDET` |
@@ -104,6 +109,33 @@ clef, accidental and rest an exact coordinate — and combining that x with the
 bar's own x, computed from the OMR's `<measure width>` values, names the bar a
 symbol stands in without anyone looking at a picture. That is how the movement
 01 key signatures were settled; see *2026-09-07 (b)*.
+
+### Reading a single notehead off the page
+
+The same glyph list settles **one note's pitch**, which is what a
+disagreement with the choir file usually comes down to. Two constants, both
+measured on movement 01's pages, turn a `y` into a pitch (font `Mozart9`,
+size 12.6):
+
+- a treble clef `&` has its baseline on **B4**, a bass clef `%` on **D3**;
+- one diatonic step is **1.5625 pt**, and `y` decreases as pitch rises.
+
+Read the clefs at `x < 95` and sort them by `y` — that is the system's staves,
+top to bottom, and the count changes from page to page. Assign each glyph to
+the nearest clef. The check that the calibration holds on a new page: a
+three-sharp key signature must come out as exactly F5, C5 and G5 above each
+treble clef.
+
+Glyph codes on movement 01's pages: `.` natural, `+` sharp, `-` flat, `&`/`%`
+clefs, `d`/`c`/`b` noteheads, `r`/`s`/`t` rests. **They are font-specific.**
+Movement II·9b's PDF uses a subset font with private-use codepoints
+(`\ue0a3` and such) and none of the above applies there until the codes are
+identified the same way they were the first time — by counting occurrences
+against something known, e.g. six staves × three systems.
+
+This measures **what the engraver drew**, which is not the same as what is
+right: movement I's alto bar 77 prints a G♯5 that is probably an engraving
+error. Section 4's rule still governs.
 
 ## 4. Confirm a named hypothesis; never derive content from pixels
 

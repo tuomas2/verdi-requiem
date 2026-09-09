@@ -64,6 +64,7 @@ class Savellaji:
     mxl: str            # lähde, jota ei koskaan muokata
     out: str            # tulos, jonka yhdista.py lukee
     siirrot: tuple      # (väärä tahti, oikea tahti, fifths)
+    valmiit: tuple = ()  # osastot joissa vaihto on jo oikeassa tahdissa
 
 
 # Toimenpiteet:
@@ -137,6 +138,144 @@ OSA_I = Osa(
         # Sivu 10, 1. järjestelmä: tahti 129 kantaa tavun "i" ja tahti 130
         # tavun "son,". Sama myöhästyminen kuin edellä.
         ("129", 0, "lisaa", "middle", "i"),
+    ),
+)
+
+# Osan I kuorosopraano, altto ja tenori. Kuorobasson tekstin korjaukset ovat
+# yllä; nämä kolme jäivät 2026-09-09 asti koskematta. Kaksi eri lähdettä
+# todistaa kaiken alla olevan, eikä kummankaan lukemista tarvitse arvata:
+#
+#   * Lähde-PDF:n oma tekstikerros. `korjaa_sanat.py` lukee sen jo, mutta
+#     sen kohdistus liukui näissä paikoissa, joten se jätti tavut ennalleen
+#     ("kohdistamatta"-rivit sen raportissa). Sanarivit ovat PDF:ssä
+#     järjestyksessä ylhäältä alas, ja kolmannen järjestelmän neljä
+#     kuororiviä sivulla 1 lukevat kaikki "-pe-tu-a, et lux per-pe-tu-a
+#     lu-ce-at ...", eli sama säe joka äänessä.
+#   * Kuoron oma MuseScore-tiedosto (musescore/01_requiem), jossa ei ole
+#     sanoja lainkaan mutta sävelet ovat oikein.
+#
+# Sanat: konelukema hajotti sanan "et lux per-pe-tu-a" tavuja kolmessa
+# äänessä. Kuorobasso ja tenori laulavat sen tahdeissa 17-19 ja 21-22,
+# sopraano ja altto samat tahdit — sama kuvio, sama teksti, ja bassossa se
+# on jo oikein, joten jokainen korjaus on luettavissa suoraan viereiseltä
+# viivastolta.
+OSA_I_SOPRAANO = Osa(
+    mxl=OSA_I.mxl,
+    out=OSA_I.out,
+    osasto="P13",
+    nimi="Kuoro S",
+    # Sopraanolla on tavuja kahdella äänellä (t.65 "Do-mi" on äänessä 2),
+    # joten yksi_sanarivi ei kelpaa: sen tarkistus estää nostamisen, kun
+    # päällekkäisyys olisi mahdollinen. Rivit siirretään tahti kerrallaan.
+    yksi_sanarivi=False,
+    korjaukset=(
+        # Sivu 2, 1. järjestelmä: "Te de-cet hym-nus, De-us in Si-on, et
+        # ti-bi red-de-tur vo-". Koko säe on konelukemassa sanarivillä 2,
+        # joten stemmaan tulostuu tyhjä ylärivi ja teksti sen alle.
+        ("35", None, "sanarivi", "2", "1"),
+        ("36", None, "sanarivi", "2", "1"),
+        ("38", None, "sanarivi", "2", "1"),
+        ("39", None, "sanarivi", "2", "1"),
+        ("40", None, "sanarivi", "2", "1"),
+        ("41", None, "sanarivi", "2", "1"),
+
+        # Sivu 3, 2. järjestelmä: "Re-qui-em," — keskimmäinen tavu yksin
+        # rivillä 2, eli sana katkeaa kahdelle tekstiriville. Sama vika kuin
+        # kuorobasson tahdissa 108 (2026-09-04), mutta datassa eikä
+        # yhdista.py:ssä.
+        ("59", 2, "sanarivi", "2", "1"),
+
+        # Sivu 1, 3. järjestelmä: "et lux per-pe-tu-a".
+        ("21", 0, "aseta", "lg},", "single", "et"),
+        ("21", 1, "aseta", "ux", "single", "lux"),
+        ("22", 1, "aseta", "tll", "middle", "tu"),
+
+        # Sivu 2, 1. järjestelmä, tahdit 28-34: konelukema luki tämän
+        # jakson kolmen ristin sävellajissa, koska se näki F-duurin vaihdon
+        # vasta seuraavan järjestelmän alusta (ks. SAVELLAJIT). Sävellaji on
+        # syy, väärät sävelet vahinko: kuoron oma tiedosto laulaa "Te de-cet
+        # hym-nus" F-duurissa, ja se on näiden seitsemän nuotin ainoa ero
+        # koko osan sopraanossa ja altossa.
+        ("28", 0, "korkeus", "Fis4", "F4"),
+        ("28", 1, "korkeus", "Fis4", "F4"),
+        ("34", 0, "korkeus", "Cis5", "C5"),
+
+        # Sivu 4, tahti 76, neljäs nuotti: konelukema luki palautusmerkin
+        # b:ksi ja kirjasi Ces5:n. Sivu 4 mitattuna (nuottifontin merkit,
+        # ks. SAVELLAJIT-kommentti) sopraanoviivastolla on tahdin 76 x:llä
+        # 304,6 palautusmerkki ja x:llä 307,9 nuottipää C5:n korkeudella.
+        # Kuoron oma tiedosto laulaa saman C5:n palautusmerkillä.
+        ("76", 3, "korkeus", "Ces5", "C5"),
+    ),
+)
+
+OSA_I_ALTTO = Osa(
+    mxl=OSA_I.mxl,
+    out=OSA_I.out,
+    osasto="P14",
+    nimi="Kuoro A",
+    # Altossa tavut ovat yhdellä äänellä mutta kuudella sanarivillä (1, 2,
+    # 4, 5, 6, 8): konelukema numeroi rivit uudelleen aina kun se hukkasi
+    # ketjun. Yksikään nuotti ei kanna kahta tavua sen jälkeen kun t.136:n
+    # dynamiikkamerkintä on poistettu, joten kaikki nousevat riville 1.
+    yksi_sanarivi=True,
+    korjaukset=(
+        # Sivu 10: "PPP" on dynamiikkamerkintä, ei tavu. Konelukema pani sen
+        # sanariville 2 saman nuotin päälle jolla on tavu "e".
+        ("136", 0, "poista", "PPP"),
+
+        # Sivu 1, 3. järjestelmä: "et lux per-pe-tu-a".
+        ("21", 0, "aseta", "eh,", "single", "et"),
+        ("21", 1, "aseta", "luX", "single", "lux"),
+        ("21", 2, "aseta", "er", "begin", "per"),
+        ("22", 0, "aseta", "pe.", "middle", "pe"),
+
+        # Sivu 2, 2. järjestelmä: altto laulaa "-us in Si-on, et ti-bi
+        # red-de-tur, ti-bi red-de-tur", joten tahdin 37 tavu on "et".
+        # HUOM: `korjaa_sanat.py` ehdottaa samaan tahtiin tätä ja lisäksi
+        # t.39 "ti" -> "vo", jota se ei sovella. Toinen ehdotus on väärä —
+        # PDF:n alttorivi kertaa "ti-bi red-de-tur" eikä jatka sanaan
+        # "vo-tum" — joten vain tämä kirjataan.
+        ("37", 1, "aseta", "at", "single", "et"),
+
+        # Tahdit 32-33, sama sävellajin aiheuttama vahinko kuin sopraanolla.
+        ("32", 0, "korkeus", "Fis4", "F4"),
+        ("32", 1, "korkeus", "Gis4", "G4"),
+        ("33", 0, "korkeus", "Gis4", "G4"),
+        ("33", 1, "korkeus", "Fis4", "F4"),
+    ),
+)
+
+OSA_I_TENORI = Osa(
+    mxl=OSA_I.mxl,
+    out=OSA_I.out,
+    osasto="P15",
+    nimi="Kuoro T",
+    yksi_sanarivi=True,
+    korjaukset=(
+        # Sivu 10: dynamiikkamerkintä tavuna, kuten altolla.
+        ("136", 0, "poista", "ppp"),
+
+        # Sivu 1, 2. järjestelmä: "et lux per-".
+        ("17", 2, "aseta", "e", "single", "et"),
+        ("18", 0, "aseta", "ux", "single", "lux"),
+        ("19", 2, "aseta", "er", "begin", "per"),
+
+        # Sivu 3, 3. järjestelmä: "et lux per-pe-tu-a" toisen kerran.
+        ("67", 2, "aseta", "e", "single", "et"),
+        ("70", 0, "aseta", "e", "middle", "pe"),
+
+        # Sivu 4: "lu-ce-at e-is." — konelukema luki l:n ja u:n isoksi I:ksi
+        # ja n:ksi. Kaikki neljä kuororiviä lukevat siinä järjestelmässä
+        # "lu-ce-at e-is.".
+        ("76", 1, "aseta", "In", "begin", "lu"),
+
+        # Sivu 2, tahti 43, toinen nuotti: risti puuttuu. Sivu mitattuna
+        # tenoriviivastolla on x:llä 181,4 risti ja heti sen perässä x:llä
+        # 185,3 nuottipää C5:n korkeudella; tahti 43 alkaa x:llä 146.
+        # Kuoron oma tiedosto laulaa Cis5:n, ja sen ja meidän tenorin
+        # tahdit 39-46 täsmäävät muuten nuotti nuotilta.
+        ("43", 1, "korkeus", "C5", "Cis5"),
     ),
 )
 
@@ -280,6 +419,39 @@ OSA_II6 = Osa(
         ("46", None, "vaihda_sanarivit", "1", "2"),    # t.367
         ("47", None, "vaihda_sanarivit", "1", "2"),    # t.368
         ("48", None, "vaihda_sanarivit", "1", "2"),    # t.369
+
+        # T.22 (juokseva 343), toinen nuotti. Kuvio on kolme kertaa sama:
+        # päänuotti, puolisävelaskel alta, päänuotti takaisin. T.21
+        # "Bes3 A3 Bes3" ja t.23 "C4 B3 C4" ovat sitä, mutta t.22 lukee
+        # "Ces4 Aes3 Ces4" — alanuotti on iso terssi eikä puolisävelaskel.
+        # Kolme todistetta: kuoron oma tiedosto (musescore/03_rex_tremendae)
+        # laulaa Bes3:n, viereiset tahdit kertovat kuvion, ja päänuottien
+        # sarja nousee Bes3 - Ces4 - C4, joten alanuotti nousee mukana.
+        # Tämä on osan 07 kuorobasson AINOA sävelero kuorotiedostoon
+        # nähden koko osassa (174 nuottia).
+        ("22", 1, "korkeus", "Aes3", "Bes3"),
+    ),
+)
+
+# Rex tremendae (II·6), kuorotenori. Tenoriviivastolla on kolme ääntä
+# (kuoron omassa tiedostossa Tenor 1-3), joten sointuja ei voi verrata
+# suoraan; ylin ääni vastaa Tenor 1:tä ja täsmää 150 nuotista kaikissa
+# paitsi yhdessä.
+#
+# T.32 (juokseva 353), ensimmäinen nuotti. Tenori ja basso laulavat
+# t.27-32 unisonossa "sal-va me" kolmesti: C#3 C#3 C#3, E3 E3 E3, C3 C3
+# C3. Tenorin kolmannen kerran viimeinen nuotti on C4, oktaavia liian
+# korkealla. Neljä todistetta: oma kuorobasso t.32 laulaa C3:n, kuoron oma
+# tiedoston Tenor 1 laulaa C3:n, ja kaksi edellistä kertaa (t.28, t.30)
+# päättyvät samaan säveleen kuin alkavat.
+OSA_II6_TENORI = Osa(
+    mxl=OSA_II6.mxl,
+    out=OSA_II6.out,
+    osasto="P7",
+    nimi="Kuoro T",
+    yksi_sanarivi=False,
+    korjaukset=(
+        ("32", 0, "korkeus", "C4", "C3"),
     ),
 )
 
@@ -307,6 +479,18 @@ OSA_II6 = Osa(
 # joten toisin kuin dokumentaatio on kuukauden sanonut, siinä ei ole
 # käsimuokkauksia hukattavana — vaarassa on vain osa 14. Ks.
 # docs/menetelmat/omr.md.
+# Sanan "Sy-bil-la" tavuviiva puuttuu kaikista neljästä äänestä: tavu "Sy"
+# on merkitty itsenäiseksi sanaksi ja "bil" seuraavan sanan alkuun, joten
+# stemmaan tulostuu "Sy bil-la,". Syy on lähde-PDF:n omassa tekstikerroksessa:
+# neljästä sanarivistä kolme lukee "Sy-bil--la," ja yksi (ylin) "Sy bil--la,"
+# ilman ensimmäistä viivaa, joten `korjaa_sanat.py`:n tavutusäänestys ei
+# nähnyt sanaa yhtenä lainkaan ja jätti "Sy":n itsenäiseksi joka äänessä.
+# Kolme riviä neljästä ja sana itse (Sibylla) kertovat oikean tavutuksen.
+SYBILLA = (
+    ("27", 2, "aseta", "Sy", "begin", "Sy"),
+    ("28", 0, "aseta", "bil", "middle", "bil"),
+)
+
 OSA_II9B = Osa(
     mxl="10b-Verdi_Dies_irae_paluu-OMR-korjattu.mxl",
     out="10b-Verdi_Dies_irae_paluu-kasin.mxl",
@@ -315,8 +499,26 @@ OSA_II9B = Osa(
     yksi_sanarivi=False,
     korjaukset=(
         ("35", None, "dynamiikka", "p"),               # t.607
-    ),
+    ) + SYBILLA,
 )
+
+OSAT_II9B_SAT = [
+    Osa(mxl=OSA_II9B.mxl, out=OSA_II9B.out, osasto=pid, nimi=nimi,
+        yksi_sanarivi=False,
+        korjaukset=SYBILLA + lisaa)
+    for pid, nimi, lisaa in (
+        ("P1", "Kuoro S", ()),
+        # Altolta puuttuu sana "cum" kokonaan. Tahdin rakenne on sama kuin
+        # sopraanolla ja bassolla — tauko, nuotti, nuotti — ja niissä "cum"
+        # on toisella nuotilla, joten paikka ei ole arvaus. PDF:n neljä
+        # sanariviä lukevat kaikki "te-ste Da-vid cum Sy-bil--la,".
+        # Kuorotenorin sama puute on jätetty auki: sen tahdissa on neljä
+        # nuottia eikä kolme, joten tavun paikkaa ei voi lukea muista
+        # äänistä.
+        ("P2", "Kuoro A", (("27", 1, "lisaa", "single", "cum"),)),
+        ("P3", "Kuoro T", ()),
+    )
+]
 
 # Lacrymosa (II·10). Sanakerros on CPDL:n lähteessä väärä kahdessa äänessä,
 # ja kyse ei ole konelukemasta: tämä tiedosto tulee Finale + Dolet -erästä,
@@ -673,9 +875,36 @@ OSA_VII_TENORI = Osa(
 # Osan 14 (Agnus Dei) korjaukset on aikanaan tehty suoraan lähdetiedostoon,
 # joten sillä ei ole omaa Osa-riviä. Jos se joskus puretaan tänne, ks.
 # CLAUDE.md, *Recipe*-luvun viimeinen kappale.
-OSAT = ([OSA_I, OSA_II1] + OSAT_II4
-        + [OSA_II6, OSA_II9B, OSA_II10_KUORO_B, OSA_II10_DIVISI] + OSAT_IV
-        + [OSA_IV_KUORO_B_II]
+# Agnus Dei (V). Tämän osan sanakorjaukset ovat toistaiseksi leivottuja
+# suoraan `14-...-OMR-korjattu.mxl`:ään (ks. CLAUDE.md:n varoitus), mutta
+# uudet korjaukset kirjataan tänne, ja `yhdista.py` lukee tämän tuloksen.
+#
+# P5 ja P6 ovat tahdeissa 1-13 sooloäänet ja tahdista 14 pianon kaksi
+# viivastoa. Pianoviivastolla ei ole sanoja, joten jokainen tavu siellä on
+# konelukemisen roskaa:
+#
+#   * P6 t.68 kantaa tavut "A." ja "Reutenauer". Ne ovat nuottipainoksen
+#     alalaidan kaivertajamerkintä: lähde-PDF:n tekstikerroksessa sama
+#     "A. Reutenauer" on sivun 5 alimpana rivinä y:llä 767, kaukana
+#     alimmasta viivastosta.
+#   * P5 t.31 kantaa tavun "¢|¢", joka ei ole sana lainkaan.
+OSAT_V = [
+    Osa(mxl="14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl",
+        out="14-Verdi_requiem_agnus-dei-kasin.mxl",
+        osasto="P5", nimi="Piano 1 / Solisti S", yksi_sanarivi=False,
+        korjaukset=(("31", 1, "poista", "¢|¢"),)),
+    Osa(mxl="14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl",
+        out="14-Verdi_requiem_agnus-dei-kasin.mxl",
+        osasto="P6", nimi="Piano 2 / Solisti M-S", yksi_sanarivi=False,
+        korjaukset=(("68", 2, "poista", "A."),
+                    ("68", 3, "poista", "Reutenauer"))),
+]
+
+OSAT = ([OSA_I, OSA_I_SOPRAANO, OSA_I_ALTTO, OSA_I_TENORI, OSA_II1]
+        + OSAT_II4
+        + [OSA_II6, OSA_II6_TENORI, OSA_II9B] + OSAT_II9B_SAT
+        + [OSA_II10_KUORO_B, OSA_II10_DIVISI] + OSAT_IV
+        + [OSA_IV_KUORO_B_II] + OSAT_V
         + [OSA_VII_TENORI, OSA_VII])
 
 
@@ -692,8 +921,19 @@ OSAT = ([OSA_I, OSA_II1] + OSAT_II4
 # (leveydet lähteen omista <measure width>-arvoista, kerroin 0,306), tahti 59
 # vasta seuraavassa järjestelmässä. Sama menetelmä vahvistaa, että tahdin 67
 # kolme ristiä ovat oikeassa tahdissa, joten vain tämä yksi vaihto siirtyy.
+#
+# Sama vika kolme tahtia aiemmin ja seitsemän tahdin verran isompana: sivun 2
+# ensimmäisessä järjestelmässä kolmen ristin sävellaji puretaan ja yksi b
+# asetetaan x:llä 138-147, ja tahti 28 alkaa x:llä 135. Vaihto kuuluu siis
+# tahtiin 28. Konelukema kirjasi sen tahtiin 28 vain kuorotenoriin (P15) ja
+# kuorobassoon (P16) ja muissa viidessätoista osastossa tahtiin 35, seuraavan
+# järjestelmän alkuun. Siirto on pelkkä merkintä eikä muuta yhtään
+# sävelkorkeutta — sen aiheuttama vahinko on korjattu erikseen sopraanon ja
+# alton `korkeus`-riveillä.
 SAVELLAJIT = (
     Savellaji(mxl=OSA_I.mxl, out=OSA_I.out, siirrot=(("59", "56", 0),)),
+    Savellaji(mxl=OSA_I.mxl, out=OSA_I.out, siirrot=(("35", "28", -1),),
+              valmiit=("P15", "P16")),
 )
 
 
@@ -849,12 +1089,17 @@ def aseta_korkeus(note, teksti):
     note.attrib.pop("default-y", None)
 
 
-def siirra_savellaji(root, mista, mihin, fifths):
+def siirra_savellaji(root, mista, mihin, fifths, valmiit=()):
     """Siirrä sävellajin vaihto tahdista toiseen kaikissa osastoissa.
 
     <key> siirretään, ei kopioida: vanhaan tahtiin jäävä vaihto merkitsisi
     sävellajin vaihtuvan kahdesti. Muu <attributes>-sisältö jää paikalleen,
     koska se kuvaa sitä tahtia eikä sävellajia.
+
+    `valmiit` on niiden osastojen tunnukset, joissa konelukema sattui
+    näkemään vaihdon jo oikeassa tahdissa. Niitä ei siirretä, mutta ne
+    tarkistetaan: vaihto on kohdetahdissa ja lähtötahdissa ei ole toista.
+    Ilman tarkistusta lista voisi vanhentua huomaamatta.
     """
     selosteet = []
     for part in root.findall("part"):
@@ -863,6 +1108,16 @@ def siirra_savellaji(root, mista, mihin, fifths):
         vanha, uusi = tahdit.get(mista), tahdit.get(mihin)
         assert vanha is not None, f"{pid}: tahtia {mista} ei ole"
         assert uusi is not None, f"{pid}: tahtia {mihin} ei ole"
+
+        if pid in valmiit:
+            assert uusi.findtext("attributes/key/fifths") == str(fifths), (
+                f"{pid} t.{mihin}: sävellajia {fifths} ei ole, "
+                f"vaikka osasto on merkitty valmiiksi")
+            assert vanha.find("attributes/key") is None, (
+                f"{pid} t.{mista}: sävellajin vaihto on, "
+                f"vaikka osasto on merkitty valmiiksi")
+            selosteet.append(f"{pid}: sävellaji {fifths} oli jo t.{mihin}")
+            continue
 
         attrs = vanha.find("attributes")
         key = None if attrs is None else attrs.find("key")
@@ -1017,8 +1272,13 @@ def sovella(part, osa):
             # asettelua: ylä-ääni kuuluu ylemmälle riville. `default-y` on
             # laskettu vanhalle riville, joten se pudotetaan samasta syystä
             # kuin `korkeus` pudottaa omansa — MuseScore asettelee itse.
+            # Indeksi rajaa siirron yhteen nuottiin. Sitä tarvitaan, kun
+            # tahdissa on tavuja kahdella rivillä: konelukema pudotti sanan
+            # keskimmäisen tavun riville 2 ja jätti muut riville 1, jolloin
+            # sana katkeaa kahdelle tekstiriville.
             vanha, uusi = args
-            ly = [x for n in notes for x in lyriikat(n)]
+            ly = [x for n in ([note] if note is not None else notes)
+                  for x in lyriikat(n)]
             assert ly, f"t.{tahti}: ei tavuja siirrettäväksi"
             on = sorted({x.get("number") for x in ly})
             assert on == [vanha], (
@@ -1174,7 +1434,8 @@ def main(argv):
             if isinstance(osa, Savellaji):
                 print("  sävellajit (kaikki osastot)")
                 for mista, mihin, fifths in osa.siirrot:
-                    for s in siirra_savellaji(root, mista, mihin, fifths):
+                    for s in siirra_savellaji(root, mista, mihin, fifths,
+                                              osa.valmiit):
                         print("    " + s)
                 continue
             selosteet = sovella(find_part(root, osa.osasto), osa)

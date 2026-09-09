@@ -17,7 +17,7 @@ sivunumerot kussakin stemma-PDF:ssä
   II·10Lacrymosa                 7      7      7      7      7      7      7      7
   III  Offertorio                8      8      8      8      8      8      8      8
   IV   Sanctus                   9      9      8      8      8      8      8      8
-  V    Agnus Dei                11     10     10      9     10     10     10      9
+  V    Agnus Dei                11     10     10     10     10     10     10      9
   VI   Lux aeterna              11     11     10     10     11     11     10     10
   VII  Libera me                12     11     10     10     11     11     10     10
 -----------------------------------------------------------------------------------

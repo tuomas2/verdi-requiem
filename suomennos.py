@@ -550,10 +550,8 @@ RIKKI = {
     "ro": "ca-ro",
     "o": "o-ra-ti-o-nem",
     "vo": "vo-tum",
-    "ux": "l-ux",
     "ira": "i-rae",
     "domi": "Do-mi-ne",
-    "at": "lu-ce-at",
     # Kaksi sanaa kirjoitettu yhteen: edellisen sanan loppu ja seuraavan alku
     # samaan tavuun tai ilman sanarajaa.
     "dodoeis": "do-na e-is",
@@ -561,15 +559,9 @@ RIKKI = {
     "doila": "do-na il-la",
     "requiemem": "re-qui-em",
     "requiemna": "re-qui-em do-na",
-    "inceat": "lu-ceat",
     # Kirjoitus- ja konelukuvirheitä lähteessä.
     "hosana": "Hosanna",
-    "perpetlla": "perpetua",
-    "peretua": "perpetua",
     "perpettua": "perpetua",
-    "erpetua": "perpetua",
-    "eh": "?",
-    "lg": "?",
     "d": "?",
     # Solistiviivastot, samat viat. Suurin osa on osien 01 ja 14
     # konelukemisen jälkeä, ja "Kyrie eleison" on niistä pahin: se hajoaa
@@ -604,11 +596,12 @@ RIKKI = {
     "cis": "?",
     "fii": "?",
     "moren": "?",
-    # Nuotinnusmerkintä luettu tavuksi: dynamiikkamerkintä ja — kuoron
-    # tenorissa, osan I tahdissa 68 — julkaisijan nimi.
+    # Nuotinnusmerkintä luettu tavuksi. Kaivertajan nimi "A. Reutenauer"
+    # osan V pianoviivastolla ja osan I kuoroäänten "PPP" olivat samaa
+    # sarjaa; ne on poistettu 2026-09-10 (korjaa_kasin.py, OSAT_V ja
+    # OSA_I_ALTTO/OSA_I_TENORI), joten niitä ei ole enää tässä.
     "p": "dynamiikkamerkintä, ei tavu",
     "pp": "dynamiikkamerkintä, ei tavu",
-    "reutenauer": "julkaisijan nimi, ei tavu (Kuoro T, osa I t. 68)",
 }
 
 
