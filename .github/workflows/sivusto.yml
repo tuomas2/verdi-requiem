@@ -17,8 +17,17 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Testit ovat oma workflow, jotta ne ajetaan myös muissa haaroissa ja
+  # jotta punainen rasti kertoo mikä hajosi. Julkaisu odottaa niitä:
+  # vanhentunut LUOTETTAVUUS.md on testi, ja se on nimenomaan lupaus
+  # sivuston lukijalle.
+  testit:
+    uses: ./.github/workflows/testit.yml
+
   rakenna:
+    needs: testit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -26,15 +35,8 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 15 testiä lukee lähde-PDF:iä mutoolilla. MuseScorea ei tarvita:
-      # yksikään testi ei kutsu sitä, ja stemmojen PDF:t tulevat reposta
-      # valmiina, koska niitä ei voi rakentaa ilman MuseScorea.
-      - name: Asenna mutool
-        run: sudo apt-get update && sudo apt-get install -y mupdf-tools
-
-      - name: Aja testit
-        run: python3 -m unittest discover -s testit -t .
-
+      # Sivuston rakennus on puhdasta vakiokirjastoa: ei mutoolia eikä
+      # MuseScorea. Mitattu ajamalla sivusto.py ilman kumpaakaan.
       - name: Rakenna sivusto
         run: python3 sivusto.py _sivusto
 

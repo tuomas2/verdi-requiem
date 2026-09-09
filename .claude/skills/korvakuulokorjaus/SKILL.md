@@ -179,7 +179,7 @@ this shipped something. Checks that have caught real problems:
   Cheap, and it catches what the page cannot: a word missing its hyphens, two
   words run together, a gloss that makes no sense. It found four defects the
   first time it was run.
-- `python3 -m unittest discover -s testit -t .` — 256 tests.
+- `python3 -m unittest discover -s testit -t .` — 265 tests.
 
 ## The one movement not yet in the table
 

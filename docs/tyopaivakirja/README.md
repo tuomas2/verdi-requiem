@@ -23,6 +23,7 @@ sellainen on aina merkitty molempiin päihin.
 | *2026-09-07 (b)* | [`2026-09-07-luotettavuustaulukko.md`](2026-09-07-luotettavuustaulukko.md) | Luotettavuustaulukko generoiduksi ja commitoiduksi `LUOTETTAVUUS.md`:ksi |
 | *2026-09-07 (b)* | [`2026-09-07-savellaji-tyhjassa-tahdissa.md`](2026-09-07-savellaji-tyhjassa-tahdissa.md) | Palautusmerkki tyhjässä tahdissa oli väärään tahtiin merkitty sävellajin purku; nuottifontin glyyfit mittanauhana |
 | *2026-09-09* | [`2026-09-09-suomennokset.md`](2026-09-09-suomennokset.md) | Suomennos joka latinan sanan alle, ja `--teksti`, joka löysi neljä päiviä painunutta virhettä |
+| *2026-09-09 (b)* | [`2026-09-09-dokumentaatio-ja-ci.md`](2026-09-09-dokumentaatio-ja-ci.md) | Muistiinpanot pilkottiin hakemistoksi ja skilliksi; testit omaksi CI-workflowksi, jota julkaisu kutsuu |
 
 ## Where things stand
 

@@ -75,6 +75,10 @@ python3 sisallys.py                            # sisällysluettelo
 python3 -m unittest discover -s testit -t .
 ```
 
+Samat testit ajetaan GitHub Actionsissa joka työnnöllä ja Pythonin
+versioilla 3.9 ja 3.13 (`.github/workflows/testit.yml`). Sivusto
+julkaistaan vain jos ne menevät läpi.
+
 Tekstin voi lukea läpi juoksevana proosana, latina ja suomennos rinnakkain.
 Se on nopein tapa löytää rikkinäinen tavutus ja väärä suomennos, koska
 kumpikin näkyy virkkeessä heti — nuottikuvasta ne pitää etsiä sivu
