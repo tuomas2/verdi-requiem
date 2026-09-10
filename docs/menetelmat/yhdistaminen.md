@@ -120,7 +120,7 @@ line to change in `yhdista.py`; see `YHDISTAMINEN.md` for how.
 |---|---|---|
 | ~~Measure numbers restart in every movement~~ — **settled**: Dies irae (02–11, incl. II·9b) numbers 1–701 continuously; every other movement still restarts at 1 | The user confirmed the choir's rehearsal book numbers Dies irae continuously | Done — `NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA = False`, and since 2026-09-02 the per-sub-movement start numbers are read from the book itself (`DIES_IRAE_ALUT`), not computed |
 | ~~Confutatis→Lacrymosa gap (II·9b) is 51 measures, computed at 578–628~~ — **settled**: II·9b is at 573–623 and the Lacrymosa **file** starts at 624 (the book's Lacrymosa *heading* is at 621, three bars earlier, inside the 10b file) | Two independent PDFs print their own continuous numbers | Done — see *2026-09-02 (later)* and *2026-09-03 (c): Lacrymosa's three-bar shift* |
-| Sanctus chorus bass = Bass I | User has the higher of the two; Bass I is higher (median G3 vs D3) | Bass I enters at m. 2, Bass II at m. 4 |
+| ~~Sanctus chorus bass = Bass I~~ — **settled 2026-09-10**: the user enters at m. 2, and `Kuoro B` (P4) is the staff that enters at m. 2, so `SINGER_PARTS`'s mapping is right | User has the higher of the two; Bass I is higher (median G3 vs D3) | Done — the singer read the book: Bass I at m. 2, Bass II at m. 4. See *2026-09-10 (c)* |
 | Movement 05 soloist = mezzo | File says "Soprano solo" but Liber scriptus is the mezzo aria | Musicological, not a data question |
 | Movements 12, 15 soloist order | Parts are unnamed; inferred from standard score order | Compare with any full score |
 

@@ -37,7 +37,7 @@ bassoa. Basso on siksi oletuksena ◑ ja muut äänet ○.
 | II·7 | Recordare | – | – | – | – |
 | II·8 | Ingemisco | – | – | – | – |
 | II·9 | Confutatis | – | – | – | – |
-| II·9b | Dies irae (kertaus) | ○ | ○ | ○ | ◑ |
+| II·9b | Dies irae (kertaus) | ○ | ○ | ○ | ✔ |
 | II·10 | Lacrymosa | ○ | ○ | ⚠ | ✔ |
 | III | Offertorio | – | – | – | – |
 | IV | Sanctus | ○ | ○ | ○ | ◑ |
@@ -56,7 +56,7 @@ vikaa. Muut ovat oletuksia: kuorobasso ◑, muut äänet ○.
 
 - **S, A — ◑ osittain:** Sanat korjattu koneellisesti lähde-PDF:ää vasten, peitto 83–91 %, mutta ei tarkistettu tavu tavulta; "et lux per-pe-tu-a" korjattu käsin tahdeissa 21–22. Nuotit vertailtu kuoron omaan tiedostoon tahdeissa 1–78 ja jokainen ero mitattu lähdesivun nuottifontin koordinaateista: konelukemisen sävellajivirhe tahdeissa 28–34 ("Te decet hymnus" ristillisenä) korjattu, seitsemän säveltä, ja sopraanon t.76 Ces5 → C5. Kyrie tahdista 79 eteenpäin on vertailematta. Yksi ero jäi auki: alton t.77 on lähdesivulla Gis5, mutta kuorotiedosto laulaa Gis4:n, ja hyppy kuulostaa painovirheeltä.
 - **T — ◑ osittain:** Sanat korjattu koneellisesti lähde-PDF:ää vasten, peitto 83–91 %, mutta ei tarkistettu tavu tavulta; "et lux per-pe-tu-a" ja "lu-ce-at" korjattu käsin. Nuotit vertailtu kuoron omaan tiedostoon tahdeissa 1–78: t.43 puuttunut risti lisätty (C5 → Cis5), ja kaksi muuta eroa ratkesi lähdesivun hyväksi. Kyrie tahdista 79 eteenpäin on vertailematta.
-- **B — ◑ osittain:** Sanat korjattu lähde-PDF:ää vasten ja kahdeksan kohtaa varmistettu käsin, useimmat laulajan kuulohavainnon perusteella. Lisäksi yhden b:n purku siirretty tahtiin 56, jonne lähdesivu sen painaa; konelukema oli merkinnyt sen kolme tahtia myöhemmäksi. Nuotit vertailtu kuoron omaan tiedostoon tahdeissa 1–78: kaksi eroa, kumpikin ratkesi lähdesivun hyväksi (t.35 palautusmerkki, t.52 nouseva kromatiikka). Kyrie tahdista 79 eteenpäin on vertailematta, koska kuorotiedoston tahdit eivät siellä osu meidän tahteihin.
+- **B — ◑ osittain:** Sanat korjattu lähde-PDF:ää vasten ja kahdeksan kohtaa varmistettu käsin, useimmat laulajan kuulohavainnon perusteella. Lisäksi yhden b:n purku siirretty tahtiin 56, jonne lähdesivu sen painaa; konelukema oli merkinnyt sen kolme tahtia myöhemmäksi. Nuotit vertailtu kuoron omaan tiedostoon tahdeissa 1–78: kaksi eroa, kumpikin ratkesi lähdesivun hyväksi (t.35 palautusmerkki, t.52 nouseva kromatiikka). Kyrie tahdista 79 eteenpäin on vertailematta, koska kuorotiedoston tahdit eivät siellä osu meidän tahteihin. Laulaja luki 2026-09-10 nuottikirjasta kaksi näistä: t.35:n palautusmerkki on kirjassa, ja t.51–52:n tavu "nis" on tahdin 51 toisella nuotilla jatkoviivan kanssa — molemmat nyt kolmen lähteen varassa.
 
 ### II·1 Dies irae
 
@@ -76,7 +76,7 @@ vikaa. Muut ovat oletuksia: kuorobasso ◑, muut äänet ○.
 ### II·9b Dies irae (kertaus)
 
 - **S, A, T — ○ tarkistamatta:** Konelukemisen tulosta. Nuotteja ilman tavua on selvästi enemmän kuin bassossa; osa on aitoja melismoja, mutta sitä ei ole tarkistettu yksitellen. Sanan "Sy-bil-la" tavutus korjattu kaikilta neljältä ääneltä ja altolta lisätty puuttunut "cum".
-- **B — ◑ osittain:** Sanat tarkistettu lähde-PDF:ää vasten nuotti nuotilta. Nuotit ovat konelukemisen tulosta ja tarkistamatta yhtä rakenteellista pistokoetta lukuun ottamatta.
+- **B — ✔ varmistettu:** Sanat tarkistettu lähde-PDF:ää vasten nuotti nuotilta. Nuotit vertailtu kuoron omaan tiedostoon koko 51 tahdin matkalta: ainoa ero oli tahti 607, jonka "di-es" oli konelukemassa puhtaana G:nä, ja laulaja luki 2026-09-10 nuottikirjasta G♭:n — korjattu kuoron tiedoston mukaiseksi. Tahtiin 607 on lisätty myös dynamiikkamerkintä p, jota lähteessä ei ollut.
 
 ### II·10 Lacrymosa
 

@@ -488,10 +488,18 @@ class OsaIKokonaisuutena(unittest.TestCase):
                                     ly[0].findtext("syllabic"),
                                     ly[0].findtext("text"))
 
-    def test_omnis_nis_on_tahdin_52_viimeisella_nuotilla(self):
+    def test_omnis_nis_on_tahdin_51_toisella_nuotilla(self):
+        # 2026-09-02 tavu siirrettiin laulajan pyynnöstä tahdin 52 viimeiselle
+        # nuotille, melisma tavulle "om". 2026-09-10 laulaja luki kuoron
+        # nuottikirjaa: "nis" on tahdin 51 toisella nuotilla ja jatkoviiva
+        # ulottuu tahdin 52 loppuun, eli lähde-PDF oli oikeassa. Siirto on
+        # peruttu ja jatkoviiva lisätty; tahdin 52 nuotit ovat sanattomia.
         self.assertEqual(self.tavu("51", 0), ("1", "begin", "om"))
-        self.assertIsNone(self.tavu("51", 1))
-        self.assertEqual(self.tavu("52", 3), ("1", "end", "nis"))
+        self.assertEqual(self.tavu("51", 1), ("1", "end", "nis"))
+        self.assertIsNotNone(
+            self.bars["51"][1].find("lyric/extend"))
+        self.assertEqual([self.tavu("52", i) for i in range(4)],
+                         [None, None, None, None])
 
     def test_tahti_108_eleison_on_yhdella_sanarivilla(self):
         self.assertEqual(self.tavu("107", 3), ("1", "begin", "e"))
@@ -1422,11 +1430,23 @@ class DiesIraenKertausKokonaisuutena(unittest.TestCase):
         self.assertEqual(merkityt, [("3", [("above", "ff")]),
                                     ("35", [("above", "p")])])
 
+    def test_tahdin_607_di_es_on_ges(self):
+        # Konelukema antoi puhtaan G:n, kuoron oma tiedosto laulaa G♭:n, ja
+        # 2026-09-10 laulaja luki nuottikirjasta G♭:n. Sävellaji on -2, joten
+        # b-merkki on painettuna sivulla eikä tule sävellajista.
+        m = self.tahti("35")
+        self.assertEqual(
+            [(n.findtext("pitch/step"), n.findtext("pitch/alter"),
+              n.findtext("lyric/text")) for n in m.findall("note")],
+            [("G", "-1", "di"), ("G", "-1", "es")])
+
     def test_lahdetiedostoa_ei_muuteta(self):
         alkuperainen = find_part(load(OSA_II9B.mxl), OSA_II9B.osasto)
         m = next(m for m in alkuperainen.findall("measure")
                  if m.get("number") == "35")
         self.assertEqual(dynamiikat(m), [])
+        self.assertEqual([n.findtext("pitch/alter")
+                          for n in m.findall("note")], [None, None])
 
 
 class Sybilla(unittest.TestCase):
