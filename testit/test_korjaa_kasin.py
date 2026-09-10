@@ -1436,17 +1436,89 @@ class RexTremendaenSavelet(unittest.TestCase):
         self.assertEqual(self.savelet(self.tenori, "32")[0], "C3")
 
 
+class AgnusDeinKuorobasso(unittest.TestCase):
+    """Osa V t.40-43: yksi melisma, ei kahta "do-na":a.
+
+    Konelukema oli kopioinut bassolle ylä-äänten kuvion: tahdissa 41 luki
+    "na," ja tahdissa 42 "do". Lähdesivu 3 antaa basson tavuriville vain
+    "Do-@45" ja "na@259", eli tahdit 41-42 ovat melismaa. Samalla t.42:n
+    toisen nuotin piste, joka on ristiriidassa oman kestonsa (24 = puoli),
+    tahtilajin (4/4) ja kuoron oman tiedoston kanssa.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        osa = next(o for o in OSAT_V if o.osasto == "P4")
+        cls.part = find_part(load(osa.mxl), "P4")
+        sovella(cls.part, osa)
+
+    def tahti(self, numero):
+        return next(m for m in self.part.findall("measure")
+                    if m.get("number") == numero)
+
+    def tavut(self, numero):
+        return [(ly.findtext("syllabic"), ly.findtext("text"))
+                for n in self.tahti(numero).findall("note")
+                for ly in n.findall("lyric")]
+
+    def test_do_alkaa_sanan_tahdissa_40(self):
+        self.assertEqual(self.tavut("40"), [("begin", "Do")])
+
+    def test_tahdit_41_ja_42_ovat_melismaa(self):
+        self.assertEqual(self.tavut("41"), [])
+        self.assertEqual(self.tavut("42"), [])
+
+    def test_na_paattyy_tahdin_43_ensimmaiselle_nuotille(self):
+        # Tahdin toinen nuotti (kahdeksasosa) jatkaa samaa melismaa, joten
+        # se ei kanna tavua; "e-is" alkaa vasta kolmannelta.
+        self.assertEqual(self.tavut("43"),
+                         [("end", "na"), ("begin", "e"), ("end", "is")])
+        notes = self.tahti("43").findall("note")
+        self.assertEqual(notes[1].findall("lyric"), [])
+
+    def test_tahdin_42_puolinuotissa_ei_ole_pistetta(self):
+        notes = self.tahti("42").findall("note")
+        self.assertEqual([n.findtext("duration") for n in notes], ["24", "24"])
+        self.assertEqual([len(n.findall("dot")) for n in notes], [0, 0])
+
+    def test_pisteet_ja_kestot_ovat_muuten_sopusoinnussa(self):
+        """Tämä oli osan ainoa ristiriita; testi pitää sen niin."""
+        arvot = {"whole": 48, "half": 24, "quarter": 12, "eighth": 6,
+                 "16th": 3, "32nd": 1.5}
+        for m in self.part.findall("measure"):
+            for i, n in enumerate(m.findall("note")):
+                pisteet = len(n.findall("dot"))
+                tyyppi = n.findtext("type")
+                if not pisteet or tyyppi not in arvot:
+                    continue
+                with self.subTest(tahti=m.get("number"), nuotti=i):
+                    self.assertEqual(int(n.findtext("duration")),
+                                     arvot[tyyppi] * (2 - 0.5 ** pisteet))
+
+    def test_lahdetiedostoa_ei_muuteta(self):
+        osa = next(o for o in OSAT_V if o.osasto == "P4")
+        alkuperainen = find_part(load(osa.mxl), "P4")
+        m = next(m for m in alkuperainen.findall("measure")
+                 if m.get("number") == "41")
+        self.assertEqual([ly.findtext("text") for n in m.findall("note")
+                          for ly in n.findall("lyric")], ["na,"])
+
+
 class AgnusDeinPianoviivastot(unittest.TestCase):
     """Osa V: kaivertajan nimi ja roskamerkki pianoviivastolla sanoina."""
 
     @classmethod
     def setUpClass(cls):
-        root = load(OSAT_V[0].mxl)
+        # Indeksointi osaston tunnuksella eikä paikalla: OSAT_V sai
+        # 2026-09-10 uuden rivin alkuun (P4), ja OSAT_V[0] oli sen jälkeen
+        # eri osasto kuin testi tarkoitti.
+        osat = {o.osasto: o for o in OSAT_V}
+        root = load(osat["P5"].mxl)
         cls.osastot = {}
-        for osa_ in OSAT_V:
-            part = find_part(root, osa_.osasto)
-            sovella(part, osa_)
-            cls.osastot[osa_.osasto] = part
+        for pid in ("P5", "P6"):
+            part = find_part(root, pid)
+            sovella(part, osat[pid])
+            cls.osastot[pid] = part
 
     def tavut(self, pid, tahti):
         m = next(m for m in self.osastot[pid].findall("measure")
@@ -1467,7 +1539,8 @@ class AgnusDeinPianoviivastot(unittest.TestCase):
         self.assertEqual(self.tavut("P6", "13"), ["qui", "em"])
 
     def test_lahdetiedostoa_ei_muuteta(self):
-        alkuperainen = find_part(load(OSAT_V[1].mxl), "P6")
+        osa = next(o for o in OSAT_V if o.osasto == "P6")
+        alkuperainen = find_part(load(osa.mxl), "P6")
         m = next(m for m in alkuperainen.findall("measure")
                  if m.get("number") == "68")
         self.assertEqual([ly.findtext("text") for n in m.findall("note")

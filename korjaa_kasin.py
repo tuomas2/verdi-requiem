@@ -915,7 +915,53 @@ OSA_VII_TENORI = Osa(
 #     "A. Reutenauer" on sivun 5 alimpana rivinä y:llä 767, kaukana
 #     alimmasta viivastosta.
 #   * P5 t.31 kantaa tavun "¢|¢", joka ei ole sana lainkaan.
+#
+# Kuorobasso (P4) t.40-43: lähdesivu 3, 2. järjestelmä (tahdit 40-45).
+# Laulaja: "tahdissa 40 pitäisi olla do-, joka loppuu tahdin 43 ensimmäiseen
+# nuottiin (tai oikeastaan na-tavu jatkuu vielä toiseen nuottiin asti)."
+# Konelukema oli kopioinut bassolle ylä-äänten "do-na, do-na" -kuvion:
+# tahdissa 41 luki "na," ja tahdissa 42 "do". Bassolla on niissä pelkkä
+# melisma.
+#
+# Mitattu lähde-PDF:n tekstikerroksesta, ei silmällä. Sivun 3 toisen
+# järjestelmän neljä sanariviä x-koordinaatteineen (`mutool draw -F stext`,
+# Garamond 10; kuorobasso on 4. viivasto, bassoavain x:llä 27, tavurivi
+# y:llä 425):
+#
+#   S: Do-@45 na,@96 do-@172 na@231 e-@259 is@278 do-@305 na@392 …
+#   T: Do-@45 na@120  do-@172 na@232 e@259  is@305 re-@362 qui-@392 …
+#   B: Do-@45         na@259 e-@305 is@329 re-@362 qui-@392 em,@438 do-@529 na.@553
+#
+# Tahdit alkavat x:illä 40->45, 41->96, 42->172, 43->259, 44->362, 45->529
+# (basson nuottipäät: kaksi kokonuottia 45 ja 96, kaksi puolinuottia 172 ja
+# 208, sitten 259 pisteellinen neljäsosa + 290 kahdeksasosa + 305 + 329).
+# Basson rivillä ei siis ole tavua x:ien 45 ja 259 välissä lainkaan: "Do-"
+# tahdissa 40, melisma tahtien 41-42 yli, "na" tahdin 43 ensimmäisellä
+# nuotilla ja sen melisma toisella. Ylä-äänet laulavat "do-na," kahdesti,
+# basso kerran — juuri niin kuin laulaja sen kuuli.
+#
+# Tahdin 43 tavut ("na" nuotilla 0, "e" nuotilla 2, "is" nuotilla 3) ovat jo
+# oikein, joten vain "Do":n syllabic muuttuu ja kaksi roskatavua lähtee.
+#
+# Samalla t.42:n toisen nuotin piste. Se näkyi vasta kun korjattu tahti
+# katsottiin kuvana: nuotti on `<type>half</type><dot/>` mutta
+# `<duration>24</duration>`, eli MuseScore piirtää pisteellisen puolinuotin
+# ja laskee puolinuotin. Kolme riippumatonta asiaa sanoo, ettei pistettä ole:
+# tahtilaji on 4/4 eikä puoli + pisteellinen puoli mahdu siihen (2+3=5),
+# kuoron oma tiedosto (musescore/06_agnus_dei, sen t.23 = meidän t.42) laulaa
+# kaksi tavallista puolinuottia, ja tiedoston oma kesto on 24. Lähdesivu
+# kuitenkin *piirtää* pisteen (sivu 3, x 211, y 403) — sama tilanne kuin
+# Lacrymosan t.653: painettu merkki kertoo mitä kaivertaja piirsi eikä sitä,
+# oliko se oikein. Tämä on koko kuorobasson ainoa pisteen ja keston
+# ristiriita — kaikissa kuudessa viivastossa yhteensä ei ole toista.
 OSAT_V = [
+    Osa(mxl="14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl",
+        out="14-Verdi_requiem_agnus-dei-kasin.mxl",
+        osasto="P4", nimi="Kuoro B", yksi_sanarivi=False,
+        korjaukset=(("40", 0, "aseta", "Do", "begin", "Do"),
+                    ("41", 0, "poista", "na,"),
+                    ("42", 0, "poista", "do"),
+                    ("42", 1, "kesto", "24/half.", "24/half"))),
     Osa(mxl="14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl",
         out="14-Verdi_requiem_agnus-dei-kasin.mxl",
         osasto="P5", nimi="Piano 1 / Solisti S", yksi_sanarivi=False,
@@ -1221,9 +1267,16 @@ def sovella(part, osa):
             assert len(ly) == 1 and teksti(ly[0]) == odotettu, (
                 f"t.{tahti} nuotti {i}: odotettiin {odotettu!r}, "
                 f"on {[teksti(x) for x in ly]}")
+            # Pelkkä syllabicin vaihto ei näy tekstissä, ja kuiva ajo, joka
+            # sanoo "'Do' -> 'Do'", ei kerro mitä se aikoo tehdä.
+            vanha_syllabic = ly[0].find("syllabic").text
             ly[0].find("syllabic").text = syllabic
             ly[0].find("text").text = text
-            selosteet.append(f"t.{tahti}: {odotettu!r} -> {text!r}")
+            if text == odotettu and syllabic != vanha_syllabic:
+                selosteet.append(f"t.{tahti}: {text!r} {vanha_syllabic} "
+                                 f"-> {syllabic}")
+            else:
+                selosteet.append(f"t.{tahti}: {odotettu!r} -> {text!r}")
 
         elif laji == "jatka":
             # Melisma: tavu jatkuu seuraavalle nuotille, ja <extend/> piirtää

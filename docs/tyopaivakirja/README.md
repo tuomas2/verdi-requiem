@@ -32,6 +32,7 @@ sellainen on aina merkitty molempiin päihin.
 | *2026-09-10 (d)* | [`2026-09-10-osan-i-piano.md`](2026-09-10-osan-i-piano.md) | Osaan I tuli piano ensimmäistä kertaa — kuoron omasta MuseScore-tiedostosta, 126 tahtia 140:stä. Tahtikartoitus tehdään kohdistamalla tahteja eikä nuottivirtaa, ja kuoron tiedostot merkitsevät leikkaussaumansa tyhjällä pianotahdilla. `yhdista.py` luki `divisions`in yhdestä viitaosastosta ja käytti sitä kaikille riveille, mikä kaatoi koko käännöksen; kaksi uutta tarkistusta. Samalla osan I t.40:n puuttuva puolitauko, ja Kyrien tahtikartoitus ratkesi sivutuotteena |
 | *2026-09-10 (e)* | [`2026-09-10-sisallysluettelo.md`](2026-09-10-sisallysluettelo.md) | Stemman ensimmäiselle sivulle klikattava sisällysluettelo ja samat osat PDF:n kirjanmerkkeinä. Tila sille varataan MuseScorella näkymättömällä valkoisella tekstillä, koska MusicXML:n oma `top-system-distance` ei tee mitään eikä tyhjä rivi vie korkeutta — ja kaksipalstaisena se ei maksanut yhtään sivua. PDF:ään kirjoittaminen käy vain `mutool run`illa, ja MuseScoren oma sisältövirta jättää voimaan 0,06-kertaisen muunnoksen, joka teki lisätystä tekstistä näkymätöntä |
 | *2026-09-10 (f)* | [`2026-09-10-ci-n-mupdf.md`](2026-09-10-ci-n-mupdf.md) | CI oli punaisena eikä pinon jälki kertonut miksi: ubuntu-24.04:n mupdf 1.23.10 palauttaa `outlineIterator()`ista väärän kirjanmerkin nimen, URI:n paikalla nimen ja mukana alustamatonta muistia. Kirjoituspuoli oli kunnossa, vain tarkistus oli sokea; `loadOutline()` antaa saman tuloksen molemmilla versioilla. Ratkesi ajamalla testit CI:n omalla binäärillä |
+| *2026-09-10 (g)* | [`2026-09-10-agnus-dein-yksi-melisma.md`](2026-09-10-agnus-dein-yksi-melisma.md) | Agnus Dein kuorobasso lauloi "do-na" kahdesti tahdeissa 40-43, vaikka lähdesivun tavurivillä on yksi "Do-" ja kahden tahdin melisma — konelukema oli kopioinut ylä-äänten kuvion. Valmiin tahdin katsominen kuvana paljasti toisen vian: t.42:n pisteellinen puolinuotti, jota ei mahdu 4/4:aan. Ja iso asia: osan ✔ oli ylilupaus, koska sanoja ei ollut verrattu tavu tavulta mihinkään — merkintä on nyt ◑ |
 
 ## Where things stand
 
@@ -259,3 +260,20 @@ verifies them was blind. `doc.loadOutline()` answers identically on both
 versions and is what `linkit.lue` uses now. What settled it in one step, after
 guessing had settled nothing, was unpacking CI's own `mutool` deb next to the
 system one and running the suite against it. See *2026-09-10 (f)*.
+
+And last on 2026-09-10, one by-ear report that turned into a correction of
+this file's own promises. **Agnus Dei's chorus bass sang "do-na" twice in
+bars 40–43** where the source page's lyric row has a single "Do-" and a
+two-bar melisma — the machine had copied the upper voices' figure onto the
+bass staff, and the page's own text layer shows the four voices' rows side by
+side with nothing at all on the bass's between x = 45 and x = 259. Reading the
+rebuilt bar back as an image then found a second defect nobody had reported:
+bar 42 printed a **dotted half in a 4/4 bar**, a dot that contradicts its own
+duration, the meter, and the choir's file, and is the movement's only such
+contradiction. The larger result is a demotion. This voice has been **✔**
+since 2026-08-31 on a note-for-note comparison over all 74 bars, but ✔ is
+defined here as note for note *and syllable for syllable*, and its syllables
+were never compared to anything: the choir's files have no lyrics, and the
+check that was run — "does every note carry a syllable" — cannot see a wrong
+one. It is **◑** now, with the reason written down, and the remaining ✔s are
+Lacrymosa and II·9b. See *2026-09-10 (g)*.

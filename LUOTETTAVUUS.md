@@ -41,7 +41,7 @@ bassoa. Basso on siksi oletuksena ◑ ja muut äänet ○.
 | II·10 | Lacrymosa | ○ | ○ | ⚠ | ✔ |
 | III | Offertorio | – | – | – | – |
 | IV | Sanctus | ○ | ○ | ○ | ◑ |
-| V | Agnus Dei | ⚠ | ⚠ | ⚠ | ✔ |
+| V | Agnus Dei | ⚠ | ⚠ | ⚠ | ◑ |
 | VI | Lux aeterna | – | – | – | – |
 | VII | Libera me | ○ | ○ | ○ | ◑ |
 
@@ -90,7 +90,7 @@ vikaa. Muut ovat oletuksia: kuorobasso ◑, muut äänet ○.
 ### V Agnus Dei
 
 - **S, A, T — ⚠ puutteita:** Konelukemisen tulosta ja selvästi kesken: sanapeitto 48–59 %, keksittyä sisältöä ja tyhjiä tahteja tahdeissa 59–74, ja teoksen loppusointu puuttuu kokonaan tahdista 72.
-- **B — ✔ varmistettu:** Vertailtu kuoron omaan tiedostoon nuotti nuotilta koko 74 tahdin matkalta, ei yhtään eroa. 15 virhettä löytyi ja korjattiin, muun muassa neljä kokonaan tyhjää tahtia ja kaksi kohtaa joissa konelukija oli lukenut väärää viivastoa kuoron vaietessa.
+- **B — ◑ osittain:** Nuotit vertailtu kuoron omaan tiedostoon nuotti nuotilta koko 74 tahdin matkalta, ei yhtään eroa. 15 virhettä löytyi ja korjattiin, muun muassa neljä kokonaan tyhjää tahtia ja kaksi kohtaa joissa konelukija oli lukenut väärää viivastoa kuoron vaietessa. Sanat sen sijaan eivät ole tavu tavulta tarkistettuja: kuoron tiedostossa ei ole sanoja lainkaan, ja tehty tarkistus on ollut "kantaako joka nuotti tavun", mikä ei näe väärää tavua. 2026-09-10 laulaja kuuli tahdeista 40-42 sellaisen: konelukema oli kopioinut bassolle ylä-äänten "do-na, do-na" -kuvion, kun bassolla on siellä yksi melisma.
 
 ### VII Libera me
 

@@ -43,7 +43,7 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `nayta.py` | Prints a staff's notes, voices and **lyric rows** per bar — the first tool for any reported error |
 | `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |
 | `harjoitus/*.mscz` | The result, one per singer. Gitignored |
-| `testit/test_*.py` | Tests; all of them: `python3 -m unittest discover -s testit -t .` (433). Run from the repo root — the tests and the scripts both use relative paths |
+| `testit/test_*.py` | Tests; all of them: `python3 -m unittest discover -s testit -t .` (439). Run from the repo root — the tests and the scripts both use relative paths |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
 | `tiivistys.mss` | MuseScore style for the reading parts: multimeasure rests, a bar number on every bar, extra air between systems |
 | `.local/musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files*. **Not in the repo**: authorship is unknown and the filenames carried singers' names, so they were kept out of the public history. They exist only on the user's own machine, and `.local/` is listed in `.git/info/exclude`. (Earlier notes call this directory plain `musescore/`; it moved under `.local/` on 2026-09-10.) |
