@@ -251,6 +251,10 @@ def korjaukset():
     ovat tarkistamatta, eikä tekijä yksin bassoa laulaen niitä tarkista:
     ainoa tie eteenpäin on se, että joku joka laulaa stemman ilmoittaa
     mitä siinä on vikana.
+
+    Toinen kanava on WhatsApp, koska siellä kuoro jo puhuu — mutta sivulle
+    ei kirjoiteta nimeä, numeroa eikä ryhmän nimeä: sivusto on julkinen, ja
+    kuorolaiset tietävät kenelle viesti menee ilman että se on tässä.
     """
     osat = "".join("<dt>%s</dt><dd>%s</dd>" % (nimi, teksti)
                    for nimi, teksti in RAPORTIN_OSAT)
@@ -271,7 +275,7 @@ asti kun korjaus on tehty ja stemma rakennettu uudelleen.</p>
 <dl class="ominaisuudet">{osat}</dl>
 <p class="tausta">Mieluiten yksi virhe per tiketti: ne korjataan ja
 suljetaan yksitellen. Jos GitHub-tunnusta ei ole, kelpaa yhtä hyvin
-sanallinen viesti harjoituksissa — samat tiedot siinäkin.</p>
+WhatsApp-viesti tekijälle — samat tiedot tarvitaan siinäkin.</p>
 </section>
 """
 
