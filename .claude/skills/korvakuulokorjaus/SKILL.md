@@ -37,6 +37,7 @@ line the user reads, but nothing in it is bass-specific.
 | Movement 14 (Agnus Dei), **new** fixes | hand-corrections table since 2026-09-10 | `korjaa_kasin.py`, `OSAT_V` |
 | Movement 13 (IV Sanctus) | hand-corrections table | `korjaa_kasin.py`, `OSA_IV` |
 | Movement 16 (VII Libera me) | hand-corrections table | `korjaa_kasin.py`, `OSA_VII` |
+| A bar is **short or long** — a note sounds too early, or MuseScore calls the file corrupted | `korjaa_kasin.py`, a `lisaa_tauko` or `poista_nuotti` row. A missing rest changes no pitch, so a pitch-by-pitch check against the choir file cannot find it; movement I bar 40 hid inside a "verified" range that way | `korjaa_kasin.py` |
 | Any movement: the source file is right but the **part** is wrong | tool bug | `yhdista.py` + a test |
 | Movement 14: a fix the older hand edits already touched | still baked into `14-…-OMR-korjattu.mxl` | see the last section below |
 | A passage is **missing entirely** | copy it from `musescore/` if the figure already exists elsewhere in the part | `kopioi_tahti`, see *2026-09-03 (b)* |
@@ -188,6 +189,7 @@ someone will have to undo it, because they may.
 
     python3 korjaa_sanat.py            # vain jos PDF-sanat muuttuivat
     python3 korjaa_kasin.py
+    python3 kuoropiano.py              # osan I piano; yhdista lukee sen tuloksen
     python3 yhdista.py Verdi-Requiem-koko.mxl
     python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"
     python3 sivuotsikot.py stemma-basso-1.mxl    # sivujen osaotsikot

@@ -51,6 +51,32 @@ def part(*measures):
     return p
 
 
+def kestollinen(notes):
+    """Yhden tahdin osasto, jossa nuoteilla on kesto — `part()` ei aseta niitä.
+
+    Nuotti on (korkeus, kesto, tyyppi) tai (korkeus, kesto, tyyppi, ääni);
+    korkeus None tarkoittaa taukoa.
+    """
+    p = ET.Element("part", {"id": "P1"})
+    m = ET.SubElement(p, "measure", {"number": "1"})
+    for note in notes:
+        pitch, kesto, tyyppi = note[0], note[1], note[2]
+        voice = note[3] if len(note) > 3 else "1"
+        n = ET.SubElement(m, "note")
+        if pitch is None:
+            ET.SubElement(n, "rest")
+        else:
+            pe = ET.SubElement(n, "pitch")
+            ET.SubElement(pe, "step").text = pitch[0]
+            if pitch[1:-1]:
+                ET.SubElement(pe, "alter").text = {"es": "-1", "is": "1"}[pitch[1:-1]]
+            ET.SubElement(pe, "octave").text = pitch[-1]
+        ET.SubElement(n, "duration").text = str(kesto)
+        ET.SubElement(n, "voice").text = voice
+        ET.SubElement(n, "type").text = tyyppi
+    return p
+
+
 def rows(p):
     return [(m.get("number"), i, ly.get("number"), ly.findtext("syllabic"),
              ly.findtext("text"))
@@ -99,6 +125,38 @@ class Toimenpiteet(unittest.TestCase):
         p = part([(None, [])])
         with self.assertRaises(AssertionError):
             sovella(p, osa([("1", None, "kopioi_tahti", "9")]))
+
+    def test_lisaa_tauko_asettaa_tauon_nuotin_eteen(self):
+        p = kestollinen([("Bes3", 8, "half")])
+        sovella(p, osa([("1", 0, "lisaa_tauko", "8/half", "16")]))
+        notes = p.findall("measure/note")
+        self.assertEqual(len(notes), 2)
+        self.assertIsNotNone(notes[0].find("rest"))
+        self.assertEqual(notes[0].findtext("duration"), "8")
+        self.assertEqual(notes[0].findtext("type"), "half")
+        # Nuotti itse ei liiku eikä muutu.
+        self.assertEqual(notes[1].findtext("pitch/step"), "B")
+        self.assertEqual(notes[1].findtext("duration"), "8")
+
+    def test_lisaa_tauko_perii_nuotin_aanen(self):
+        p = kestollinen([("C3", 4, "quarter", "2")])
+        sovella(p, osa([("1", 0, "lisaa_tauko", "4/quarter", "8")]))
+        self.assertEqual(p.findall("measure/note")[0].findtext("voice"), "2")
+
+    def test_lisaa_tauko_kaataa_jos_summa_ei_taydy(self):
+        # Tämä on toimenpiteen koko idea: se muuttaa tahdin pituutta, joten
+        # oikea pituus pitää sanoa riviltä ja tarkistaa. Väärä summa on
+        # merkki siitä että tauko on väärän mittainen tai väärässä tahdissa.
+        p = kestollinen([("Bes3", 8, "half")])
+        with self.assertRaises(AssertionError):
+            sovella(p, osa([("1", 0, "lisaa_tauko", "4/quarter", "16")]))
+
+    def test_lisaa_tauko_osaa_pisteellisen(self):
+        p = kestollinen([("C3", 4, "quarter")])
+        sovella(p, osa([("1", 0, "lisaa_tauko", "12/half.", "16")]))
+        tauko = p.findall("measure/note")[0]
+        self.assertEqual(tauko.findtext("type"), "half")
+        self.assertEqual(len(tauko.findall("dot")), 1)
 
     def test_jatka_lisaa_melisman_jatkoviivan(self):
         p = part([("C3", [("1", "end", "ic")])])
@@ -500,6 +558,18 @@ class OsaIKokonaisuutena(unittest.TestCase):
             self.bars["51"][1].find("lyric/extend"))
         self.assertEqual([self.tavu("52", i) for i in range(4)],
                          [None, None, None, None])
+
+    def test_tahti_40_alkaa_puolitauolla(self):
+        # Konelukema pudotti puolitauon, jolloin tahti oli 2/4 mittainen ja
+        # "ex" soi ensimmäiseltä iskulta. Kuoron tiedostossa tahti on
+        # puolitauko + B♭3, eli sisääntulo on kolmannella iskulla.
+        notes = self.bars["40"]
+        self.assertEqual(len(notes), 2)
+        self.assertIsNotNone(notes[0].find("rest"))
+        self.assertEqual(notes[0].findtext("duration"), "8")
+        self.assertEqual(kuvaa(notes[1]), "Bes3")
+        self.assertEqual(self.tavu("40", 1), ("1", "begin", "ex"))
+        self.assertEqual(sum(int(n.findtext("duration")) for n in notes), 16)
 
     def test_tahti_108_eleison_on_yhdella_sanarivilla(self):
         self.assertEqual(self.tavu("107", 3), ("1", "begin", "e"))

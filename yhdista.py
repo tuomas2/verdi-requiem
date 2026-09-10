@@ -47,7 +47,7 @@ TARGETS = [
 # ---------------------------------------------------------------- osat
 # (tiedosto, numero partituurissa, nimi)
 MOVEMENTS = [
-    ("01-Verdi_Requiem-kasin.mxl",                  "I",     "Requiem & Kyrie"),
+    ("01-Verdi_Requiem-piano.mxl",                  "I",     "Requiem & Kyrie"),
     ("02-Verdi-Dies_irae-kasin.mxl",                "II·1",  "Dies irae"),
     ("03-Verdi-Tuba_mirum.mxl",                     "II·2",  "Tuba mirum"),
     ("04-Verdi-Mors_stupebit.mxl",                  "II·3",  "Mors stupebit"),
@@ -73,7 +73,11 @@ MOVEMENTS = [
 #   ("P5", 14, None, 1)               kuten yllä, mutta kohdeviivastolle 1
 # Useampi viipale samassa listassa yhdistyy samalle riville.
 MAPPING = {
-    "01-Verdi_Requiem-kasin.mxl": {
+    # HUOM: tämä osa luetaan `-piano.mxl`:stä eikä `-kasin.mxl`:stä, koska
+    # `kuoropiano.py` kirjoittaa siihen pianoviivaston kuoron omasta
+    # MuseScore-tiedostosta. Ketju on korjaa_sanat -> korjaa_kasin ->
+    # kuoropiano -> yhdista.
+    "01-Verdi_Requiem-piano.mxl": {
         # Audiveris pilkkoi solistiviivastot useaan osastoon; ne yhdistetään.
         "Solisti S": ["P7", "P3", "P1"],
         "Solisti M-S": ["P8", "P4", "P2"],
@@ -81,14 +85,14 @@ MAPPING = {
         "Solisti B": ["P11", "P6"],
         "Kuoro S": ["P13"], "Kuoro A": ["P14"],
         "Kuoro T": ["P15"], "Kuoro B": ["P16"],
-        # P17 on tämän osan piano, mutta se on jätetty pois. Audiveriksen
-        # tuottamassa pianostemmassa on tahteja, joihin MuseScoren moottori
-        # kaatuu (Spanner::setTick2, ChordLayout::placeDots), ja soitto
-        # pysähtyi tahtiin 81 kesken osaa. Paikkausyritykset rikkoivat
-        # tiedoston muualta. Tälle riville tulee nyt taukoja; osassa I ei
-        # siis ole pianosäestystä. Palautettavissa siivoamalla
-        # 01-Verdi_Requiem.omr Audiveriksen käyttöliittymässä ja lisäämällä
-        # tähän "Piano": ["P17"].
+        # P17 on tämän osan piano. Audiveriksen tuottamassa pianostemmassa
+        # oli tahteja, joihin MuseScoren moottori kaatuu (Spanner::setTick2,
+        # ChordLayout::placeDots) ja soitto pysähtyi tahtiin 81 kesken osaa,
+        # joten osasto oli 2026-09-10 asti jätetty tästä pois eikä osassa I
+        # ollut pianoa lainkaan. `kuoropiano.py` korvaa nyt koko osaston
+        # kuoron oman MuseScore-tiedoston pianoriisulla, joten kaatava
+        # sisältö ei ole enää tiedostossa ja osasto voidaan lukea.
+        "Piano": ["P17"],
         # P9 on kokonaan tyhjä eikä sitä käytetä.
     },
     "02-Verdi-Dies_irae-kasin.mxl": {
@@ -172,7 +176,7 @@ TITLE_PARTS = ["Solisti S", "Kuoro B"]
 # laulaja lukee tavallista riviä kaikissa muissa osissa.
 # Konelukemisella tuotetut osat: niiden tahtien pituudet normalisoidaan.
 # Sanat on korjattu lähde-PDF:ää vasten, ks. korjaa_sanat.py.
-OMR_SOURCES = {"01-Verdi_Requiem-kasin.mxl",
+OMR_SOURCES = {"01-Verdi_Requiem-piano.mxl",
                "14-Verdi_requiem_agnus-dei-kasin.mxl",
                "10b-Verdi_Dies_irae_paluu-kasin.mxl"}
 
@@ -290,6 +294,96 @@ def measure_meta(part):
                 key_changed = True
         meta[m.get("number")] = (div, beats, btype, fifths, time_changed, key_changed)
     return meta
+
+
+def jaotukset(part):
+    """Osaston divisions-arvo tahdeittain."""
+    ulos, d = {}, None
+    for m in part.findall("measure"):
+        t = m.findtext("attributes/divisions")
+        if t:
+            d = int(t)
+        ulos[m.get("number")] = d
+    return ulos
+
+
+def tarkista_jaotus(filename, ref, src_parts, mapping):
+    """Kaadu jos jokin lähdeosasto käyttää eri divisions-arvoa kuin viite.
+
+    `measure_meta` lukee jaotuksen **yhdestä** osastosta (siitä, jolla on
+    eniten tahteja) ja sitä arvoa käytetään kaikille kohderiveille. Jos jonkin
+    toisen osaston jaotus poikkeaa, yhdistäjän itse tekemät kokotahdin tauot
+    saavat väärän keston, MuseScore pitää tahtia vääränmittaisena ja
+    kieltäytyy koko partituurista ilman `-f`:ää — eikä mikään kerro miksi.
+
+    Näin kävi 2026-09-10, kun osan I pianoviivasto otettiin käyttöön: sen
+    jaotus on 12 ja lauluäänten 4, ja seuraus oli tasan tuo. `kuoropiano.py`
+    yhtenäistää nyt osan I jaotuksen.
+
+    Tämä ei kaada ajoa vaan palauttaa varoitukset, koska ero on olemassa
+    myös vanhoissa lähteissä (osa 08, osasto P3) eikä siellä ole aiheuttanut
+    vikaa: haitta syntyy vain jos yhdistäjä joutuu tekemään juuri siihen
+    tahtiin sisältöä itse. Varsinainen suoja on `tarkista_mitat`, joka
+    tarkistaa valmiin tuloksen.
+    """
+    viite = jaotukset(ref)
+    ulos = []
+    for pid in sorted({s[0] for rows in mapping.values()
+                       for s in normalise(rows)}):
+        part = src_parts.get(pid)
+        if part is None:
+            continue
+        eri = sorted({(d, viite.get(n)) for n, d in jaotukset(part).items()
+                      if d is not None and viite.get(n) is not None
+                      and d != viite.get(n)})
+        for oma, ref_d in eri:
+            ulos.append(f"{filename}: osaston {pid} jaotus {oma}, "
+                        f"viiteosaston {ref_d}")
+    return ulos
+
+
+def tarkista_mitat(parts):
+    """Täyttyykö jokainen valmiin tuloksen tahti oman jaotuksensa mukaan?
+
+    Tämä on se tarkistus, joka olisi kertonut suoraan mikä oli vialla, kun
+    `mscore` alkoi 2026-09-10 kieltäytyä koko partituurista ilman `-f`:ää:
+    osan I pianoviivastolle syntyi kokotahdin taukoja, joiden kesto oli 16
+    vaikka tahti on jaotuksella 12 pituudeltaan 48. MuseScore kertoo vain
+    "corrupted", ei mitä tahtia se tarkoittaa.
+
+    Kestoja ei lasketa äänittäin yhteen vaan kuljetaan tahdin läpi
+    kursorilla, koska ääni voi tulla sisään kesken tahtia `<forward>`in
+    takaa.
+    """
+    ulos = []
+    for name, part in parts.items():
+        div, beats, btype = 4, 4, 4
+        for m in part.findall("measure"):
+            attrs = m.find("attributes")
+            if attrs is not None:
+                if attrs.findtext("divisions"):
+                    div = int(attrs.findtext("divisions"))
+                t = attrs.find("time")
+                if t is not None and t.findtext("beats"):
+                    beats = int(t.findtext("beats"))
+                    btype = int(t.findtext("beat-type"))
+            pituus = div * beats * 4 // btype
+            kohta = ulottuma = 0
+            for e in m:
+                if e.tag == "note":
+                    if e.find("chord") is not None or e.find("grace") is not None:
+                        continue
+                    kohta += int(e.findtext("duration") or 0)
+                elif e.tag == "backup":
+                    kohta -= int(e.findtext("duration") or 0)
+                elif e.tag == "forward":
+                    kohta += int(e.findtext("duration") or 0)
+                ulottuma = max(ulottuma, kohta)
+            if ulottuma != pituus:
+                ulos.append(f"{name} t.{m.get('number')}: ulottuma {ulottuma}, "
+                            f"pitäisi olla {pituus} (divisions {div}, "
+                            f"{beats}/{btype})")
+    return ulos
 
 
 def rest_measure(number, div, beats, btype, staves):
@@ -951,6 +1045,7 @@ def main():
 
     warnings = []
     repaired = 0
+    jaotusvaroitukset = []
     filled = 0
     evened = 0
     elisions = 0
@@ -967,6 +1062,7 @@ def main():
         ref = src_parts[max(src_parts, key=lambda k: len(src_parts[k].findall("measure")))]
         numbers = [m.get("number") for m in ref.findall("measure")]
         meta = measure_meta(ref)
+        jaotusvaroitukset += tarkista_jaotus(filename, ref, src_parts, mapping)
         offset = 0
         if not NUMEROINTI_ALKAA_JOKA_OSASSA_YKKOSESTA:
             offset = DIES_IRAE_SIIRTYMAT.get(filename, 0)
@@ -1114,6 +1210,20 @@ def main():
               f"(elisio, ks. merge_elisions)")
     if repaired:
         print(f"korjattu {repaired} kaksinkertaista nuottiarvoa (piano)")
+    if jaotusvaroitukset:
+        print(f"jaotusero {len(jaotusvaroitukset)} lähdeosastossa "
+              f"(ks. tarkista_jaotus):")
+        for rivi in jaotusvaroitukset:
+            print("  " + rivi)
+    vaarat = tarkista_mitat(parts)
+    if vaarat:
+        # Yhteenveto, ei lista: näitä on 552 ja ne ovat vanhaa tilaa, jonka
+        # MuseScore hyväksyy. Luku on silti tulosteessa, koska se on ainoa
+        # paikka josta huomaa jos se kasvaa. Pianorivin oma nolla on
+        # kiinnitetty testillä.
+        rivit = sorted({r.split(" t.")[0] for r in vaarat})
+        print(f"vääränmittaisia tahteja tuloksessa {len(vaarat)} "
+              f"({len(rivit)} rivillä: {', '.join(rivit)})")
     if tavutettu:
         print(f"korjattu {sum(tavutettu.values())} tavun syllabic-merkintä "
               f"({len(tavutettu)} eri sanassa, ks. suomennos.korjaa_tavutus)")

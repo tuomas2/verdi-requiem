@@ -9,6 +9,7 @@ import zipfile
 import unittest
 import xml.etree.ElementTree as ET
 
+import yhdista
 from yhdista import (DIES_IRAE_ALUT, DIES_IRAE_SIIRTYMAT, ELISIO, MOVEMENTS,
                      OSAOTSIKOT, merge_elisions, normalise_lyrics,
                      osaotsikko, saumaraportti, verse_number,
@@ -316,6 +317,110 @@ class Taukohannat(unittest.TestCase):
         part, alut = osasto([True, False], [True])
         yhdista_taukohannat(part, alut)
         self.assertEqual(part.findall("measure")[2].findall("print"), [])
+
+
+class Jaotusansa(unittest.TestCase):
+    """`divisions` luetaan yhdestä viitaosastosta ja käytetään kaikille.
+
+    2026-09-10: osan I pianoviivasto otettiin käyttöön, sen jaotus on 12 ja
+    lauluäänten 4, ja seuraus oli että yhdistäjän itse tekemät kokotahdin
+    tauot saivat keston 16 eikä 48. `mscore` kieltäytyi koko partituurista
+    ilman `-f`:ää eikä kertonut mistä tahdista on kyse. Nämä kaksi
+    tarkistusta ovat siitä jäänyt suoja.
+    """
+
+    def osasto(self, pid, div):
+        p = ET.Element("part", {"id": pid})
+        m = ET.SubElement(p, "measure", {"number": "1"})
+        a = ET.SubElement(m, "attributes")
+        ET.SubElement(a, "divisions").text = str(div)
+        n = ET.SubElement(m, "note")
+        ET.SubElement(n, "duration").text = str(div * 4)
+        ET.SubElement(n, "voice").text = "1"
+        return p
+
+    def test_jaotusero_raportoidaan(self):
+        ref = self.osasto("P1", 4)
+        varoitukset = yhdista.tarkista_jaotus(
+            "koe.mxl", ref, {"P1": ref, "P2": self.osasto("P2", 12)},
+            {"Kuoro B": ["P1"], "Piano": ["P2"]})
+        self.assertEqual(len(varoitukset), 1)
+        self.assertIn("P2", varoitukset[0])
+        self.assertIn("12", varoitukset[0])
+
+    def test_sama_jaotus_ei_varoita(self):
+        ref = self.osasto("P1", 4)
+        self.assertEqual(
+            yhdista.tarkista_jaotus("koe.mxl", ref,
+                                    {"P1": ref, "P2": self.osasto("P2", 4)},
+                                    {"Kuoro B": ["P1"], "Piano": ["P2"]}),
+            [])
+
+    def test_vaaranmittainen_tahti_loytyy_tuloksesta(self):
+        # Juuri se vika, joka syntyi: kokotahdin tauko jaotuksella 4 kun
+        # tahti on jaotuksella 12.
+        p = ET.Element("part", {"id": "P1"})
+        m = ET.SubElement(p, "measure", {"number": "1"})
+        a = ET.SubElement(m, "attributes")
+        ET.SubElement(a, "divisions").text = "12"
+        n = ET.SubElement(m, "note")
+        ET.SubElement(n, "rest").set("measure", "yes")
+        ET.SubElement(n, "duration").text = "16"
+        ET.SubElement(n, "voice").text = "1"
+        vaarat = yhdista.tarkista_mitat({"Piano": p})
+        self.assertEqual(len(vaarat), 1)
+        self.assertIn("ulottuma 16", vaarat[0])
+        self.assertIn("pitäisi olla 48", vaarat[0])
+
+    def test_forwardin_takaa_alkava_aani_ei_ole_virhe(self):
+        p = ET.Element("part", {"id": "P1"})
+        m = ET.SubElement(p, "measure", {"number": "1"})
+        a = ET.SubElement(m, "attributes")
+        ET.SubElement(a, "divisions").text = "12"
+        for kesto in (48,):
+            n = ET.SubElement(m, "note")
+            ET.SubElement(n, "duration").text = str(kesto)
+            ET.SubElement(n, "voice").text = "1"
+        b = ET.SubElement(m, "backup")
+        ET.SubElement(b, "duration").text = "48"
+        f = ET.SubElement(m, "forward")
+        ET.SubElement(f, "duration").text = "24"
+        n = ET.SubElement(m, "note")
+        ET.SubElement(n, "duration").text = "24"
+        ET.SubElement(n, "voice").text = "2"
+        self.assertEqual(yhdista.tarkista_mitat({"Piano": p}), [])
+
+
+class OsanIPiano(unittest.TestCase):
+    """Osan I piano tulee kuoron tiedostosta; ks. `kuoropiano.py`.
+
+    Vaatii että johdetut/-partituuri on rakennettu.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        polku = os.path.join("johdetut", "Verdi-Requiem-koko.mxl")
+        if not os.path.exists(polku):
+            raise unittest.SkipTest("yhdistettyä partituuria ei ole rakennettu")
+        with zipfile.ZipFile(polku) as z:
+            nimi = next(n for n in z.namelist()
+                        if not n.startswith("META-INF")
+                        and n.lower().endswith(".xml"))
+            juuri = ET.fromstring(z.read(nimi))
+        nimet = {p.get("id"): (p.findtext("part-name") or "").strip()
+                 for p in juuri.findall("part-list/score-part")}
+        pid = next(p for p, n in nimet.items() if n == "Piano")
+        part = next(x for x in juuri.findall("part") if x.get("id") == pid)
+        cls.osa_i = ET.Element("part", {"id": pid})
+        for m in part.findall("measure")[:140]:
+            cls.osa_i.append(m)
+
+    def test_osan_i_pianolla_on_savelia(self):
+        # Ennen 2026-09-10 tämä rivi oli osassa I pelkkää taukoa.
+        self.assertGreater(len(list(self.osa_i.iter("pitch"))), 1000)
+
+    def test_jokainen_osan_i_pianotahti_on_oikean_mittainen(self):
+        self.assertEqual(yhdista.tarkista_mitat({"Piano": self.osa_i}), [])
 
 
 class TahtinumerotValmiissaPartituurissa(unittest.TestCase):

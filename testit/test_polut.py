@@ -63,6 +63,7 @@ def taulukoiden_nimet():
     """Jokainen tiedostonimi, jonka jokin skriptin taulukko mainitsee."""
     import korjaa_kasin
     import korjaa_sanat
+    import kuoropiano
     import sisallys
     import yhdista
 
@@ -76,6 +77,8 @@ def taulukoiden_nimet():
         nimet.update([s.mxl, s.pdf, s.out])
     for osa in korjaa_kasin.OSAT:
         nimet.update([osa.mxl, osa.out])
+    for piano in kuoropiano.PIANOT:
+        nimet.update([piano.mxl, piano.out, piano.piano])
     nimet.update(pdf for _nimi, pdf in sisallys.STEMMAT)
     nimet.add(sisallys.ULOS)
     return nimet

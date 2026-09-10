@@ -94,85 +94,41 @@ puolellaan — nämä ovat aitoja kysymyksiä:
   sisältöä, tyhjiä tahteja, sanapeitto 48–59 %. Kuoron oma tiedosto kattaa
   osasta vain 44 tahtia, joten se ei auta siellä. 16 tahtia kolmelle äänelle on
   oikeaa työtä, mutta se on ainoa tapa saada osa kuntoon.
-- **Pianoriisu kuoron tiedostoista sinne, missä ne kattavat.** Laulajan idea
-  2026-09-10, ei aloitettu. Kuoron omissa MuseScore-tiedostoissa on oma
-  `Piano`-osasto, ja sen sävelet ovat lähtökohtaisesti oikeat siinä missä
-  meidän pianomme on konelukemaa. Mitattuna: `01_requiem`-tiedostossa piano on
-  1620 nuottia 127 tahdissa ja `04_dies_irae_2`:ssa 1739 nuottia 96 tahdissa
-  (kummassakin lisäksi `Finger Snap` -klikkiraita, jota ei tarvita). Kaksi
-  syytä miksi tämä kannattaisi:
+- **Pianoriisu osiin 10b ja 14** kuoron tiedostoista. Osa I on tehty
+  2026-09-10 (`kuoropiano.py`): sen pianoviivasto tulee nyt kuoron omasta
+  MuseScore-tiedostosta, 126 tahtia 140:stä, ja se **soi harjoitustiedostossa**
+  — aiemmin osassa I ei ollut pianoa lainkaan. Kaksi muuta jäivät tekemättä eri
+  syistä:
 
-  1. **Osassa I ei ole pianoa lainkaan** — ei konelukemaa, ei mitään; se on
-     oma avoin kohtansa ([`docs/menetelmat/yhdistaminen.md`](docs/menetelmat/yhdistaminen.md),
-     *Movement I has no piano*). Kuoron tiedostossa se on. Tämä on koko idean
-     isoin yksittäinen voitto.
-  2. **Piano on ratkaisija sävelkysymyksissä.** Juuri se esti yllä olevien
-     kolmen pudonneen b:n korjaamisen: meidän pianomme sanoo G♭, mutta se on
-     samaa konelukemaa kuin lauluäänet, joten se on argumentti eikä mittaus.
-     Riippumaton piano tekisi siitä mittauksen — ja samalla se ratkaisisi
-     saman luokan kysymyksiä jatkossa ilman kirjaa.
+  - **10b: kaksi lähdettä ovat eri mieltä oktaavista kuudessa tahdissa**, ja
+    viisi niistä on avausjuoksutuksen oikea käsi (t.3, 4, 6, 13 ja 14 kuorolla
+    oktaavia ylempänä, t.10 alempana). Se on yksi päätös eikä kuusi, mutta ei
+    meidän päätettävissä: meidän lähde on painetun laitoksen konelukema ja
+    kuoron tiedosto on käsin kirjoitettu, eikä kumpikaan kerro kummassa
+    oktaavissa riisu kuuluu olla. **Tämän voi kysyä kuoronjohtajalta tai
+    keneltä tahansa, jolla on partituuri edessään.** Sen jälkeen kopiointi on
+    nopea: kartoitus on valmis (meidän t.1–40 = kuoron t.1–40) ja koneisto on
+    olemassa. Samalla korjautuisi t.6–8, joissa meidän pianossa on 3, 1 ja 1
+    nuottia kuoron 8, 8 ja 7:n sijasta — siellä meidän lähde on selvästi
+    puutteellinen eikä kyse ole tulkinnasta.
+  - **14: hyöty on pienempi.** Kartoitus on valmis (kolme lohkoa: meidän
+    t.14–26, 37–45 ja 56–72, yhteensä 39 tahtia 74:stä) ja oktaavieroja on
+    yksi, mutta tämän osan piano ei ole rikki samalla tavalla kuin osan I oli.
 
-  **Tahtikartoitus on nyt mitattu, ja se oli helpompi kuin luultiin.**
-  Kohdistus tehtiin tahdeittain eikä nuottivirtana: tahdin tunniste on
-  kaikkien neljän kuoroäänen sisältö puolisävelaskeleina, joten kaksi tahtia
-  vastaavat toisiaan vain jos kaikki neljä ääntä ovat samaa mieltä — kartoitus
-  tarkistaa itsensä eikä tuota "noin siinä kohtaa" -numeroita. Tyhjät tahdit
-  jätetään kohdistuksen ulkopuolelle, koska tyhjä tunniste osuu mihin tahansa
-  toiseen tyhjään (ilman tätä osan 10b loppu kohdistui Lacrymosan puolelle).
+  Osaan I jäi kaksi aukkoa, joissa kuoron tiedostossa ei ole tahteja
+  lainkaan: **t.79–90** (solistijakso, jonka kuoro leikkasi pois) ja
+  **t.139–140**. Ne ovat pianolla taukoa. Aukko on ikävässä paikassa, koska
+  juuri siinä lasket taukoja etkä kuule mitään — mutta se ei ole korjattavissa
+  kuoron tiedostosta, koska sitä ei siellä ole.
 
-  | Osa | Kartoitus | Kattavuus | Kunto |
-  |---|---|---|---|
-  | **01** | meidän t.1–78 ↔ kuoron t.1–78 (siirtymä 0), meidän t.90–138 ↔ kuoron t.79–127 (siirtymä **+11**) | 127/140 tahtia | **Valmis.** Kaksi vakiosiirtymää, todistettu 59 + 23 täsmälleen samalla tahdilla; rajat naulattu tahdin tarkkuudella. Puuttuu t.79–89 (solistijakso, jonka kuoro leikkasi pois) ja t.139–140 |
-  | **10b** | meidän t.1–39 ↔ kuoron t.1–39 (siirtymä 0) | 39/51 tahtia | **Valmis.** Yksi siirtymä. Loput t.41–51 ovat kuorolle taukoa, ja kuoron tiedosto jatkaa siitä Lacrymosaan |
-  | **14** | kolme lohkoa: t.14–26 ↔ 4–16 (+10), t.41–43 ↔ 22–24 (+19), t.59–71 ↔ 31–43 (+28) | ~33/74 tahtia | **Kesken.** Keskimmäinen lohko nojaa vain kahteen osuvaan tahtiin, joten sen rajat pitää naulata käsin |
-
-  Muut mitatut asiat:
-
-  - **Osan I piano ei olekaan puuttuva vaan hylätty.** `yhdista.py`:n
-    `MAPPING`-kommentti kertoo miksi: konelukema tuotti sinne 1912 nuottia,
-    mutta MuseScoren moottori kaatuu niihin (`Spanner::setTick2`,
-    `ChordLayout::placeDots`) ja soitto pysähtyi tahtiin 81, joten `P17`
-    jätettiin pois. Kuoron piano siis **korvaisi tunnetusti rikkinäisen
-    osaston** eikä täyttäisi tyhjiötä — ja kiertäisi sen kaatumisen kokonaan.
-    Tiheys on samaa luokkaa (kuorolla 1620 nuottia 127 tahdissa, meidän
-    hylätyssä 1912 nuottia 140:ssä), eli kyse on aidosta pianoriisusta eikä
-    luurangosta.
-  - **Divisions**: kuoron tiedostossa 12, meidän osassa 01 sekä 4 että 12.
-    Kestot pitää siis skaalata, mutta kertoimella 3 — pieni kokonaisluku.
-  - **Tahtien pituudet täsmäävät** joka kartoitetussa tahdissa kahta lukuun
-    ottamatta, ja kumpikin on meidän tiedostomme oma vanha vika eikä
-    kartoituksen ongelma (t.119 on 9/8 mittainen, mutta `yhdista.py` korjaa sen
-    itse; t.40 ei, ks. alla).
-
-  Jäljelle jäävät kysymykset:
-
-  - **Kattavuus.** Vain neljä kansiota kahdeksasta on käyty läpi ääni ääneltä,
-    eivätkä tiedostot kata kaikkia osia. Osassa 01 aukko t.79–89 on juuri se
-    solistijakso, jossa piano soittaa ja jossa laulaja laskee taukoja — eli
-    kaikkein huonoin paikka aukolle.
-  - **Alkuperä.** `.local/musescore/` on tarkoituksella versionhallinnan
-    ulkopuolella, koska tiedostojen tekijää ei tiedetä ja tiedostonimissä on
-    laulajien nimiä. Sävelten *vertaaminen* niihin ei vie mitään repoon;
-    pianon *kopioiminen* vie. Se on kysymys, joka pitää kysyä ennen kuin
-    yhtään tahtia siirretään julkiseen partituuriin.
-
-- **Osan I t.40 on puolen tahdin mittainen — vika omassa stemmassasi.**
-  Löytyi 2026-09-10 pianokartoituksen sivutuotteena. Kuorobasson tahdissa 40
-  on vain puolinuotti B♭3 tavulla "ex", eli 2/4 neljästä neljäsosasta, ja
-  **alusta puuttuu puolitauko**: kuoron tiedostossa tahti on puolitauko + B♭3.
-  Sisääntulo "ex-au-di" kuuluu siis kolmannelle iskulle, ei ensimmäiselle.
-  Painetussa stemmassa haitta on pieni (MuseScore asettelee nuotin suunnilleen
-  oikeaan kohtaan, mutta taukoa ei piirry), mutta harjoitustiedostossa nuotti
-  **soi kaksi iskua liian aikaisin**. Tämä ei löytynyt aiemmasta t.1–78:n
-  tarkistuksesta, koska se vertaili säveliä eikä rytmiä. Korjaus tarvitsee
-  `korjaa_kasin.py`:yn uuden toimenpiteen (tauon lisäys); sellaista ei vielä
-  ole.
-
-- **Osan I Kyrie, t.79–140.** Suurin yhtenäinen tarkistamaton pätkä osassa I.
-  Kuoron tiedosto ei kelpaa siihen sellaisenaan, koska sen tahdit lakkaavat
-  vastaamaan meidän tahteja noin tahdista 94. Jos joku selvittää sen
-  tahtikartoituksen samalla tavalla kuin Lacrymosalle tehtiin 2026-09-03,
-  koko pätkä avautuu ilman kirjaa.
+- **Osan I Kyrie, t.79–140.** Suurin yhtenäinen tarkistamaton pätkä osassa I —
+  ja **este on nyt poissa**. Tahtikartoitus, jota tässä kohdassa on pidetty
+  ratkaisemattomana ("tahdit lakkaavat vastaamaan noin tahdista 94"), on siisti
+  vakiosiirtymä: meidän t.91–138 ovat kuoron t.80–127, koska kuoro leikkasi
+  pois solistijakson t.79–89. Sillä siirtymällä Kyrieen jää **13 tarkistettavaa
+  tahtia** (96, 103, 105, 115–118, 120–121, 123–126); loput 32 täsmäävät
+  kaikissa neljässä äänessä. Tämä on työtä tiedostojen ääressä, ei kirjan
+  ääressä, eikä sitä tarvitse tehdä kuoronjohtajan kanssa.
 
 ## Mitä *ei* kannata katsoa
 
@@ -182,6 +138,7 @@ puolellaan — nämä ovat aitoja kysymyksiä:
 - **Osa I, t.35 ja t.51–52**: ratkaistu kirjasta 2026-09-10, ks. yllä.
 - **Sanctuksen basson valinta**: ratkaistu, luet Basso I:tä ja se on oikea.
 - **II·9b:n kuorobasso**: valmis, ei eroja kuoron tiedostoon.
+- **Osan I t.40**: puuttuva puolitauko korjattu 2026-09-10, joten sisääntulo "ex-au-di" on nyt kolmannella iskulla niin kuin kuuluu — ja harjoitustiedostossa se soi oikeasta paikasta.
 - **Rex tremendaen S/A/T sanat**: S/A/T eivät laula säkeistön säkeitä lainkaan,
   vain "sal-va me" (altto ja tenori lisäksi "fons pi-e-ta-tis" tahdeissa
   364–366). Se bassossa ollut vika — säe kahdesti, seuraava pois — ei voi olla

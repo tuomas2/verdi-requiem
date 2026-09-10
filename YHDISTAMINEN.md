@@ -27,6 +27,7 @@ komennot toimivat sekä nimellä että täydellä polulla.
 | `harjoitus.py` | Rakentaa harjoittelutiedoston yhdelle laulajalle |
 | `korjaa_sanat.py` | Korjaa osien 01, 14 ja II·9b:n kuorosanat lähde-PDF:ää vasten |
 | `korjaa_kasin.py` | Käsin todennetut korjaukset (osat I, II·1, II·4, II·6, II·10, IV ja VII), taulukkona — tavut, korkeudet, rytmi, sanarivit, tavutus, sävellajin paikka |
+| `kuoropiano.py` | Osan I pianoviivasto kuoron omasta MuseScore-tiedostosta, todennetun tahtikartoituksen mukaan |
 | `suomennos.py` | Latinan sanojen suomennos tavujen alle, tavutuksen korjaus, ja `--teksti` tulostaa koko tekstin juoksevana proosana |
 | `nayta.py` | Näyttää viivaston nuotit, äänet ja sanarivit tahdeittain |
 | `fix-mxl.py` | Korjaa Audiveris-viennistä puuttuvat tahdit |
@@ -83,17 +84,23 @@ Jos lähdeaineisto muuttuu, aja koko ketju **tässä järjestyksessä** —
 
     python3 korjaa_sanat.py                       # 1. sanat PDF:stä
     python3 korjaa_kasin.py                       # 2. todennetut korjaukset
-    python3 yhdista.py Verdi-Requiem-koko.mxl     # 3. partituuri
-    python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"   # 4. stemmat
-    python3 sivuotsikot.py stemma-basso-1.mxl     # 5. sivujen osaotsikot
-    python3 paivays.py stemma-basso-1.mxl         # 6. päiväys ensimmäiselle sivulle
+    python3 kuoropiano.py                         # 3. osan I piano
+    python3 yhdista.py Verdi-Requiem-koko.mxl     # 4. partituuri
+    python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"   # 5. stemmat
+    python3 sivuotsikot.py stemma-basso-1.mxl     # 6. sivujen osaotsikot
+    python3 paivays.py stemma-basso-1.mxl         # 7. päiväys ensimmäiselle sivulle
     "/Applications/MuseScore 4.app/Contents/MacOS/mscore" \
         -S tiivistys.mss -o stemma-basso-1.pdf stemma-basso-1.mxl
-    python3 harjoitus.py --stemma "Basso I"       # 7. harjoittelutiedosto
-    python3 sisallys.py                           # 8. sisällysluettelo
-    python3 suomennos.py --teksti stemma-basso-1.mxl   # 9. lue teksti läpi
+    python3 harjoitus.py --stemma "Basso I"       # 8. harjoittelutiedosto
+    python3 sisallys.py                           # 9. sisällysluettelo
+    python3 suomennos.py --teksti stemma-basso-1.mxl   # 10. lue teksti läpi
 
-Vaihe 6 on viimeinen ennen PDF:ää: se merkitsee stemmaan päivän, jona sen
+Vaihe 3 on uusi 2026-09-10: se kirjoittaa osan I pianoviivaston kuoron omasta
+MuseScore-tiedostosta ja tuottaa `01-Verdi_Requiem-piano.mxl`:n, jota
+`yhdista.py` lukee `-kasin.mxl`:n sijasta. Jos sen jättää ajamatta, osan I
+piano jää edelliseen ajoon eikä mikään huomauta siitä.
+
+Vaihe 7 on viimeinen ennen PDF:ää: se merkitsee stemmaan päivän, jona sen
 sisältö viimeksi muuttui, ja lataa sen pienellä ensimmäisen sivun vasempaan
 ylälaitaan. Päivä ei ole rakennuspäivä vaan verrataan gitissä olevaan
 versioon, joten muuttumaton stemma pitää vanhan päivänsä. Sivusto lukee
@@ -508,16 +515,19 @@ solistiriveihin ei kosketa lainkaan.
 
 Nyt sekä partituuri että kaikki kahdeksan stemmaa kääntyvät **ilman `-f`-lippua**.
 
-**Osassa I ei ole pianosäestystä.** Sen pianostemma tuli konelukemisesta, ja
-siinä on tahteja, joihin MuseScoren moottori kaatuu: tiedosto avautui ilman
-varoitusta mutta soitto pysähtyi tahtiin 81 kuin seinään. Neljä eri
-paikkausyritystä rikkoi tiedoston muualta, joten pianorivi jätettiin osasta I
-pois ja sen tilalla on taukoja. Lauluäänet soivat normaalisti. Palautus
-onnistuu siivoamalla `01-Verdi_Requiem.omr` Audiveriksessa ja lisäämällä
-kartoitukseen takaisin `"Piano": ["P17"]`.
+**Osassa I on pianosäestys 2026-09-10 lähtien, ja se tulee kuoron omasta
+tiedostosta.** Konelukemisesta tullut pianostemma oli käyttökelvoton: tiedosto
+avautui ilman varoitusta mutta soitto pysähtyi tahtiin 81 kuin seinään, ja
+neljä paikkausyritystä rikkoi tiedoston muualta, joten pianorivi jätettiin
+osasta I pois. `kuoropiano.py` korvaa nyt koko pianoviivaston kuoron oman
+MuseScore-harjoitustiedoston pianoriisulla, joten kaatava sisältö ei ole enää
+tiedostossa lainkaan. Kuoron tiedostossa ei ole meidän tahteja 79-90 eikä
+139-140 (se leikkasi solistijakson pois), joten ne 14 tahtia ovat pianolla
+taukoa; muut 126 soivat.
 
 Soivuuden voi tarkistaa MIDI-viennillä: `mscore -o x.mid Verdi-Requiem-koko.mxl`.
-Nyt se ulottuu 1699 tahtiin; aiemmin 81:een.
+Pianoraita ulottuu nyt koko partituurin loppuun asti, samaan pituuteen kuin
+lauluäänet; ennen kuoron pianoa se pysähtyi tahtiin 81.
 
 ## Sävellajin vaihto väärässä tahdissa
 

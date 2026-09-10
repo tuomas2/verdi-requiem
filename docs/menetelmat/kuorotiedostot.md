@@ -45,38 +45,79 @@ below).
 | `6 Agnus Dei` | 44 | Same tune as `14` (74 measures, OMR), but shorter — see below |
 | `7 Libera me` + `8 Libera me 2` | 137 + 239 = 376 | `16-Libera_Me.mxl` (421 measures) split into two rehearsal halves — confirmed, see below |
 
-## The piano in these files, and what it could be worth
+## The piano in these files: movement I now uses it
 
-Recorded 2026-09-10 as the user's idea, **not started.** Every choir file
-carries its own `Piano` part — measured: `01_requiem` 1620 notes over 127 bars,
-`04_dies_irae_2` 1739 over 96 — plus a `Finger Snap` click track that is of no
-use here. Two reasons to want it:
+Every choir file carries its own `Piano` part — measured: `01_requiem` 1620
+notes over 127 bars, `04_dies_irae_2` 1739 over 96, `06_agnus_dei` its own —
+plus a `Finger Snap` click track that is of no use here. The user's idea
+2026-09-10; **movement I is done**, movements 10b and 14 are not.
 
-1. **Movement I has no piano at all** in our score, which is its own open item.
-   The choir file has one.
-2. **Our piano is not an independent source and it needs to be.** In movements
-   01, 14 and II·9b it comes out of the same Audiveris pass as the voices, so
-   when it agrees with the choir file against our own vocal staff — as it does
-   at II·9b bars 605 and 612 — that is an argument and not a measurement, and
-   three near-certain dropped flats are sitting unapplied because of it. A
-   piano from a different source would decide that class of question without
-   the book.
+### The bar mapping, and how to measure one
 
-What has to be settled first, and why this is not a small job:
+Align **bars**, not a note stream. A bar's signature is all four chorus
+voices' content in semitones, so two bars correspond only if all four voices
+agree — the mapping then checks itself and never produces the "somewhere near"
+numbers the rule above warns about. Two details, each of which gave a wrong
+answer first:
 
-- **A bar mapping per movement.** These are the choir's condensed chorus-only
-  cut, so the two sides' bars do not correspond throughout: movement I is 127
-  bars against our 140 and stops corresponding around bar 94. Copying without
-  the mapping would land the piano on the wrong bars, and the standing rule
-  above applies with full force — never take a bar number from a `difflib`
-  alignment.
-- **Coverage.** Four of the eight folders have been compared voice by voice;
-  none covers a whole movement by definition, and Agnus Dei covers 44 bars of
-  74.
-- **Provenance.** These files are outside version control precisely because
-  their authorship is unknown and the filenames carry singers' names.
-  *Comparing* against them puts nothing in the repo; *copying* their piano
-  into the published score does. Ask before moving a single bar.
+- **Drop rests from the signature.** The same empty bar is one whole rest on
+  one side and two half rests on the other. With rests in, movement I's bars
+  15–65 came out as non-corresponding, which is the opposite of the truth.
+- **Then leave empty bars out of the alignment.** With rests dropped, an empty
+  bar's signature is `((),(),(),())` and matches any other empty bar — which is
+  what aligned movement 10b's tail against Lacrymosa's opening on the first
+  attempt.
+
+Where the chorus is silent, **the piano itself is the anchor**: our OMR piano
+is wrong here and there but identifies a bar. Jaccard overlap of the two
+pianos' pitch sets runs 0.86–0.92 inside a block and collapses to 0.00 at its
+edge, which is how movement 10b's boundary was pinned to bar 40 exactly.
+
+And the structural key: **the choir files mark every splice with an empty piano
+bar.** Segmenting on those gives the blocks without any threshold guessing.
+
+| Movement | Mapping | Coverage | State |
+|---|---|---|---|
+| 01 | ours 1–78 ↔ theirs 1–78; ours 91–138 ↔ theirs 80–127 (**+11**) | 126/140 | **In use**, see `kuoropiano.py` |
+| 10b | ours 1–40 ↔ theirs 1–40 | 40/51 | Mapped, **not copied** — see the octaves below |
+| 14 | ours 14–26 ↔ 4–16 (+10); 37–45 ↔ 18–26 (+19); 56–72 ↔ 28–44 (+28) | 39/74 | Mapped, not copied |
+
+Movement 14's middle block looked too weakly anchored at first (two matching
+chorus bars), and the chorus settled it after all: our bars 37–39 are tacet in
+soprano, alto and bass on both sides, and 40–45 match note for note, so the
+block's position is forced. Our chorus **tenor** has content in 37–39 where the
+choir file has rests — a duplicate of a figure that belongs elsewhere, which is
+the "fabricated content" that movement's S/A/T is known for.
+
+### Where the two pianos disagree, and why 10b is not copied
+
+Checked per bar, and also at ±12 semitones so a systematic register
+disagreement cannot hide:
+
+| Movement | Same | Close | **Octave apart** | Other |
+|---|---|---|---|---|
+| 01 | 63 | 27 | **0** | 7 |
+| 10b | 17 | 8 | **6** | 9 |
+| 14 | 25 | 7 | **1** | 4 |
+
+Movement 01 has no register disagreement anywhere, which is what made it safe
+to take wholesale. **Movement 10b has six**, five of them the right hand of the
+opening descending figure (bars 3, 4, 6, 13, 14 an octave up in the choir file,
+bar 10 an octave down) — one decision, not six, but not ours to make: our
+source is an OMR of a printed edition and the choir file is hand-entered, and
+nothing in either settles which register the reduction belongs in. Its bars
+6–8 are a different matter: our piano has 3, 1 and 1 notes where the choir file
+has 8, 8 and 7, so there ours is simply missing content.
+
+### Provenance, and the one file that crossed the line
+
+These files are outside version control because their authorship is unknown and
+the filenames carry singers' names. *Comparing* against them puts nothing in
+the repo; *copying* their piano does. Movement I's piano therefore lives in
+`lahteet/01-kuoropiano.musicxml` — one identifiable file, with an
+`<identification><rights>` saying where it came from and that the author is
+unknown — so that what was taken is visible rather than mixed into a derived
+file. The user asked for it after being told this.
 
 ## Method: pitch-sequence matching, no lyrics needed
 
