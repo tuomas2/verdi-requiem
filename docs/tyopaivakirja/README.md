@@ -27,6 +27,7 @@ sellainen on aina merkitty molempiin päihin.
 | *2026-09-09 (c)* | [`2026-09-09-suomennoksen-tasaus.md`](2026-09-09-suomennoksen-tasaus.md) | Suomennos alkaa samasta kohdasta kuin latinan tavu eikä keskity sen alle: Edwinin merkkileveydet mitattiin ilman fonttitiedostoa |
 | *2026-09-09 (d)* | [`2026-09-09-rex-tremendaen-sakeet-ja-taukohannat.md`](2026-09-09-rex-tremendaen-sakeet-ja-taukohannat.md) | Rex tremendae toisti säkeistön yhtä säettä ja pudotti seuraavan (t.340-341, 362-363); divisin sanarivit t.367-369; p tahteihin 607 ja 677; osan 10b oma korjaustaulukko, ja mitattuna sen käsikerros ei koskaan ollut vaarassa; taukohännät liitetään seuraavan osan riviin, 3-5 riviä per stemma |
 | *2026-09-10* | [`2026-09-10-kuorotiedostot-ja-osan-i-savelet.md`](2026-09-10-kuorotiedostot-ja-osan-i-savelet.md) | Kuoron omat tiedostot takaisin koneelle `.local/musescore/`:een; osan I sopraanon ja alton sävellajivahinko korjattu, ja nuottipään korkeus luetaan nyt lähdesivun fontista säveleksi — yksitoista säveltä, neljätoista tavua, kaksi Rex tremendaen sävelvirhettä ja "Sy-bil-la" |
+| *2026-09-10 (b)* | [`2026-09-10-stemman-paivays.md`](2026-09-10-stemman-paivays.md) | Jokainen stemma kertoo nyt itse, milloin sen sisältö viimeksi muuttui: päivä PDF:n ensimmäisen sivun ylälaidassa ja sivustolla latauslinkin alla, eikä rakennuspäivänä vaan gitin versioon verraten — ja `<credit>`in kaksi mitattua yllätystä matkan varrelta |
 
 ## Where things stand
 
@@ -173,3 +174,9 @@ in the PDF's music font is now read as a pitch** (treble clef baseline = B4,
 bass = D3, one step = 1.5625 pt), so a single note can be checked against the
 printed page without rendering anything — and it defended our reading against
 the choir file eight times out of ten. See *2026-09-10*.
+
+The same day, later: **every part now says when it last changed** — small at
+the top left of the PDF's first page, and under the download link on the
+site, both from one stamp in the `.mxl`. The date is not the build date but
+the part compared against its committed self, so an unchanged voice keeps its
+old date however often it is rebuilt. See *2026-09-10 (b)*.

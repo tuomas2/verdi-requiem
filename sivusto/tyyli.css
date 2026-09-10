@@ -137,6 +137,12 @@ a{color:var(--rubric)}
 }
 .lataukset .muodot a{color:var(--ink-soft);text-decoration:none}
 .lataukset .muodot a:hover{color:var(--rubric);text-decoration:underline}
+/* Päiväys on stemman ikä, ei sen nimi: pienimmällä ja vaaleimmalla, jotta
+   se vastaa kysymykseen "onko minulla uusin" vasta kun sitä kysytään. */
+.lataukset .paivays{
+  display:block;margin-top:.1rem;
+  font-size:.62rem;color:var(--ink-soft);opacity:.75;
+}
 .lataukset img{
   display:block;border:1px solid var(--rule);background:#fff;
   margin-bottom:.4rem;

@@ -18,7 +18,7 @@ kuoron oman nuottikirjan kanssa**, ja stemman on oltava tiivis.
 
 | | |
 |---|---|
-| `stemmat/stemma-*.pdf` | Kahdeksan stemmaa: S/A/T/B × I/II. Tahtinumero joka tahdin päällä, käynnissä olevan osan nimi joka sivun yläreunassa, latinan sanojen suomennos tavujen alla pienemmällä |
+| `stemmat/stemma-*.pdf` | Kahdeksan stemmaa: S/A/T/B × I/II. Tahtinumero joka tahdin päällä, käynnissä olevan osan nimi joka sivun yläreunassa, latinan sanojen suomennos tavujen alla pienemmällä, ja ensimmäisen sivun ylälaidassa päivä jona stemma viimeksi muuttui |
 | `johdetut/Verdi-Requiem-koko.mxl` | Koko teos yhtenä partituurina: 15 viivastoa, 1807 tahtia |
 | `stemmat/stemmat-sisallys.txt` | Miltä sivulta mikin osa alkaa kussakin kahdeksassa stemmassa |
 | `harjoitus.py` | Rakentaa harjoittelutiedoston, jossa oma ääni soi trumpettina ja muut kuuluvat mutta eivät näy |
@@ -70,6 +70,7 @@ python3 korjaa_kasin.py                        # käsin todennetut korjaukset
 python3 yhdista.py Verdi-Requiem-koko.mxl      # yhdistetty partituuri
 python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"
 python3 sivuotsikot.py stemma-basso-1.mxl      # osan nimi joka sivulle
+python3 paivays.py stemma-basso-1.mxl          # päiväys ensimmäiselle sivulle
 mscore -S tiivistys.mss -o stemmat/stemma-basso-1.pdf stemmat/stemma-basso-1.mxl
 python3 sisallys.py                            # sisällysluettelo
 python3 -m unittest discover -s testit -t .

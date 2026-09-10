@@ -187,6 +187,7 @@ the standing example.
     python3 yhdista.py Verdi-Requiem-koko.mxl
     python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"
     python3 sivuotsikot.py stemma-basso-1.mxl    # sivujen osaotsikot
+    python3 paivays.py stemma-basso-1.mxl        # päiväys ensimmäiselle sivulle
     mscore -S tiivistys.mss -o stemmat/stemma-basso-1.pdf stemmat/stemma-basso-1.mxl
     python3 harjoitus.py --stemma "Basso I"
     python3 sisallys.py                # jos sivumäärät muuttuivat
@@ -206,6 +207,16 @@ but committed, and a test fails if it is stale.
 scratch) and **before** rendering. It runs `mscore` itself, twice per part, to
 read the computed page layout back.
 
+`paivays.py` runs **last, right before rendering**: it stamps the part with
+the date its content last changed, and the site reads that same stamp. The
+date is not the build date — the part is compared against the version in git
+with the stamp taken off both, so a part that did not change keeps its old
+date. That means a fix that never reaches a commit keeps re-dating the part
+to today, which is correct and not a bug. Skipping the script is what breaks
+the promise: the reader is told a stale date. If it stops with "vienti ei
+sisältänyt yhtään credittiä", let it stop — writing the date anyway would
+take the title and the composer off page 1 with it.
+
 Then render the finished part and **look at it**. Every session that skipped
 this shipped something. Checks that have caught real problems:
 
@@ -216,7 +227,7 @@ this shipped something. Checks that have caught real problems:
   Cheap, and it catches what the page cannot: a word missing its hyphens, two
   words run together, a gloss that makes no sense. It found four defects the
   first time it was run.
-- `python3 -m unittest discover -s testit -t .` — 306 tests.
+- `python3 -m unittest discover -s testit -t .` — 366 tests.
 
 ## The one movement not yet in the table
 
