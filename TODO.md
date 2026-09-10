@@ -130,6 +130,19 @@ puolellaan — nämä ovat aitoja kysymyksiä:
   kaikissa neljässä äänessä. Tämä on työtä tiedostojen ääressä, ei kirjan
   ääressä, eikä sitä tarvitse tehdä kuoronjohtajan kanssa.
 
+## 5. Yksi kysymys lukulaitteelle, ei kirjalle
+
+- **Toimivatko sisällysluettelon linkit Booxilla?** Stemman ensimmäisellä
+  sivulla on 2026-09-10 lähtien sisällysluettelo, jonka jokainen rivi on
+  linkki sen osan alkusivulle, ja samat osat ovat PDF:n kirjanmerkkeinä
+  (lukuohjelman oma sisällysvalikko). Molemmat ovat tavallista PDF:ää ja
+  molemmat on luettu tiedostosta takaisin (`python3 linkit.py --lue
+  stemma-basso-1.pdf`), mutta sitä, mitä lukulaite niillä tekee, ei voi
+  mitata täältä: **kokeile napauttaa riviä ja avata lukuohjelman
+  sisällysvalikko.** Jos kumpikaan ei toimi, se ei ole nuottivirhe vaan
+  tiedetään heti mihin katsoa — ks.
+  [`docs/tyopaivakirja/2026-09-10-sisallysluettelo.md`](docs/tyopaivakirja/2026-09-10-sisallysluettelo.md).
+
 ## Mitä *ei* kannata katsoa
 
 - **Osa I, tahdit 1–78**: kaikkien neljän kuoroäänen sävelet on tarkistettu

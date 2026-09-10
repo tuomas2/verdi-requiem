@@ -29,8 +29,9 @@ sellainen on aina merkitty molempiin päihin.
 | *2026-09-10* | [`2026-09-10-kuorotiedostot-ja-osan-i-savelet.md`](2026-09-10-kuorotiedostot-ja-osan-i-savelet.md) | Kuoron omat tiedostot takaisin koneelle `.local/musescore/`:een; osan I sopraanon ja alton sävellajivahinko korjattu, ja nuottipään korkeus luetaan nyt lähdesivun fontista säveleksi — yksitoista säveltä, neljätoista tavua, kaksi Rex tremendaen sävelvirhettä ja "Sy-bil-la" |
 | *2026-09-10 (b)* | [`2026-09-10-stemman-paivays.md`](2026-09-10-stemman-paivays.md) | Jokainen stemma kertoo nyt itse, milloin sen sisältö viimeksi muuttui: päivä PDF:n ensimmäisen sivun ylälaidassa ja sivustolla latauslinkin alla, eikä rakennuspäivänä vaan gitin versioon verraten — ja `<credit>`in kaksi mitattua yllätystä matkan varrelta |
 | *2026-09-10 (c)* | [`2026-09-10-nuottikirjan-nelja-tarppia.md`](2026-09-10-nuottikirjan-nelja-tarppia.md) | Neljä nimettyä kysymystä vietiin painettuun nuottikirjaan ja kaikki neljä vastattiin: II·9b:n t.607 "di-es" on G♭ (kuoron tiedosto oli oikeassa), osan I t.51–52:n "nis" palautettiin lähdesivun mukaiseksi jatkoviivalla, ja kaksi vahvistusta — t.35:n palautusmerkki sekä se, että Sanctuksen kuorobasso todella on Bass I. II·9b:n kuorobasso on nyt ✔ |
-
 | *2026-09-10 (d)* | [`2026-09-10-osan-i-piano.md`](2026-09-10-osan-i-piano.md) | Osaan I tuli piano ensimmäistä kertaa — kuoron omasta MuseScore-tiedostosta, 126 tahtia 140:stä. Tahtikartoitus tehdään kohdistamalla tahteja eikä nuottivirtaa, ja kuoron tiedostot merkitsevät leikkaussaumansa tyhjällä pianotahdilla. `yhdista.py` luki `divisions`in yhdestä viitaosastosta ja käytti sitä kaikille riveille, mikä kaatoi koko käännöksen; kaksi uutta tarkistusta. Samalla osan I t.40:n puuttuva puolitauko, ja Kyrien tahtikartoitus ratkesi sivutuotteena |
+| *2026-09-10 (e)* | [`2026-09-10-sisallysluettelo.md`](2026-09-10-sisallysluettelo.md) | Stemman ensimmäiselle sivulle klikattava sisällysluettelo ja samat osat PDF:n kirjanmerkkeinä. Tila sille varataan MuseScorella näkymättömällä valkoisella tekstillä, koska MusicXML:n oma `top-system-distance` ei tee mitään eikä tyhjä rivi vie korkeutta — ja se maksoi yhden sivun yhdessä äänessä. PDF:ään kirjoittaminen käy vain `mutool run`illa, ja MuseScoren oma sisältövirta jättää voimaan 0,06-kertaisen muunnoksen, joka teki lisätystä tekstistä näkymätöntä |
+
 ## Where things stand
 
 Tämä on kertomusmuotoinen tilannekuva, joka on kasvanut istunto kerrallaan. Se
@@ -233,3 +234,15 @@ than missing — 1912 OMR notes that crash MuseScore. And the measurement found 
 defect of its own: **movement I bar 40 is half a bar long** in the bass, missing
 the half rest before "ex", inside the stretch this file calls verified — because
 that check compared pitches, and a missing rest changes no pitch.
+
+And last on 2026-09-10, the parts got a **table of contents on page 1** —
+seventeen rows, each a full-width link to that movement's first page, plus the
+same seventeen as PDF bookmarks. The interesting half is not the links but the
+room: MusicXML's `top-system-distance` is ignored by MuseScore 4.7.4, and
+whitespace-only text reserves no height, so the space is reserved by an
+invisible (white) line of dots above the first measure — measured at ~10.5 pt
+per 9 pt line, and costing one page in one voice out of eight. Writing into
+the finished PDF goes through `mutool run`, where MuseScore's own content
+stream turned out to leave a 0.06 transform in force. Both halves strip their
+own work before redoing it, because the list repeats every movement name on
+page 1 and `sisallys.py` finds movements by name. See *2026-09-10 (e)*.

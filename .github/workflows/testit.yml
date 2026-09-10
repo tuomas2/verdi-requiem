@@ -45,8 +45,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      # 15 testiä lukee lähde-PDF:iä `mutool draw -F stext`:llä. Mitattu:
-      # ilman tätä ne 15 kaatuvat exit 127:ään, muut 241 menevät läpi.
+      # 15 testiä lukee lähde-PDF:iä `mutool draw -F stext`:llä ja 9 lisää
+      # kirjoittaa stemma-PDF:ään `mutool run`illa. Mitattu: ilman tätä ne 15
+      # kaatuvat exit 127:ään ja 9 ohitetaan, muut 407 menevät läpi.
       # Sivuston rakennus ei tarvitse mutoolia, joten se on vain täällä.
       - name: Asenna mutool
         run: sudo apt-get update && sudo apt-get install -y mupdf-tools

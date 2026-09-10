@@ -1,8 +1,20 @@
 """Rakenna stemmat-sisallys.txt: kummalla sivulla kukin osa alkaa kussakin
 kahdeksassa stemma-PDF:ssä. Sivu löytyy etsimällä osan otsikkoteksti
-("V  Agnus Dei") PDF:n tekstisisällöstä sivu kerrallaan."""
+("V  Agnus Dei") PDF:n tekstisisällöstä sivu kerrallaan.
+
+Sama tieto kirjoitetaan myös **stemmaan itseensä**: klikattava
+sisällysluettelo sivun 1 tyhjään tilaan ja PDF:n kirjanmerkit. Sen tekee
+`linkit.py`; tämä skripti on se, joka tietää mistä sivulta mikä osa alkaa,
+joten se myös ajaa sen. `--ei-linkkeja` jättää PDF:t koskematta.
+
+Järjestys on pakollinen: luettelo sisältää kaikkien osien nimet sivulla 1,
+joten `etsi` löytäisi seuraavalla ajolla joka osan sivulta 1. Siksi vanha
+luettelo riisutaan ennen kuin sivujen teksti luetaan — `linkit.riisu`
+tunnistaa omat lisäyksensä merkinnästä eikä paikasta.
+"""
 import re, subprocess, sys
 
+import linkit
 import polut
 from yhdista import MOVEMENTS
 
@@ -37,23 +49,38 @@ def etsi(sivut, nimi):
     return None
 
 
-def main():
+def kohdat(sivut):
+    """[(numero, nimi, alkusivu)]; sivu on None jos otsikkoa ei löytynyt."""
+    return [(num, nimi, etsi(sivut, nimi)) for _t, num, nimi in MOVEMENTS]
+
+
+def lisaa_yhteen(pdf):
+    """Kirjoita yhden stemman sisällysluettelo ja kirjanmerkit."""
+    linkit.riisu(pdf)
+    return linkit.lisaa(pdf, kohdat(sivujen_teksti(pdf)), riisuttu=True)
+
+
+def main(argv=()):
+    linkita = '--ei-linkkeja' not in argv
     kaikki = {}
     for lyh, pdf in STEMMAT:
+        if linkita:
+            linkit.riisu(pdf)          # ennen lukemista, ks. moduulin ohje
         sivut = sivujen_teksti(pdf)
-        kaikki[lyh] = (sivut, len(sivut))
+        kaikki[lyh] = (kohdat(sivut), len(sivut))
         print(f'  luettu {pdf} ({len(sivut)} sivua)', file=sys.stderr)
+        if linkita:
+            linkit.lisaa(pdf, kaikki[lyh][0], riisuttu=True)
 
     rivit = ['SISÄLLYS - Verdi: Messa da Requiem, kuorostemmat',
              'sivunumerot kussakin stemma-PDF:ssä',
              '=' * 83,
              ' ' * 7 + 'osa'.ljust(20) + ''.join(f'{l:>7}' for l, _ in STEMMAT),
              '-' * 83]
-    for _, num, nimi in MOVEMENTS:
+    for i, (_, num, nimi) in enumerate(MOVEMENTS):
         solut = ''
         for lyh, _ in STEMMAT:
-            sivut, _n = kaikki[lyh]
-            s = etsi(sivut, nimi)
+            s = kaikki[lyh][0][i][2]
             solut += f'{s if s else "?":>7}'
         rivit.append(f'  {num:<5}{nimi:<20}{solut}')
     rivit += ['-' * 83,
@@ -65,4 +92,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

@@ -9,6 +9,16 @@
   MuseScore has no built-in OMR — "Import PDF" opens musescore.com in a browser.
 - `mutool` (mupdf-tools) installed via Homebrew. Used for rasterising and for
   reading text out of PDFs. `poppler` is *not* installed.
+- **`mutool run` works — mupdf's JS build is there, and it is the only tool
+  here that can edit a PDF.** `linkit.py` writes the parts' clickable contents
+  through it: `Document.openDocument`, `doc.addStream`/`addObject`/
+  `newDictionary` for objects, `doc.addSimpleFont(new Font("Times-Roman"),
+  "Latin")` for a font (with `font.encodeCharacter`/`advanceGlyph` as the
+  metrics), `doc.outlineIterator().insert({title, uri: "#page=N"})` for
+  bookmarks, and `doc.save(out, "compress,garbage=compact")`. Two things
+  measured the hard way: a missing dictionary key comes back as JS `null`
+  (not a null object, so `.isBoolean()` on it throws), and `insert` leaves the
+  cursor **after** the item it added, so bookmarks go in in reading order.
 - **Nothing on this machine can crop an image.** No PIL/Pillow, no ImageMagick
   (`convert`/`magick`), no `pdftoppm`, no `pymupdf` — and `mutool draw`
   rasterises but has no crop (`mutool trim` clips the content and leaves the

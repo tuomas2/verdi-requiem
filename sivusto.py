@@ -333,6 +333,11 @@ def ominaisuudet():
         ("Osan nimi joka sivulla",
          "Käynnissä olevan osan nimi sivun ensimmäisen tahdin päällä, joten "
          "keskeltä avattu sivu kertoo itse, missä osassa ollaan."),
+        ("Klikattava sisällys ensimmäisellä sivulla",
+         f"Kaikki {len(yhdista.MOVEMENTS)} osaa sivunumeroineen sivulla 1, ja "
+         "jokainen rivi on linkki sen osan alkusivulle — koko rivin "
+         "levyinen, jotta siihen osuu sormella. Samat osat ovat myös PDF:n "
+         "kirjanmerkkeinä eli lukuohjelman omassa sisällysvalikossa."),
         (f"Tahtinumerot {e(luotettavuus.REFERENSSI)}in mukaan",
          f"Dies irae numeroituu yhtenäisesti {alku}–{loppu} niin kuin "
          "kuoron nuottikirjassa; muut osat alkavat ykkösestä. Tämä on koko "
