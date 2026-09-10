@@ -4,7 +4,8 @@ Tässä on ne avoimet kohdat, jotka ratkeavat **painetusta nuottikirjasta**
 (Edition Peters) eivätkä mistään tiedostosta. Ne on muotoiltu nimetyiksi
 kysymyksiksi — "onko näiden kahden nuotin edessä b?" eikä "mitä tässä lukee" —
 koska niin ne ratkeavat yhdellä vilkaisulla ja vastaus on yksikäsitteinen.
-Järjestys on halvimmasta kalleimpaan.
+Järjestys on halvimmasta kalleimpaan. Viimeinen osio on kirjasta riippumatonta
+työtä, joka odottaa tekijää.
 
 Tahtinumerot ovat kirjan omia, eli samoja kuin stemmoissa. Kun jokin näistä
 ratkeaa, korjaus ja perustelu kirjataan `korjaa_kasin.py`:n taulukkoon ja
@@ -93,11 +94,41 @@ puolellaan — nämä ovat aitoja kysymyksiä:
   sisältöä, tyhjiä tahteja, sanapeitto 48–59 %. Kuoron oma tiedosto kattaa
   osasta vain 44 tahtia, joten se ei auta siellä. 16 tahtia kolmelle äänelle on
   oikeaa työtä, mutta se on ainoa tapa saada osa kuntoon.
-- **Osan I Kyrie, t.79–140.** Suurin yhtenäinen tarkistamaton pätkä osassa I.
-  Kuoron tiedosto ei kelpaa siihen sellaisenaan, koska sen tahdit lakkaavat
-  vastaamaan meidän tahteja noin tahdista 94. Jos joku selvittää sen
-  tahtikartoituksen samalla tavalla kuin Lacrymosalle tehtiin 2026-09-03,
-  koko pätkä avautuu ilman kirjaa.
+- **Pianoriisu osiin 10b ja 14** kuoron tiedostoista. Osa I on tehty
+  2026-09-10 (`kuoropiano.py`): sen pianoviivasto tulee nyt kuoron omasta
+  MuseScore-tiedostosta, 126 tahtia 140:stä, ja se **soi harjoitustiedostossa**
+  — aiemmin osassa I ei ollut pianoa lainkaan. Kaksi muuta jäivät tekemättä eri
+  syistä:
+
+  - **10b: kaksi lähdettä ovat eri mieltä oktaavista kuudessa tahdissa**, ja
+    viisi niistä on avausjuoksutuksen oikea käsi (t.3, 4, 6, 13 ja 14 kuorolla
+    oktaavia ylempänä, t.10 alempana). Se on yksi päätös eikä kuusi, mutta ei
+    meidän päätettävissä: meidän lähde on painetun laitoksen konelukema ja
+    kuoron tiedosto on käsin kirjoitettu, eikä kumpikaan kerro kummassa
+    oktaavissa riisu kuuluu olla. **Tämän voi kysyä kuoronjohtajalta tai
+    keneltä tahansa, jolla on partituuri edessään.** Sen jälkeen kopiointi on
+    nopea: kartoitus on valmis (meidän t.1–40 = kuoron t.1–40) ja koneisto on
+    olemassa. Samalla korjautuisi t.6–8, joissa meidän pianossa on 3, 1 ja 1
+    nuottia kuoron 8, 8 ja 7:n sijasta — siellä meidän lähde on selvästi
+    puutteellinen eikä kyse ole tulkinnasta.
+  - **14: hyöty on pienempi.** Kartoitus on valmis (kolme lohkoa: meidän
+    t.14–26, 37–45 ja 56–72, yhteensä 39 tahtia 74:stä) ja oktaavieroja on
+    yksi, mutta tämän osan piano ei ole rikki samalla tavalla kuin osan I oli.
+
+  Osaan I jäi kaksi aukkoa, joissa kuoron tiedostossa ei ole tahteja
+  lainkaan: **t.79–90** (solistijakso, jonka kuoro leikkasi pois) ja
+  **t.139–140**. Ne ovat pianolla taukoa. Aukko on ikävässä paikassa, koska
+  juuri siinä lasket taukoja etkä kuule mitään — mutta se ei ole korjattavissa
+  kuoron tiedostosta, koska sitä ei siellä ole.
+
+- **Osan I Kyrie, t.79–140.** Suurin yhtenäinen tarkistamaton pätkä osassa I —
+  ja **este on nyt poissa**. Tahtikartoitus, jota tässä kohdassa on pidetty
+  ratkaisemattomana ("tahdit lakkaavat vastaamaan noin tahdista 94"), on siisti
+  vakiosiirtymä: meidän t.91–138 ovat kuoron t.80–127, koska kuoro leikkasi
+  pois solistijakson t.79–89. Sillä siirtymällä Kyrieen jää **13 tarkistettavaa
+  tahtia** (96, 103, 105, 115–118, 120–121, 123–126); loput 32 täsmäävät
+  kaikissa neljässä äänessä. Tämä on työtä tiedostojen ääressä, ei kirjan
+  ääressä, eikä sitä tarvitse tehdä kuoronjohtajan kanssa.
 
 ## Mitä *ei* kannata katsoa
 
@@ -107,6 +138,7 @@ puolellaan — nämä ovat aitoja kysymyksiä:
 - **Osa I, t.35 ja t.51–52**: ratkaistu kirjasta 2026-09-10, ks. yllä.
 - **Sanctuksen basson valinta**: ratkaistu, luet Basso I:tä ja se on oikea.
 - **II·9b:n kuorobasso**: valmis, ei eroja kuoron tiedostoon.
+- **Osan I t.40**: puuttuva puolitauko korjattu 2026-09-10, joten sisääntulo "ex-au-di" on nyt kolmannella iskulla niin kuin kuuluu — ja harjoitustiedostossa se soi oikeasta paikasta.
 - **Rex tremendaen S/A/T sanat**: S/A/T eivät laula säkeistön säkeitä lainkaan,
   vain "sal-va me" (altto ja tenori lisäksi "fons pi-e-ta-tis" tahdeissa
   364–366). Se bassossa ollut vika — säe kahdesti, seuraava pois — ei voi olla

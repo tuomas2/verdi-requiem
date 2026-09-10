@@ -30,6 +30,7 @@ sellainen on aina merkitty molempiin päihin.
 | *2026-09-10 (b)* | [`2026-09-10-stemman-paivays.md`](2026-09-10-stemman-paivays.md) | Jokainen stemma kertoo nyt itse, milloin sen sisältö viimeksi muuttui: päivä PDF:n ensimmäisen sivun ylälaidassa ja sivustolla latauslinkin alla, eikä rakennuspäivänä vaan gitin versioon verraten — ja `<credit>`in kaksi mitattua yllätystä matkan varrelta |
 | *2026-09-10 (c)* | [`2026-09-10-nuottikirjan-nelja-tarppia.md`](2026-09-10-nuottikirjan-nelja-tarppia.md) | Neljä nimettyä kysymystä vietiin painettuun nuottikirjaan ja kaikki neljä vastattiin: II·9b:n t.607 "di-es" on G♭ (kuoron tiedosto oli oikeassa), osan I t.51–52:n "nis" palautettiin lähdesivun mukaiseksi jatkoviivalla, ja kaksi vahvistusta — t.35:n palautusmerkki sekä se, että Sanctuksen kuorobasso todella on Bass I. II·9b:n kuorobasso on nyt ✔ |
 
+| *2026-09-10 (d)* | [`2026-09-10-osan-i-piano.md`](2026-09-10-osan-i-piano.md) | Osaan I tuli piano ensimmäistä kertaa — kuoron omasta MuseScore-tiedostosta, 126 tahtia 140:stä. Tahtikartoitus tehdään kohdistamalla tahteja eikä nuottivirtaa, ja kuoron tiedostot merkitsevät leikkaussaumansa tyhjällä pianotahdilla. `yhdista.py` luki `divisions`in yhdestä viitaosastosta ja käytti sitä kaikille riveille, mikä kaatoi koko käännöksen; kaksi uutta tarkistusta. Samalla osan I t.40:n puuttuva puolitauko, ja Kyrien tahtikartoitus ratkesi sivutuotteena |
 ## Where things stand
 
 Tämä on kertomusmuotoinen tilannekuva, joka on kasvanut istunto kerrallaan. Se
@@ -197,3 +198,38 @@ bass really is Bass I**, so the reader has been on the right staff of the
 double chorus all along. With bar 607 fixed, II·9b's chorus bass agrees with
 the choir file at every note and is the third voice to reach ✔. See
 *2026-09-10 (c)*.
+
+And, the same day, the question that entry ended on got answered by doing it:
+**movement I has a piano for the first time**, taken from the choir's own
+MuseScore file by a bar mapping that checks itself — 126 of its 140 bars, the
+other fourteen a passage the choir cut. Movement I's piano was never missing
+but *rejected*: 1912 OMR notes that crash MuseScore, so the choir file replaces
+a known-bad part rather than filling a void, and the crash is gone with it.
+Getting there cost one real fight with `yhdista.py`, which reads `divisions`
+from a single reference part and applies it to every row — the piano's 12
+against the voices' 4 made the generated rests a third too short, and `mscore`
+refused the entire score while naming no bar. Two checks came out of that, one
+of which found 552 pre-existing wrong-length bars nobody had seen. **Movement
+10b was mapped and then deliberately not copied**, because the two sources
+disagree by an octave in six bars and that is a question for someone with a
+score. Two more results fell out: **movement I bar 40 was half a bar long** in
+the bass — a missing rest, so the entry sounded two beats early in the practice
+file — and **the Kyrie's bar mapping is solved**, which unblocks the largest
+unverified stretch in movement I. See *2026-09-10 (d)*.
+
+The same entry ends with a measurement rather than a fix. The user asked how
+hard it would be to copy the piano out of the choir files, and the answer is
+that the part everyone feared — **the bar mapping** — is easy once you align
+bars instead of a note stream: a bar's signature is all four chorus voices in
+semitones, so a match needs all four to agree and the mapping checks itself.
+Movement 01 is **two constant offsets** (ours 1–78 ↔ theirs 1–78, ours 90–138 ↔
+theirs 79–127, the +11 being the soloists' passage they cut), movement 10b is
+one, and movement 14 is three chunks of which the middle is too weakly anchored
+to use. That also **unblocks the largest open item in movement I**: the Kyrie's
+bars, which this file has called uncheckable because the two sides "stop
+corresponding around 94", correspond perfectly at +11 and leave thirteen
+candidate bars to look at. Movement I's piano turns out to be *rejected* rather
+than missing — 1912 OMR notes that crash MuseScore. And the measurement found a
+defect of its own: **movement I bar 40 is half a bar long** in the bass, missing
+the half rest before "ex", inside the stretch this file calls verified — because
+that check compared pitches, and a missing rest changes no pitch.

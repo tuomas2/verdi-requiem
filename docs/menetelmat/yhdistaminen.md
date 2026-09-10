@@ -82,7 +82,32 @@ fit (32 warnings became 100), and retyping any rest whose type disagrees with
 its duration (99 warnings — that mismatch is legal in tuplets and odd meters).
 The guard that matters is `implied > limit and actual <= limit`.
 
-## Movement I has no piano — and why patching it is a trap
+## Movement I's piano: rejected OMR, replaced 2026-09-10 from the choir file
+
+**Since 2026-09-10 movement I has a piano again**, and it does not come from
+the OMR. `kuoropiano.py` replaces the whole of `P17` with the piano reduction
+out of the choir's own MuseScore file, so `MAPPING` reads `"Piano": ["P17"]`
+again and the crash-inducing content is not in the file at all. The mapping is
+two constant offsets (ours 1–78 ↔ theirs 1–78, ours 91–138 ↔ theirs 80–127),
+126 of 140 bars; our 79–90 and 139–140 stay rests because the choir cut the
+soloists' passage. The rest of this section is why the OMR piano could not be
+used, and it still applies to that file.
+
+**One trap it sprang on the way, worth knowing before adding any source whose
+`divisions` differ:** `measure_meta` reads `divisions` from **one** reference
+part — the one with the most measures — and that value is used for every
+target row of the movement. The choir piano uses 12 and movement I's voices 4,
+so the rest measures `yhdista.py` generated came out 16 long in a bar that is
+48 long, and `mscore` refused the whole score without `-f` while saying only
+"corrupted". Two things came out of that: `kuoropiano.py` now normalises the
+whole movement file to one `divisions` (the LCM, so the rescale is always
+integral), and `yhdista.py` gained `tarkista_jaotus`, which reports the
+mismatch, and `tarkista_mitat`, which checks every finished measure's metric
+extent. The report is not fatal, because the same mismatch exists in older
+sources (movement 08's `P3`, and nine more) where it has never caused harm —
+it only bites where the merger has to synthesise content into that very bar.
+
+## Why the OMR piano of movement I could not be patched
 
 Playback stopped dead at measure 81 while the notes still displayed. The cause
 was the Audiveris piano of movement 01 (`P17`): it contains measures whose
@@ -91,9 +116,10 @@ them (`Spanner::setTick2`, `ChordLayout::placeDots`). Note that this is
 *separate* from the corruption warning — the file loaded with zero warnings and
 still would not play past bar 81.
 
-`P17` is therefore commented out of `MAPPING`. Movement I plays with voices
-only. Everything else, including movement 14's OMR piano, is fine. Verified by
-exporting MIDI and measuring its length: 81 → 1699 measures.
+`P17` was therefore commented out of `MAPPING` from then until 2026-09-10, and
+movement I played with voices only. Everything else, including movement 14's
+OMR piano, is fine. Verified by exporting MIDI and measuring its length:
+81 → 1699 measures, and 1751 once the choir's piano was in.
 
 Four patch attempts were tried and all made things worse; do not repeat them:
 
@@ -104,8 +130,11 @@ Four patch attempts were tried and all made things worse; do not repeat them:
 | Blank malformed piano measures entirely | Removing notes removed slur/wedge endings, leaving dangling spanners |
 | Strip slurs and wedges from OMR movements | No effect on playback at all |
 
-To restore the piano, clean `01-Verdi_Requiem.omr` in the Audiveris GUI, export
-fresh, and re-add `"Piano": ["P17"]`.
+That is what made the choir file the answer instead: a fifth patch attempt was
+never needed. The Audiveris route is still open if anyone wants the *printed*
+edition's own reduction rather than the choir's — clean `01-Verdi_Requiem.omr`
+in the Audiveris GUI and export fresh — but `kuoropiano.py` would then have to
+be taken back out of the chain.
 
 **Check playback by exporting MIDI, not by opening the score.** A file can load
 with no warnings and still stop playing:

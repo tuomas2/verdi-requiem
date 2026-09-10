@@ -80,6 +80,12 @@ class Savellaji:
 #   ("lisaa_aksentti",)                 lisää aksentti nuotille jolla ei ole
 #   ("poista_aksentti",)                poista nuotin aksentti
 #   ("poista_nuotti", kuvaus)           poista nuotti tai tauko
+#   ("lisaa_tauko", arvo, summa)        lisää tauko nuotin i ETEEN, esim.
+#                                       "8/half", ja tarkista että äänen
+#                                       kestojen summa on jäljestäpäin annettu
+#                                       summa — tauon lisäys muuttaa tahdin
+#                                       pituutta, joten oikea pituus pitää
+#                                       sanoa ääneen eikä päätellä
 #   ("sanarivi", vanha, uusi)           siirrä tahdin tavut toiselle
 #                                       sanariville, esim. "2" -> "1"
 #   ("vaihda_sanarivit", a, b)          vaihda kahden sanarivin tavut
@@ -107,6 +113,16 @@ OSA_I = Osa(
     # konelukema hajotti 55 tavua riville 2.
     yksi_sanarivi=True,
     korjaukset=(
+        # Sivu 2: tahdissa 40 on vain puolinuotti B♭3 tavulla "ex", eli tahti
+        # on 2/4 neljästä neljäsosasta. Alusta puuttuu puolitauko: kuoron
+        # omassa tiedostossa tahti on puolitauko + B♭3, ja kuorotenorin oma
+        # "ex" on tahdin 39 neljännellä iskulla, joten porrastettu sisääntulo
+        # on juuri sitä mitä musiikki tekee. Sisääntulo kuuluu kolmannelle
+        # iskulle. Löytyi 2026-09-10 pianokartoituksen sivutuotteena; tahtien
+        # 1-78 sävelvertailu ei voinut löytää tätä, koska puuttuva tauko ei
+        # muuta yhtään säveltä.
+        ("40", 0, "lisaa_tauko", "8/half", "16"),
+
         # Sivu 2: "o-ra-ti-o-nem me-am," päättyy tähän, joten "am" on sanan
         # viimeinen tavu eikä keskimmäinen. Väärä syllabic jättää tavuviivan
         # roikkumaan seuraavan tavun perään.
@@ -1381,6 +1397,34 @@ def sovella(part, osa):
                     muutettu += 1
             selosteet.append(f"t.{tahti}: tavutus, {muutettu} merkintää "
                              f"korjattu ({len(odotetut)} tavua tarkistettu)")
+
+        elif laji == "lisaa_tauko":
+            # Konelukema pudottaa taukoja, ja silloin tahti jää lyhyeksi:
+            # nuotti soi tahdin alusta vaikka sen pitäisi soida vasta
+            # myöhemmältä iskulta. Painetulla sivulla haitta on pieni, koska
+            # MuseScore asettelee yksinäisen nuotin suunnilleen oikeaan
+            # kohtaan, mutta harjoitustiedostossa se soi väärällä iskulla.
+            #
+            # Odotettu summa annetaan riviltä eikä päätellä: tämä on ainoa
+            # toimenpide joka tarkoituksella muuttaa tahdin pituutta, joten
+            # oikea pituus on juuri se asia, joka pitää sanoa ja tarkistaa.
+            arvo, summa = args
+            aani = note.findtext("voice") or "1"
+            tauko = ET.Element("note")
+            ET.SubElement(tauko, "rest")
+            kesto, loput = arvo.split("/")
+            tyyppi = loput.rstrip(".")
+            ET.SubElement(tauko, "duration").text = kesto
+            ET.SubElement(tauko, "voice").text = aani
+            ET.SubElement(tauko, "type").text = tyyppi
+            for _ in range(len(loput) - len(tyyppi)):
+                ET.SubElement(tauko, "dot")
+            measure.insert(list(measure).index(note), tauko)
+            nyt = kestosummat(measure).get(aani)
+            assert nyt == int(summa), (
+                f"t.{tahti}: äänen {aani} summa on {nyt}, odotettiin {summa}")
+            selosteet.append(f"t.{tahti}: lisätty tauko {arvo} nuotin {i} "
+                             f"eteen (äänen {aani} summa nyt {nyt})")
 
         elif laji == "poista_nuotti":
             (odotettu,) = args

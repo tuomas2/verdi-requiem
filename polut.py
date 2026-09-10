@@ -20,7 +20,7 @@ STEMMAT = "stemmat"
 HARJOITUS = "harjoitus"
 
 # Johdetun tiedoston tunnistaa päätteestä tai alkuosasta.
-JOHDETUN_PAATTEET = ("-kasin.mxl", "-OMR-korjattu.mxl")
+JOHDETUN_PAATTEET = ("-kasin.mxl", "-OMR-korjattu.mxl", "-piano.mxl")
 KOKO_PARTITUURI = "Verdi-Requiem-koko"
 
 

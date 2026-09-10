@@ -9,7 +9,7 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | Directory | What it holds |
 |---|---|
 | `lahteet/` | Originals: CPDL `.mxl`, source PDFs, Audiveris projects, raw `-OMR.mxl`. Never edited |
-| `johdetut/` | Everything the scripts generate: `-OMR-korjattu.mxl`, `-kasin.mxl`, the merged score |
+| `johdetut/` | Everything the scripts generate: `-OMR-korjattu.mxl`, `-kasin.mxl`, `-piano.mxl`, the merged score |
 | `stemmat/` | The eight reading parts and their contents listing |
 | `harjoitus/` | Practice `.mscz`, **not** in version control — they are 3.2 MB each and rebuilt wholesale |
 | `sivusto/` | Website sources: the shared stylesheet, `requiem.html`, part thumbnails |
@@ -23,8 +23,10 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `Verdi_10bDies_irae.pdf` | Source PDF for II·9b, the missing "Dies irae" recall (see below) |
 | `Verdi_Lacymosa.pdf` | The printed source for movement 11, same CPDL edition as the `.mxl`. Not an `.mxl` source, but what the whole chorus bass was verified against — and it **prints its own bar numbers, 624–701**. Not an authority, though: it is wrong about the text at bars 657–665 and about one note at bar 653 |
 | `*.omr` | Audiveris projects, for manual correction |
+| `01-kuoropiano.musicxml` | Movement I's piano reduction, squeezed out of the choir's own MuseScore file by `kuoropiano.py --pura`. Third-party material of unknown authorship, kept here so the whole chain reproduces without `.local/musescore/`; its `<rights>` says so |
 | `*-OMR-korjattu.mxl` | OMR'd sections with their chorus lyrics fixed from the PDFs |
-| `*-kasin.mxl` | **Generated**, not hand-edited: `korjaa_kasin.py`'s output, the file `yhdista.py` actually reads for movements 01, II·1, II·4, II·6, II·9b, II·10, IV and VII |
+| `*-kasin.mxl` | **Generated**, not hand-edited: `korjaa_kasin.py`'s output, the file `yhdista.py` actually reads for movements II·1, II·4, II·6, II·9b, II·10, IV and VII — and for movement 01 the input to `kuoropiano.py` rather than to `yhdista.py` |
+| `01-Verdi_Requiem-piano.mxl` | **Generated** by `kuoropiano.py`: movement 01 with its piano staff replaced by the choir file's, and the whole file's `divisions` normalised to one value. This is what `yhdista.py` reads for movement I |
 | `Verdi-Requiem-koko.mxl` | Merged score, 15 staves, 1807 measures |
 | `stemma-*.mxl` / `.pdf` | Eight choir reading parts |
 | `stemmat-sisallys.txt` | Where each movement starts in all eight |
@@ -34,6 +36,7 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `paivays.py` | Stamps the part with the date its content last changed — small, top left of page 1, and the same date read back by the site. Runs **last** before rendering |
 | `korjaa_sanat.py` | Fixes OMR lyric errors against the source PDFs |
 | `korjaa_kasin.py` | The hand-verified fixes on top of that, as a table; writes the `*-kasin.mxl` files |
+| `kuoropiano.py` | Movement I's piano staff, taken from the choir's own MuseScore file by a proven bar mapping; writes `01-Verdi_Requiem-piano.mxl`. Runs **after** `korjaa_kasin.py` and **before** `yhdista.py`. `--pura` extracts the source from an `mscore` export (needs `.local/musescore/`) |
 | `suomennos.py` | The Finnish glossary, the gloss placement, and the syllabic repair. `--teksti` prints a part's whole text as running prose |
 | `nayta.py` | Prints a staff's notes, voices and **lyric rows** per bar — the first tool for any reported error |
 | `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |
