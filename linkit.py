@@ -3,7 +3,9 @@
 
 **Mitä laulaja pyysi.** Lukulaitteella pitää pystyä hyppäämään siihen osaan,
 jota kuoro juuri harjoittelee, eikä selaamalla kuutta sivua. Luettelo ei saa
-viedä omaa sivuaan, mutta tilaa se saa ottaa noin puoli sivua.
+viedä omaa sivuaan; tilaa se saisi ottaa puoli sivua, mutta **kahdessa
+palstassa** se mahtuu vajaaseen kolmannekseen — ja mitattuna se ei silloin
+maksa yhtään sivua yhdessäkään kahdeksasta stemmasta.
 
 Työ on kahdessa päässä, ja järjestys on pakollinen:
 
@@ -30,10 +32,13 @@ Varaus tulee osan otsikon (`I  Requiem & Kyrie`) **jälkeen** tahdin
 alkioissa. Se on mitattu: ennen otsikkoa lisätty varaus jättää otsikon
 sivun ylälaitaan kaksisataa pistettä irti omasta viivastostaan.
 
-**Sivumäärä ei kasvanut.** Mitattu basso I:llä: 10, 20, 24 ja 28 varausriviä
+**Sivumäärä ei kasva.** Mitattu basso I:llä: 10, 20, 24 ja 28 varausriviä
 antavat kaikki 16 sivua, koska `tiivistys.mss`:n `minSystemSpread` on
 vähimmäisväli ja loput sivun tilasta jaetaan tasan — sivulta 1 jää pois
-kaksi riviä, jotka mahtuvat muiden sivujen väljyyteen.
+nuottirivejä, jotka mahtuvat muiden sivujen väljyyteen. Käytössä oleva
+varaus on 16 riviä (~168 pt), ja kaikkien kahdeksan stemman sivumäärä on
+sama kuin ennen luetteloa. Yksipalstainen versio (27 riviä) maksoi yhden
+sivun yhdessä äänessä.
 
 Luettelo lisätään PDF:ään kolmena asiana:
 
@@ -87,7 +92,8 @@ OTSIKKO = "Sisällys"
 OTSIKKO_KOKO = 11.0
 KOKO = 9.5              # luettelorivin teksti
 RIVI = 14.0             # luettelorivin korkeus, myös linkin korkeus
-LEVEYS = 330.0          # luettelon leveys; kapeampi jos tila ei riitä
+SARAKKEITA = 2          # tavoite; kapeampi tila jakaa useampaan
+LEVEYS = 330.0          # yhden palstan suurin leveys
 SARAKEVALI = 18.0
 TAYTE = " ."            # täytepisteet nimen ja sivunumeron väliin
 RESERVI = 4.0           # piste tyhjän kaistan reunoihin
@@ -277,7 +283,7 @@ def kaista(rivit, ylin, alin):
 
 # ------------------------------------------------------------------ ladonta
 
-def korkeus(maara, sarakkeita=1):
+def korkeus(maara, sarakkeita=SARAKKEITA):
     """Luettelon korkeus pisteinä, otsikko mukaan luettuna."""
     rivilla = int(math.ceil(maara / float(sarakkeita))) if maara else 0
     return OTSIKKO_KOKO * 1.8 + rivilla * RIVI + 2 * RESERVI
@@ -303,14 +309,16 @@ def asettele(kohdat, rivit, mitta):
     vasen, oikea, ylin, alin = mitta
     y0, y1 = kaista(rivit, ylin, alin)
     kaytettava = oikea - vasen
-    for sarakkeita in (1, 2, 3):
+    # Tavoitemäärä ensin ja vasta sitten useampi palsta: useampi palsta on
+    # matalampi, joten se mahtuu myös silloin kun tavoite ei mahdu.
+    for sarakkeita in range(SARAKKEITA, 5):
         if korkeus(len(kohdat), sarakkeita) <= y1 - y0:
             break
     else:
         raise SystemExit(
             "sivun 1 tyhjä tila on vain %d pt eikä luettelo mahdu siihen. "
-            "Onko `python3 linkit.py --varaa %s` ajamatta ennen mscorea?"
-            % (y1 - y0, "stemma-*.mxl"))
+            "Onko `python3 linkit.py --varaa stemma-*.mxl` ajamatta ennen "
+            "mscorea?" % (y1 - y0))
     sarake = min(LEVEYS, (kaytettava - (sarakkeita - 1) * SARAKEVALI)
                  / sarakkeita)
 

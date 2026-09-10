@@ -195,10 +195,11 @@ tilanhukkaa; nimi on otsikossa.
 Sisällysluettelon sivunumerot poimitaan valmiista PDF:istä, joten aja
 `python3 sisallys.py` aina kun stemmat on renderöity uudelleen. Se kirjoittaa
 `stemmat-sisallys.txt`:n uudestaan **ja** latoo saman luettelon jokaisen
-stemman ensimmäiselle sivulle: osan nimi, sivunumero ja koko rivin levyinen
-linkki siihen sivuun, sekä samat osat PDF:n kirjanmerkkeinä. Luettelo mahtuu
-sille tilalle, jonka `linkit.py --varaa` varasi ennen renderöintiä (vaihe 6),
-eikä stemman sivumäärä kasvanut siitä kuin yhdessä äänessä (S II, 17 -> 18).
+stemman ensimmäiselle sivulle kahtena palstana: osan nimi, sivunumero ja koko
+rivin levyinen linkki siihen sivuun, sekä samat osat PDF:n kirjanmerkkeinä.
+Luettelo mahtuu sille tilalle, jonka `linkit.py --varaa` varasi ennen
+renderöintiä (vaihe 6) — noin 170 pt sivun 1 yläosasta, eikä yhdenkään
+stemman sivumäärä kasvanut siitä.
 
 ## Latinan sanojen suomennos
 

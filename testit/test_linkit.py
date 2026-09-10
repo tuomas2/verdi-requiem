@@ -24,10 +24,10 @@ PDF = os.path.join("stemmat", "stemma-basso-1.pdf")
 MXL = os.path.join("stemmat", "stemma-basso-1.mxl")
 
 # Keksitty sivu 1: otsikkolohko riveillä 42-63, säveltäjän nimi oikealla
-# 84-94, varattu tyhjä tila 95-399 ja ensimmäinen viivastoviiva 400. Samat
+# 84-94, varattu tyhjä tila 95-279 ja ensimmäinen viivastoviiva 280. Samat
 # mitat kuin varatussa stemmassa, mutta ilman mutoolia.
 LEVEYS = 595.0
-VIIVASTO_Y = 400
+VIIVASTO_Y = 280
 
 
 def keksitty_sivu(viivasto=VIIVASTO_Y):
@@ -199,13 +199,20 @@ class Ladonta(Mitat):
         self.assertEqual(len(leveydet), 1)
         self.assertGreaterEqual(leveydet.pop(), 200.0)
 
-    def test_ahdas_tila_jakaa_luettelon_sarakkeisiin(self):
-        rivit = keksitty_sivu(viivasto=250)
+    def sarakkeet(self, laatikot):
+        return {x0 for x0, _y0, _x1, _y1, _s in laatikot}
+
+    def test_varattu_tila_riittaa_tavoitepalstamaaraan(self):
+        _ladotut, laatikot = linkit.asettele(osat(), self.rivit, self.mitta)
+        self.assertEqual(len(self.sarakkeet(laatikot)), linkit.SARAKKEITA)
+
+    def test_ahdas_tila_jakaa_useampaan_palstaan(self):
+        """Useampi palsta on matalampi, joten se mahtuu kun tavoite ei."""
+        rivit = keksitty_sivu(viivasto=230)
         mitta = linkit.tila(rivit, LEVEYS)
         _ladotut, laatikot = linkit.asettele(osat(), rivit, mitta)
         self.assertEqual(len(laatikot), 17)
-        sarakkeet = {x0 for x0, _y0, _x1, _y1, _s in laatikot}
-        self.assertGreater(len(sarakkeet), 1)
+        self.assertGreater(len(self.sarakkeet(laatikot)), linkit.SARAKKEITA)
 
     def test_varaamatta_jaanyt_tila_kaataa_ja_neuvoo(self):
         """Ilman `--varaa`-askelta tilaa on parikymmentä pistettä."""
@@ -214,6 +221,15 @@ class Ladonta(Mitat):
         with self.assertRaises(SystemExit) as e:
             linkit.asettele(osat(), rivit, mitta)
         self.assertIn("--varaa", str(e.exception))
+
+    def test_palstat_tayttyvat_lukujarjestyksessa(self):
+        """Vasen palsta ensin ylhäältä alas, sitten seuraava."""
+        _ladotut, laatikot = linkit.asettele(osat(), self.rivit, self.mitta)
+        rivilla = -(-17 // linkit.SARAKKEITA)
+        self.assertEqual(laatikot[0][0], laatikot[rivilla - 1][0])
+        self.assertLess(laatikot[0][1], laatikot[rivilla - 1][1])
+        self.assertGreater(laatikot[rivilla][0], laatikot[0][0])
+        self.assertEqual(laatikot[rivilla][1], laatikot[0][1])
 
     def test_sivunumero_asettuu_rivin_oikeaan_reunaan(self):
         """Täytepisteet lasketaan fontin mitoista, joten rivi täyttyy."""

@@ -4,10 +4,13 @@
 
 The singer asked whether the PDF could carry a clickable contents list on
 page 1 — "if it is possible at all" — taking minimal room and certainly not a
-page of its own. Halfway through it came back: *not quite that minimal, it may
-take half a page*. Both versions were built, and the second one is what
-shipped: seventeen rows, movement number, name, dot leader and page number,
-each row a full-width link, plus the same seventeen as PDF bookmarks.
+page of its own. Two messages refined it: *not quite that minimal, it may take
+half a page*, and then *how about two columns, it would take less room and look
+good*. Three versions were built and the third one shipped: seventeen rows in
+**two columns**, movement number, name, dot leader and page number, each row a
+full-width link, plus the same seventeen as PDF bookmarks. It occupies the top
+~30 % of page 1 and **costs no pages at all** — all eight parts have exactly
+the page count they had before it existed.
 
 It is one new script, [`linkit.py`](../../linkit.py), and `sisallys.py` — which
 already knew which page each movement starts on — drives its second half.
@@ -28,9 +31,9 @@ separated by `·` is a list you read, not a list you tap.
 
 ## Making room, and the four ways that do not
 
-Half a page cannot be taken from the whitespace that happens to be there — the
-music has to move down, and only MuseScore can move it. Four attempts,
-measured with MuseScore 4.7.4:
+A third of a page cannot be taken from the whitespace that happens to be
+there — the music has to move down, and only MuseScore can move it. Four
+attempts, measured with MuseScore 4.7.4:
 
 | Attempt | Result |
 |---|---|
@@ -46,6 +49,12 @@ first staff line down by **about 10.5 pt**. The exact figure does not matter:
 `lisaa` measures the finished page and lays the list into what it actually
 finds, and if the room is not there it exits with the reason.
 
+How many lines follows from the typography, and this is where the two columns
+pay for themselves. Seventeen rows of 14 pt in one column want ~283 pt (27
+reserved lines); in two columns nine rows want ~154 pt (16 lines). The column
+count is a target, not a fallback: `SARAKKEITA = 2`, and the layout only goes
+to three or four columns if the room it measures is not even enough for two.
+
 Two more measurements shaped the step:
 
 * **The reservation goes after the movement heading**, not before it. Inserted
@@ -53,10 +62,12 @@ Two more measurements shaped the step:
   some two hundred points above the staff it belongs to.
 * **It costs no pages.** With 10, 20, 24 and 28 reserved lines the bass part
   stayed at 16 pages, because `tiivistys.mss`'s `minSystemSpread` is a
-  *minimum* and the rest of the page is shared out evenly: page 1 gives up two
-  systems and the other pages have the slack to take them. Over all eight
-  parts the cost of the shipped reservation (27 lines, ~283 pt) is **one page
-  in one voice** — S II went 17 → 18.
+  *minimum* and the rest of the page is shared out evenly: page 1 gives up
+  systems and the other pages have the slack to take them. The one-column
+  version (27 lines, ~283 pt) did cost one page in one voice — S II went
+  17 → 18 — and the two-column one (16 lines, ~168 pt) costs **nothing**: all
+  eight parts came out at 18, 17, 16, 16, 17, 17, 16, 16, the same counts as
+  before the contents existed.
 
 Because the reservation moves page breaks, `--varaa` has to run **before**
 `sivuotsikot.py`, which computes the running heads from those breaks. That is

@@ -334,7 +334,8 @@ def ominaisuudet():
          "Käynnissä olevan osan nimi sivun ensimmäisen tahdin päällä, joten "
          "keskeltä avattu sivu kertoo itse, missä osassa ollaan."),
         ("Klikattava sisällys ensimmäisellä sivulla",
-         f"Kaikki {len(yhdista.MOVEMENTS)} osaa sivunumeroineen sivulla 1, ja "
+         f"Kaikki {len(yhdista.MOVEMENTS)} osaa sivunumeroineen sivulla 1 "
+         "kahtena palstana, ja "
          "jokainen rivi on linkki sen osan alkusivulle — koko rivin "
          "levyinen, jotta siihen osuu sormella. Samat osat ovat myös PDF:n "
          "kirjanmerkkeinä eli lukuohjelman omassa sisällysvalikossa."),
