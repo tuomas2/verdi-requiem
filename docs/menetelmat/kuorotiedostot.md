@@ -45,6 +45,39 @@ below).
 | `6 Agnus Dei` | 44 | Same tune as `14` (74 measures, OMR), but shorter — see below |
 | `7 Libera me` + `8 Libera me 2` | 137 + 239 = 376 | `16-Libera_Me.mxl` (421 measures) split into two rehearsal halves — confirmed, see below |
 
+## The piano in these files, and what it could be worth
+
+Recorded 2026-09-10 as the user's idea, **not started.** Every choir file
+carries its own `Piano` part — measured: `01_requiem` 1620 notes over 127 bars,
+`04_dies_irae_2` 1739 over 96 — plus a `Finger Snap` click track that is of no
+use here. Two reasons to want it:
+
+1. **Movement I has no piano at all** in our score, which is its own open item.
+   The choir file has one.
+2. **Our piano is not an independent source and it needs to be.** In movements
+   01, 14 and II·9b it comes out of the same Audiveris pass as the voices, so
+   when it agrees with the choir file against our own vocal staff — as it does
+   at II·9b bars 605 and 612 — that is an argument and not a measurement, and
+   three near-certain dropped flats are sitting unapplied because of it. A
+   piano from a different source would decide that class of question without
+   the book.
+
+What has to be settled first, and why this is not a small job:
+
+- **A bar mapping per movement.** These are the choir's condensed chorus-only
+  cut, so the two sides' bars do not correspond throughout: movement I is 127
+  bars against our 140 and stops corresponding around bar 94. Copying without
+  the mapping would land the piano on the wrong bars, and the standing rule
+  above applies with full force — never take a bar number from a `difflib`
+  alignment.
+- **Coverage.** Four of the eight folders have been compared voice by voice;
+  none covers a whole movement by definition, and Agnus Dei covers 44 bars of
+  74.
+- **Provenance.** These files are outside version control precisely because
+  their authorship is unknown and the filenames carry singers' names.
+  *Comparing* against them puts nothing in the repo; *copying* their piano
+  into the published score does. Ask before moving a single bar.
+
 ## Method: pitch-sequence matching, no lyrics needed
 
 Since neither side has reliable lyrics in the relevant spots, movements were

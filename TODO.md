@@ -4,7 +4,8 @@ Tässä on ne avoimet kohdat, jotka ratkeavat **painetusta nuottikirjasta**
 (Edition Peters) eivätkä mistään tiedostosta. Ne on muotoiltu nimetyiksi
 kysymyksiksi — "onko näiden kahden nuotin edessä b?" eikä "mitä tässä lukee" —
 koska niin ne ratkeavat yhdellä vilkaisulla ja vastaus on yksikäsitteinen.
-Järjestys on halvimmasta kalleimpaan.
+Järjestys on halvimmasta kalleimpaan. Viimeinen osio on kirjasta riippumatonta
+työtä, joka odottaa tekijää.
 
 Tahtinumerot ovat kirjan omia, eli samoja kuin stemmoissa. Kun jokin näistä
 ratkeaa, korjaus ja perustelu kirjataan `korjaa_kasin.py`:n taulukkoon ja
@@ -93,6 +94,39 @@ puolellaan — nämä ovat aitoja kysymyksiä:
   sisältöä, tyhjiä tahteja, sanapeitto 48–59 %. Kuoron oma tiedosto kattaa
   osasta vain 44 tahtia, joten se ei auta siellä. 16 tahtia kolmelle äänelle on
   oikeaa työtä, mutta se on ainoa tapa saada osa kuntoon.
+- **Pianoriisu kuoron tiedostoista sinne, missä ne kattavat.** Laulajan idea
+  2026-09-10, ei aloitettu. Kuoron omissa MuseScore-tiedostoissa on oma
+  `Piano`-osasto, ja sen sävelet ovat lähtökohtaisesti oikeat siinä missä
+  meidän pianomme on konelukemaa. Mitattuna: `01_requiem`-tiedostossa piano on
+  1620 nuottia 127 tahdissa ja `04_dies_irae_2`:ssa 1739 nuottia 96 tahdissa
+  (kummassakin lisäksi `Finger Snap` -klikkiraita, jota ei tarvita). Kaksi
+  syytä miksi tämä kannattaisi:
+
+  1. **Osassa I ei ole pianoa lainkaan** — ei konelukemaa, ei mitään; se on
+     oma avoin kohtansa ([`docs/menetelmat/yhdistaminen.md`](docs/menetelmat/yhdistaminen.md),
+     *Movement I has no piano*). Kuoron tiedostossa se on. Tämä on koko idean
+     isoin yksittäinen voitto.
+  2. **Piano on ratkaisija sävelkysymyksissä.** Juuri se esti yllä olevien
+     kolmen pudonneen b:n korjaamisen: meidän pianomme sanoo G♭, mutta se on
+     samaa konelukemaa kuin lauluäänet, joten se on argumentti eikä mittaus.
+     Riippumaton piano tekisi siitä mittauksen — ja samalla se ratkaisisi
+     saman luokan kysymyksiä jatkossa ilman kirjaa.
+
+  Mitä pitää selvittää ennen kuin tähän koskee:
+
+  - **Tahtikartoitus per osa.** Tiedostot ovat kuoron oma tiivistetty,
+    kuoro-only leikkaus: `01_requiem` on 127 tahtia meidän 140:tä vastaan, ja
+    tahdit lakkaavat vastaamaan noin tahdista 94. Ilman kartoitusta kopiointi
+    siirtäisi pianon väärille tahdeille — sama ansa kuin sävelvertailussa, ja
+    sääntö on sama: **älä koskaan lainaa tahtinumeroa `difflib`-kohdistuksesta.**
+  - **Kattavuus.** Vain neljä kansiota kahdeksasta on käyty läpi ääni ääneltä,
+    eivätkä tiedostot kata kaikkia osia (Agnus Deistä vain 44 tahtia 74:stä).
+  - **Alkuperä.** `.local/musescore/` on tarkoituksella versionhallinnan
+    ulkopuolella, koska tiedostojen tekijää ei tiedetä ja tiedostonimissä on
+    laulajien nimiä. Sävelten *vertaaminen* niihin ei vie mitään repoon;
+    pianon *kopioiminen* vie. Se on kysymys, joka pitää kysyä ennen kuin
+    yhtään tahtia siirretään julkiseen partituuriin.
+
 - **Osan I Kyrie, t.79–140.** Suurin yhtenäinen tarkistamaton pätkä osassa I.
   Kuoron tiedosto ei kelpaa siihen sellaisenaan, koska sen tahdit lakkaavat
   vastaamaan meidän tahteja noin tahdista 94. Jos joku selvittää sen
