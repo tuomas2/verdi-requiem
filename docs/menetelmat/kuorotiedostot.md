@@ -3,9 +3,13 @@
 # The choir's own MuseScore practice files
 
 2026-08-30: the user handed over a folder of 8 zip files, unzipped and sorted
-by content into `musescore/01_requiem/` … `musescore/08_libera_me_2/` (they
+by content into `01_requiem/` … `08_libera_me_2/` (they
 had arrived named only by download order — one zip's folder actually held
-five other movements' worth of zips). One zip's filenames were mangled
+five other movements' worth of zips). They live under **`.local/musescore/`**
+since 2026-09-10, when the same 77 files came back onto the machine and were
+sorted into the same eight folders by the number in each filename; earlier
+notes and code comments say plain `musescore/` and mean this. One zip's
+filenames were mangled
 (`AIIyl<0x84>.mscz`); the bytes decode correctly as **cp850**, giving
 `AIIylä.mscz` — `unzip`'s default cp437 guess is wrong for this batch.
 
@@ -58,6 +62,44 @@ The choir's "Bass 1" staff is the one that lines up with this project's
 `Kuoro B`; "Bass 2", where present, was empty rests in every file checked —
 a placeholder row, not a second real line.
 
+### Three corrections to the method, 2026-09-10
+
+Run voice by voice rather than only on the bass, the naive version produces
+more false alarms than findings. Each of these produced one before it was
+handled, and each is cheap:
+
+- **Compare semitones, not spellings.** Our sources write `Aes3` where the
+  choir file writes `Gis3`. Map each token to a MIDI number first; movement
+  I's tenor alone had two differences that were nothing but this.
+- **Filter to voice 1 and fold chord tones into the preceding token.** A
+  divisi second voice looks like a run of extra notes, and a chord member
+  looks like a *wrong* note — the most alarming possible false positive.
+  Movement 07's soprano, alto and bass each showed four to six of these.
+  Where our staff carries three voices (movement 07's tenor, against the
+  choir's Tenor 1–3), compare the top note only.
+- **Shift the tenor an octave.** Our chorus tenor is written an octave above
+  the choir file's. Movement I's tenor scores 0.109 unshifted and 0.934
+  shifted.
+
+And the standing rule, restated because it decided what could *not* be
+concluded on 2026-09-10: **never quote a bar number that came out of an
+alignment against these files.** In movement I the bars correspond exactly up
+to 78 and then stop — our bar 95 sits against their 97 — so every difference
+the aligner reported from bar 79 on is noise, and the Kyrie stays unverified
+until someone establishes the mapping the way *2026-09-03 (c)* did for
+Lacrymosa.
+
+### When the two sources disagree
+
+Often, and not always in the choir file's favour. Of fourteen differences in
+movement I's bars 1–78, seven notes were our OMR's key-signature damage, two
+were real defects in our file, and **eight were the choir file's own
+readings**, each contradicted by the printed page. The arbiter is the source
+PDF read as text — see the recipe skill, *Reading a single notehead off the
+page* — where the movement has a source PDF at all. Movements 02, 03, 05, 07,
+11, 13 and 16 do not, so there a disagreement can only be settled by what the
+other staves and the piano are doing on that beat.
+
 ## What the matching actually found
 
 - **Movement 1: 95 % pitch match**, project's `01` `Kuoro B` (P16, 287 notes)
@@ -72,10 +114,12 @@ a placeholder row, not a second real line.
     file has. The bar numbers in this comparison came from a `difflib`
     alignment of two files of different lengths (127 vs. 140 bars) and are
     approximate — treat them as "somewhere near", never as bar numbers.
-  - Four smaller single-note mismatches worth a manual check: an OMR `B3`
-    where the choir file has `Bb3` (~measure 35), a `C3`/`B2` disagreement
-    around measure 52, a `D3`/`D4` octave disagreement around measure 116,
-    and a three-note run (`A2 B2 F#3` vs `E3 E3 A3`) around measure 124–126.
+  - ~~Four smaller single-note mismatches worth a manual check~~ — **all four
+    resolved 2026-09-10**, and none of them was a defect in our file. Bars 35
+    (`B3`/`Bb3`) and 52 (`C3`/`B2`) were measured off the printed page, which
+    prints a natural in the first and `Bb2 C3 C3 C#3` in the second: ours,
+    twice. The two around 116 and 124–126 were the comparison folding a
+    divisi chord into one token, not disagreements at all.
   - The 13-measure count difference (127 vs. 140) is not explained yet.
 - **Rex tremendae: 95.2 % match** against `07-Verdi-Rex.mxl` alone — this one
   isn't an OMR movement, so it mainly validates the method and the "Bass 1 =
@@ -108,8 +152,9 @@ a placeholder row, not a second real line.
 
 1. ~~Highest value, most concrete: use the choir's `Bass 1` line to fill
    `01`'s measures 79–93~~ — there is nothing to fill, see the retraction
-   above. What remains from that comparison is the **four flagged single-note
-   spots** (~35, ~52, ~116, ~124–126), still unchecked.
+   above, and the four flagged single-note spots are resolved (2026-09-10,
+   above). What remains in movement I is the **Kyrie**, bars 79–140, where the
+   two files' bars do not correspond.
 2. Use `4 Dies irae 2` to cross-check `II·9b`'s currently-unproofread notes,
    and possibly to help pin down its position relative to Confutatis/
    Lacrymosa (the *Open: which measure numbers* question) — it's chorus-book
@@ -120,9 +165,13 @@ a placeholder row, not a second real line.
    The original note, for context: it might be more solo-passage trimming
    (harmless) or it
    might be a real content difference.
-4. Same pitch-matching method, systematically, for the S/A/T lines too —
-   everything above only ever looked at the bass, since that's the line the
-   user reads.
+4. ~~Same pitch-matching method, systematically, for the S/A/T lines too~~ —
+   **done for movements 01 and 07 on 2026-09-10**, which found and fixed the
+   soprano's and alto's wrong key in movement I and one octave error in
+   movement 07's tenor. Movements 14 and II·9b have been run but not yet
+   adjudicated: II·9b reports five candidates, four of them a G against a G♭.
+   `02_dies_irae`, `05_sanctus`, `07_libera_me` and `08_libera_me_2` have not
+   been run voice by voice at all.
 5. This comparison used pitch only, no rhythm — good enough to identify a
    passage and spot wrong notes, not a substitute for a real duration-aware
    proofreading pass.

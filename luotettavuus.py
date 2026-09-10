@@ -88,19 +88,29 @@ _POIKKEUKSET = {
         "Sanat korjattu lähde-PDF:ää vasten ja kahdeksan kohtaa varmistettu "
         "käsin, useimmat laulajan kuulohavainnon perusteella. Lisäksi yhden "
         "b:n purku siirretty tahtiin 56, jonne lähdesivu sen painaa; "
-        "konelukema oli merkinnyt sen kolme tahtia myöhemmäksi. Nuotit ovat "
-        "konelukemisen tulosta eikä niitä ole tarkistettu."),
-    ("I", ("Kuoro S", "Kuoro A")): _puutteita(
+        "konelukema oli merkinnyt sen kolme tahtia myöhemmäksi. Nuotit "
+        "vertailtu kuoron omaan tiedostoon tahdeissa 1–78: kaksi eroa, "
+        "kumpikin ratkesi lähdesivun hyväksi (t.35 palautusmerkki, t.52 "
+        "nouseva kromatiikka). Kyrie tahdista 79 eteenpäin on vertailematta, "
+        "koska kuorotiedoston tahdit eivät siellä osu meidän tahteihin."),
+    ("I", ("Kuoro S", "Kuoro A")): _osittain(
         "Sanat korjattu koneellisesti lähde-PDF:ää vasten, peitto 83–91 %, "
-        "mutta ei tarkistettu tavu tavulta. Nuoteissa on tiedossa oleva "
-        "virhe: konelukema luuli kolmen ristin sävellajin jatkuvan tahdin 28 "
-        "yli, ja luki tahdit 28–34 (\"Te decet hymnus\") ristillisinä — "
-        "Fis4 ja Cis5 siellä missä tenori ja basso laulavat F-duuria."),
-    ("I", ("Kuoro T",)): _tarkistamatta(
+        "mutta ei tarkistettu tavu tavulta; \"et lux per-pe-tu-a\" korjattu "
+        "käsin tahdeissa 21–22. Nuotit vertailtu kuoron omaan tiedostoon "
+        "tahdeissa 1–78 ja jokainen ero mitattu lähdesivun nuottifontin "
+        "koordinaateista: konelukemisen sävellajivirhe tahdeissa 28–34 (\"Te "
+        "decet hymnus\" ristillisenä) korjattu, seitsemän säveltä, ja "
+        "sopraanon t.76 Ces5 → C5. Kyrie tahdista 79 eteenpäin on "
+        "vertailematta. Yksi ero jäi auki: alton t.77 on lähdesivulla Gis5, "
+        "mutta kuorotiedosto laulaa Gis4:n, ja hyppy kuulostaa "
+        "painovirheeltä."),
+    ("I", ("Kuoro T",)): _osittain(
         "Sanat korjattu koneellisesti lähde-PDF:ää vasten, peitto 83–91 %, "
-        "mutta ei tarkistettu tavu tavulta. Nuotit konelukemisen tulosta. "
-        "Sopraanon ja alton sävellajivirhe tahdeissa 28–34 ei koske tenoria: "
-        "sen sävellaji vaihtuu lähteessä jo oikeassa tahdissa."),
+        "mutta ei tarkistettu tavu tavulta; \"et lux per-pe-tu-a\" ja "
+        "\"lu-ce-at\" korjattu käsin. Nuotit vertailtu kuoron omaan "
+        "tiedostoon tahdeissa 1–78: t.43 puuttunut risti lisätty (C5 → "
+        "Cis5), ja kaksi muuta eroa ratkesi lähdesivun hyväksi. Kyrie "
+        "tahdista 79 eteenpäin on vertailematta."),
 
     ("II·1", ("Kuoro B",)): _osittain(
         "Nuotit vertailtu kuoron omaan tiedostoon koko 91 tahdin matkalta; "
@@ -126,7 +136,19 @@ _POIKKEUKSET = {
         "(\"sal-va le\" → \"sal-va me\") sekä tahdit 340–341 ja 362–363, "
         "joissa säkeistön kolmesta säkeestä toistui yksi liikaa ja yksi "
         "puuttui. Divisin sanarivit tahdeissa 367–369 olivat päittäin ja "
-        "ykkösbasson teksti viivaston yläpuolella; korjattu."),
+        "ykkösbasson teksti viivaston yläpuolella; korjattu. Nuotit "
+        "vertailtu kuoron omaan tiedostoon koko osan matkalta: ainoa ero oli "
+        "tahti 343, jonka koruäänenä oli iso terssi puolisävelaskeleen "
+        "sijasta, ja se korjattiin."),
+    ("II·6", ("Kuoro S", "Kuoro A")): _osittain(
+        "Nuotit vertailtu kuoron omaan tiedostoon koko osan matkalta: ei "
+        "yhtään sävelerhoa. Sanoja ei ole tarkistettu."),
+    ("II·6", ("Kuoro T",)): _osittain(
+        "Nuotit vertailtu kuoron omaan tiedostoon koko osan matkalta. "
+        "Viivastolla on kolme ääntä, joten vertailu koskee ylintä; ainoa ero "
+        "oli tahti 353, joka oli oktaavia liian korkealla, ja se "
+        "korjattiin — tenori ja basso laulavat siinä unisonossa. Sanoja ei "
+        "ole tarkistettu."),
 
     ("II·9b", ("Kuoro B",)): _osittain(
         "Sanat tarkistettu lähde-PDF:ää vasten nuotti nuotilta. Nuotit ovat "
@@ -135,7 +157,8 @@ _POIKKEUKSET = {
     ("II·9b", SAT): _tarkistamatta(
         "Konelukemisen tulosta. Nuotteja ilman tavua on selvästi enemmän kuin "
         "bassossa; osa on aitoja melismoja, mutta sitä ei ole tarkistettu "
-        "yksitellen."),
+        "yksitellen. Sanan \"Sy-bil-la\" tavutus korjattu kaikilta neljältä "
+        "ääneltä ja altolta lisätty puuttunut \"cum\"."),
 
     ("II·10", ("Kuoro B",)): _varmistettu(
         "Jokainen nuotti vertailtu kuoron omaan tiedostoon ja jokainen tavu "

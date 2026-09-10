@@ -254,12 +254,14 @@ class Suomennos(unittest.TestCase):
                          {"2"})
 
     def test_rikkinainen_sana_ei_saa_suomennosta(self):
-        # "perpetlla" on konelukemisen tuottama muoto sanasta perpetua, eikä
-        # sille ole oikeaa suomennosta — se on vika, ei sana.
-        part = osasto([[("single", "perpetlla")]])
+        # "perpettua" on konelukemisen tuottama muoto sanasta perpetua, eikä
+        # sille ole oikeaa suomennosta — se on vika, ei sana. (Sama vika
+        # muodossa "perpetlla" korjattiin 2026-09-10, joten sitä ei ole
+        # enää RIKKI-listalla eikä siihen voi nojata testissä.)
+        part = osasto([[("single", "perpettua")]])
         tulos = lisaa(partituuri(part))
         self.assertEqual(tulos.lisatty, 0)
-        self.assertEqual(tulos.rikki["perpetlla"], 1)
+        self.assertEqual(tulos.rikki["perpettua"], 1)
 
     def test_tuntematon_sana_paatyy_varoitukseksi(self):
         part = osasto([[("single", "xyzzy")]])

@@ -616,7 +616,9 @@ saadaan luettua suoraan lähteestä.
     python3 korjaa_sanat.py --kuiva    # näytä raportti, älä kirjoita mitään
 
 Tulos menee tiedostoihin `01-Verdi_Requiem-OMR-korjattu.mxl` ja
-`14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl`, ja `yhdista.py` käyttää niitä.
+`14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl`. Osalla 14 on 2026-09-10
+lähtien myös oma `korjaa_kasin.py`-taulukko, joka kirjoittaa
+`14-Verdi_requiem_agnus-dei-kasin.mxl`:n, ja `yhdista.py` lukee sitä.
 Konelukemisen alkuperäisiin tiedostoihin ei kosketa.
 
 > **Varoitus: älä aja `korjaa_sanat.py`:tä ajattelematta.** Se lukee

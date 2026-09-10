@@ -40,7 +40,7 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `testit/test_*.py` | Tests; all of them: `python3 -m unittest discover -s testit -t .` (188). Run from the repo root — the tests and the scripts both use relative paths |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
 | `tiivistys.mss` | MuseScore style for the reading parts: multimeasure rests, a bar number on every bar, extra air between systems |
-| `musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files*. **Not in the repo**: authorship is unknown and the filenames carried singers' names, so they were kept out of the public history. They exist only on the user's own machine |
+| `.local/musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files*. **Not in the repo**: authorship is unknown and the filenames carried singers' names, so they were kept out of the public history. They exist only on the user's own machine, and `.local/` is listed in `.git/info/exclude`. (Earlier notes call this directory plain `musescore/`; it moved under `.local/` on 2026-09-10.) |
 | `polut.py` | Derives which of the four directories a bare filename belongs to |
 | `luotettavuus.py` | Per movement × voice: what has been verified and what has not. Writes `LUOTETTAVUUS.md` |
 | `LUOTETTAVUUS.md` | **Generated**, but committed: the table in readable form. What the site and `README.md` link to |

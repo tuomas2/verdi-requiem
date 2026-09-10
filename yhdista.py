@@ -61,7 +61,7 @@ MOVEMENTS = [
     ("11-Verdi_Lacrymosa-kasin.mxl",                "II·10", "Lacrymosa"),
     ("12-Verdi_Offertorio.mxl",                     "III",   "Offertorio"),
     ("13-Verdi-Sanctus-kasin.mxl",                  "IV",    "Sanctus"),
-    ("14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl", "V",     "Agnus Dei"),
+    ("14-Verdi_requiem_agnus-dei-kasin.mxl",        "V",     "Agnus Dei"),
     ("15-Verdi_Lux_aeterna.mxl",                    "VI",    "Lux aeterna"),
     ("16-Libera_Me-kasin.mxl",                      "VII",   "Libera me"),
 ]
@@ -144,7 +144,7 @@ MAPPING = {
         "Kuoro S II": ["P5"], "Kuoro A II": ["P6"], "Kuoro T II": ["P7"], "Kuoro B II": ["P8"],
         "Piano": ["P9"],
     },
-    "14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl": {
+    "14-Verdi_requiem_agnus-dei-kasin.mxl": {
         # P5 ja P6 ovat tahdeissa 1-13 sooloäänet (a cappella -alku) ja
         # tahdista 14 alkaen pianon kaksi viivastoa.
         "Solisti S": [("P5", 1, 13)],
@@ -173,7 +173,7 @@ TITLE_PARTS = ["Solisti S", "Kuoro B"]
 # Konelukemisella tuotetut osat: niiden tahtien pituudet normalisoidaan.
 # Sanat on korjattu lähde-PDF:ää vasten, ks. korjaa_sanat.py.
 OMR_SOURCES = {"01-Verdi_Requiem-kasin.mxl",
-               "14-Verdi_requiem_agnus-dei-OMR-korjattu.mxl",
+               "14-Verdi_requiem_agnus-dei-kasin.mxl",
                "10b-Verdi_Dies_irae_paluu-kasin.mxl"}
 
 SANCTUS = "13-Verdi-Sanctus-kasin.mxl"
