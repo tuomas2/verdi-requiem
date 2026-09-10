@@ -104,6 +104,17 @@ read it. 450 dpi cropped to a single staff's own lyric row is the setting that
 works; a full page at 450 is unreadable at review size and 200 dpi is too
 coarse for a syllable over a notehead.
 
+**Cropping is `rajaa.py`, and nothing else on this machine can do it** — no
+PIL, no ImageMagick, no `pdftoppm`, and `mutool` itself has no crop. Locate the
+spot from the text layer first, then cut it:
+
+    mutool draw -F stext -o s.xml stemmat/stemma-basso-1.pdf 7
+    # find the bar number's own bbox in s.xml -> x=131, y=225
+    python3 rajaa.py stemmat/stemma-basso-1.pdf 7 30 215 290 295 t607.png
+
+The coordinates are PDF points with y growing downwards, i.e. exactly what
+`-F stext` reports, so the crop is computed and never eyeballed.
+
 **For a symbol rather than a syllable, do not render at all.** These PDFs
 carry the music itself as font glyphs, so `mutool draw -F stext` gives every
 clef, accidental and rest an exact coordinate — and combining that x with the
