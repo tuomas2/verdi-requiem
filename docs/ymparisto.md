@@ -19,6 +19,17 @@
   measured the hard way: a missing dictionary key comes back as JS `null`
   (not a null object, so `.isBoolean()` on it throws), and `insert` leaves the
   cursor **after** the item it added, so bookmarks go in in reading order.
+- **`outlineIterator()` is broken for *reading* in mupdf 1.23.10, and that is
+  the version CI runs** (ubuntu-24.04; this machine has 1.27.0). `item().title`
+  returns the wrong bookmark's name, `item().uri` returns a name where the URI
+  belongs, and uninitialised memory comes with it — the JS output was not valid
+  UTF-8, and the byte that broke the decode changed from run to run, so the
+  traceback pointed at `subprocess` and not at the real cause. Writing is fine
+  on 1.23.10: the `/Title` entries of a PDF built with it are correct.
+  `doc.loadOutline()` gives the same answer on both versions, so `linkit.lue`
+  reads bookmarks with that. Measured by fetching the noble `mupdf-tools` deb
+  (plus `libgumbo2`, which it needs) and running the whole suite against that
+  binary — worth repeating for anything else that only CI sees.
 - **Nothing on this machine can crop an image.** No PIL/Pillow, no ImageMagick
   (`convert`/`magick`), no `pdftoppm`, no `pymupdf` — and `mutool draw`
   rasterises but has no crop (`mutool trim` clips the content and leaves the

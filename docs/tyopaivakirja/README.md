@@ -31,6 +31,7 @@ sellainen on aina merkitty molempiin päihin.
 | *2026-09-10 (c)* | [`2026-09-10-nuottikirjan-nelja-tarppia.md`](2026-09-10-nuottikirjan-nelja-tarppia.md) | Neljä nimettyä kysymystä vietiin painettuun nuottikirjaan ja kaikki neljä vastattiin: II·9b:n t.607 "di-es" on G♭ (kuoron tiedosto oli oikeassa), osan I t.51–52:n "nis" palautettiin lähdesivun mukaiseksi jatkoviivalla, ja kaksi vahvistusta — t.35:n palautusmerkki sekä se, että Sanctuksen kuorobasso todella on Bass I. II·9b:n kuorobasso on nyt ✔ |
 | *2026-09-10 (d)* | [`2026-09-10-osan-i-piano.md`](2026-09-10-osan-i-piano.md) | Osaan I tuli piano ensimmäistä kertaa — kuoron omasta MuseScore-tiedostosta, 126 tahtia 140:stä. Tahtikartoitus tehdään kohdistamalla tahteja eikä nuottivirtaa, ja kuoron tiedostot merkitsevät leikkaussaumansa tyhjällä pianotahdilla. `yhdista.py` luki `divisions`in yhdestä viitaosastosta ja käytti sitä kaikille riveille, mikä kaatoi koko käännöksen; kaksi uutta tarkistusta. Samalla osan I t.40:n puuttuva puolitauko, ja Kyrien tahtikartoitus ratkesi sivutuotteena |
 | *2026-09-10 (e)* | [`2026-09-10-sisallysluettelo.md`](2026-09-10-sisallysluettelo.md) | Stemman ensimmäiselle sivulle klikattava sisällysluettelo ja samat osat PDF:n kirjanmerkkeinä. Tila sille varataan MuseScorella näkymättömällä valkoisella tekstillä, koska MusicXML:n oma `top-system-distance` ei tee mitään eikä tyhjä rivi vie korkeutta — ja kaksipalstaisena se ei maksanut yhtään sivua. PDF:ään kirjoittaminen käy vain `mutool run`illa, ja MuseScoren oma sisältövirta jättää voimaan 0,06-kertaisen muunnoksen, joka teki lisätystä tekstistä näkymätöntä |
+| *2026-09-10 (f)* | [`2026-09-10-ci-n-mupdf.md`](2026-09-10-ci-n-mupdf.md) | CI oli punaisena eikä pinon jälki kertonut miksi: ubuntu-24.04:n mupdf 1.23.10 palauttaa `outlineIterator()`ista väärän kirjanmerkin nimen, URI:n paikalla nimen ja mukana alustamatonta muistia. Kirjoituspuoli oli kunnossa, vain tarkistus oli sokea; `loadOutline()` antaa saman tuloksen molemmilla versioilla. Ratkesi ajamalla testit CI:n omalla binäärillä |
 
 ## Where things stand
 
@@ -247,3 +248,14 @@ the finished PDF goes through `mutool run`, where MuseScore's own content
 stream turned out to leave a 0.06 transform in force. Both halves strip their
 own work before redoing it, because the list repeats every movement name on
 page 1 and `sisallys.py` finds movements by name. See *2026-09-10 (e)*.
+
+And a postscript to that one: it had turned CI red, and the traceback blamed
+`subprocess`. **CI's `mutool` is mupdf 1.23.10** and this machine's is 1.27.0,
+and in 1.23.10 the `outlineIterator()` JS binding hands back the wrong
+bookmark's name, a name where the URI belongs, and uninitialised memory with
+it — so the output was not valid UTF-8 and the byte that broke the decode
+changed from run to run. The written PDFs were never wrong; only the step that
+verifies them was blind. `doc.loadOutline()` answers identically on both
+versions and is what `linkit.lue` uses now. What settled it in one step, after
+guessing had settled nothing, was unpacking CI's own `mutool` deb next to the
+system one and running the suite against it. See *2026-09-10 (f)*.
