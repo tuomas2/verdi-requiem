@@ -37,6 +37,7 @@ line the user reads, but nothing in it is bass-specific.
 | Movement 14 (Agnus Dei), **new** fixes | hand-corrections table since 2026-09-10 | `korjaa_kasin.py`, `OSAT_V` |
 | Movement 13 (IV Sanctus) | hand-corrections table | `korjaa_kasin.py`, `OSA_IV` |
 | Movement 16 (VII Libera me) | hand-corrections table | `korjaa_kasin.py`, `OSA_VII` |
+| A note prints with **more dots than its duration has** — a dotted half whose `duration` is a plain half. MuseScore draws the dot and counts the bare value, so the bar sums correctly and only the *picture* is wrong. The meter decides it: five quarters do not fit a 4/4 bar. Found in Agnus Dei 42 by looking at the rebuilt bar, and it was the movement's only one | `korjaa_kasin.py`, a `kesto` row (`"24/half." -> "24/half"`) | `korjaa_kasin.py` |
 | A bar is **short or long** — a note sounds too early, or MuseScore calls the file corrupted | `korjaa_kasin.py`, a `lisaa_tauko` or `poista_nuotti` row. A missing rest changes no pitch, so a pitch-by-pitch check against the choir file cannot find it; movement I bar 40 hid inside a "verified" range that way | `korjaa_kasin.py` |
 | Any movement: the source file is right but the **part** is wrong | tool bug | `yhdista.py` + a test |
 | Movement 14: a fix the older hand edits already touched | still baked into `14-…-OMR-korjattu.mxl` | see the last section below |
@@ -253,12 +254,15 @@ this shipped something. Checks that have caught real problems:
 
 - Per-staff note counts before and after. A lyric-only change must leave every
   count identical; anything else means content moved.
+- **The bars you just changed, cropped and rendered.** This is where Agnus Dei
+  42's phantom dot turned up — nothing in the data's own arithmetic flagged it,
+  because the bar summed to the right length.
 - `mscore` converts without `-f`.
 - **`python3 suomennos.py --teksti <part>` — read the whole text as prose.**
   Cheap, and it catches what the page cannot: a word missing its hyphens, two
   words run together, a gloss that makes no sense. It found four defects the
   first time it was run.
-- `python3 -m unittest discover -s testit -t .` — 366 tests.
+- `python3 -m unittest discover -s testit -t .` — 439 tests.
 
 ## The one movement not yet in the table
 

@@ -117,12 +117,16 @@ _mitat = {}
 
 def aja_js(lahde, *argumentit):
     """Aja mupdf-JS ja palauta sen tuloste. Virhe kaataa selkeästi."""
-    with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as f:
+    # Sekä JS-lähde että tuloste ovat UTF-8:aa: skripti sisältää · ja ä-ö-å-é
+    # (ks. mitat), eikä ajoympäristön kieliasetus saa ratkaista niiden
+    # koodausta — CI:ssä se ei ole sama kuin täällä.
+    with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False,
+                                     encoding="utf-8") as f:
         f.write(lahde)
         nimi = f.name
     try:
         ajo = subprocess.run(["mutool", "run", nimi, *argumentit],
-                             capture_output=True, text=True)
+                             capture_output=True, encoding="utf-8")
     finally:
         os.unlink(nimi)
     if ajo.returncode != 0 or "Error:" in ajo.stderr:
@@ -496,16 +500,27 @@ def riisu(pdf):
 
 # Takaisinluku on oma askel: kirjoitettu linkki on vasta väite, ja tämä on
 # se, mitä lukuohjelma tiedostosta näkee.
+#
+# Kirjanmerkit luetaan `loadOutline()`illa eikä `outlineIterator()`illa.
+# Jälkimmäinen on rikki mupdf 1.23.10:ssä — se on ubuntu-24.04:n eli CI:n
+# ajajan versio, ja tämä oli mitattu ajamalla testit sillä binäärillä:
+# `item().title` palauttaa väärän kirjanmerkin nimen ja `item().uri`
+# palauttaa nimen URI:n paikalla, ja mukana tulee alustamatonta muistia
+# (tuloste ei ollut kelvollista UTF-8:aa, ja kaatava tavu vaihtui ajojen
+# välillä). Kirjoituspuoli on kunnossa myös 1.23.10:llä: sillä rakennetun
+# PDF:n /Title-kentät ovat oikeat. `loadOutline()` antaa molemmilla
+# versioilla saman tuloksen.
+#
+# Luettelo on yksitasoinen — `kirjoita` ei tee alikohtia — joten `down`ia
+# ei kierretä.
 LUE_JS = r"""
 var doc = Document.openDocument(%(pdf)s);
 var linkit = doc.loadPage(0).getLinks(), ulos = {"linkit": [], "merkit": []};
 for (var i = 0; i < linkit.length; i++)
     ulos.linkit.push({rect: linkit[i].getBounds(), uri: linkit[i].getURI()});
-var it = doc.outlineIterator();
-do {
-    var m = it.item();
-    if (m) ulos.merkit.push({nimi: m.title, uri: m.uri});
-} while (it.next() >= 0);
+var merkit = doc.loadOutline() || [];
+for (var i = 0; i < merkit.length; i++)
+    ulos.merkit.push({nimi: merkit[i].title, uri: merkit[i].uri});
 print(JSON.stringify(ulos));
 """
 

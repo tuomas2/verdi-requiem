@@ -27,18 +27,24 @@ class Kattavuus(unittest.TestCase):
                             "ei kuoroa")
 
     def test_varmistetut_ovat_ne_jotka_on_todella_tarkistettu(self):
-        """Agnus Dei, Lacrymosa ja II·9b ovat kokonaan läpikäydyt kuorobassot.
+        """Lacrymosa ja II·9b ovat kokonaan läpikäydyt kuorobassot.
 
-        Kaikki kolme vertailtiin kuoron omaan tiedostoon nuotti nuotilta ja
+        Molemmat vertailtiin kuoron omaan tiedostoon nuotti nuotilta ja
         niiden sanat lähdesivuun tavu tavulta; II·9b:n ainoan eron ratkaisi
         painettu nuottikirja 2026-09-10. Jos tämä testi kaatuu siksi että
         jokin muu on merkitty varmistetuksi, tarkista että työ on oikeasti
         tehty — merkintä on lupaus lukijalle.
+
+        Agnus Dei oli tässä joukossa 2026-09-10 asti, ja sen ✔ oli
+        ylilupaus: nuotit oli vertailtu koko osan matkalta, mutta sanoja ei
+        tavu tavulta mihinkään — kuoron tiedostossa ei ole sanoja lainkaan,
+        ja tehty tarkistus oli "kantaako joka nuotti tavun", joka ei näe
+        väärää tavua. Laulaja kuuli sellaisen tahdeista 40-42.
         """
         varmistetut = {(osa, aani)
                        for (osa, aani), t in luotettavuus.POIKKEUKSET.items()
                        if t.nimi == "varmistettu"}
-        self.assertEqual(varmistetut, {("V", "Kuoro B"), ("II·10", "Kuoro B"),
+        self.assertEqual(varmistetut, {("II·10", "Kuoro B"),
                                        ("II·9b", "Kuoro B")})
 
     def test_jokaisella_poikkeuksella_on_perustelu(self):
