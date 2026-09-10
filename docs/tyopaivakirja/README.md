@@ -197,3 +197,20 @@ bass really is Bass I**, so the reader has been on the right staff of the
 double chorus all along. With bar 607 fixed, II·9b's chorus bass agrees with
 the choir file at every note and is the third voice to reach ✔. See
 *2026-09-10 (c)*.
+
+The same entry ends with a measurement rather than a fix. The user asked how
+hard it would be to copy the piano out of the choir files, and the answer is
+that the part everyone feared — **the bar mapping** — is easy once you align
+bars instead of a note stream: a bar's signature is all four chorus voices in
+semitones, so a match needs all four to agree and the mapping checks itself.
+Movement 01 is **two constant offsets** (ours 1–78 ↔ theirs 1–78, ours 90–138 ↔
+theirs 79–127, the +11 being the soloists' passage they cut), movement 10b is
+one, and movement 14 is three chunks of which the middle is too weakly anchored
+to use. That also **unblocks the largest open item in movement I**: the Kyrie's
+bars, which this file has called uncheckable because the two sides "stop
+corresponding around 94", correspond perfectly at +11 and leave thirteen
+candidate bars to look at. Movement I's piano turns out to be *rejected* rather
+than missing — 1912 OMR notes that crash MuseScore. And the measurement found a
+defect of its own: **movement I bar 40 is half a bar long** in the bass, missing
+the half rest before "ex", inside the stretch this file calls verified — because
+that check compared pitches, and a missing rest changes no pitch.

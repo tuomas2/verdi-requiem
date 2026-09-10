@@ -133,6 +133,73 @@ four stay on the list, and they all still sit on the same spread of the book.
   zip metadata differs even when the content does not.)
 - `stemmat-sisallys.txt` unchanged: page counts still 18/17/16/16/17/17/16/16.
 
+## Afterwards: how hard would the choir files' piano be to copy?
+
+The user's idea, asked as a question rather than a task: the choir files have a
+correct piano, so could it be copied into the movements they cover? Recorded
+and measured, not built.
+
+**The bar mapping was the feared part and it is the part that turned out easy.**
+The trick is to align **bars**, not a note stream: a bar's signature is all four
+chorus voices' content in semitones, so two bars correspond only if all four
+voices agree — which makes the mapping self-checking and stops it producing the
+"somewhere near" numbers this file has warned about since 2026-09-02. Two
+details had to be handled, each of which produced a wrong answer first:
+
+- **Drop rests from the signature.** The same empty bar is one whole rest on one
+  side and two half rests on the other; with rests in the signature, movement
+  I's bars 15–65 were reported as non-corresponding, which is the opposite of
+  what is known about them.
+- **Then exclude the empty bars from the alignment entirely.** With rests
+  dropped, an empty bar's signature is `((),(),(),())` and matches any other
+  empty bar. That is what made movement 10b's bars 41–48 align against
+  Lacrymosa's opening on the first attempt — a textbook instance of the trap,
+  produced by the tool built to avoid it.
+
+With both handled:
+
+| Movement | Mapping | Coverage |
+|---|---|---|
+| 01 | ours 1–78 ↔ theirs 1–78 (offset 0); ours 90–138 ↔ theirs 79–127 (offset **+11**) | 127/140 |
+| 10b | ours 1–39 ↔ theirs 1–39 (offset 0) | 39/51 |
+| 14 | ours 14–26 ↔ 4–16 (+10); 41–43 ↔ 22–24 (+19); 59–71 ↔ 31–43 (+28) | ~33/74 |
+
+Movements 01 and 10b are two rows and one row of table respectively, each
+proven by long runs of exactly-matching bars (59 and 23 for 01, 28 for 10b) and
+with the boundaries pinned to the bar. Movement 14's middle block rests on two
+matching bars and is not good enough to graft against yet.
+
+**Movement I's piano is not missing — it is rejected.** `yhdista.py`'s `MAPPING`
+comment says why: Audiveris produced 1912 notes for `P17`, MuseScore's engine
+crashes on some of them (`Spanner::setTick2`, `ChordLayout::placeDots`) and
+playback stopped at bar 81, so the part was left out and the row fills with
+rests. So the choir's piano would replace a known-bad part and sidestep the
+crash, not fill a void. Its density says it is a real reduction rather than a
+skeleton: 1620 notes over 127 bars against the rejected 1912 over 140.
+
+The remaining work is the graft, and the measurements say it is small: both
+sides are a two-staff piano part, `divisions` is 12 in the choir files against 4
+and 12 in our movement 01 (a ×3 rescale), and **every mapped bar's length
+agrees** except two. The two exceptions are our own pre-existing defects, not
+mapping failures — and one of them is a real find:
+
+### Movement I bar 40 is half a bar long, in the bass
+
+The chorus bass's bar 40 holds one half note, `B♭3` on "ex", and nothing else:
+2/4 of a 4/4 bar. The choir file has **a half rest and then the `B♭3`**, which
+puts the "ex-au-di" entry on beat 3 — and the tenor's own "ex" is on beat 4 of
+bar 39, so a staggered entry is what the music is doing. On the printed page the
+harm is small, because MuseScore lays the lone note out near where it belongs
+and simply draws no rest; in the practice `.mscz` the note **sounds two beats
+early**.
+
+This sat inside the stretch this file calls verified. It is not a contradiction,
+it is a gap in what was verified: bars 1–78 were compared **pitch by pitch**, and
+a missing rest changes no pitch. Worth remembering the next time a range is
+called done — "notes match" and "the bar is right" are different claims.
+Fixing it needs a new `korjaa_kasin.py` operation, since there is no way to
+insert a rest today; not done.
+
 ## The lesson
 
 The value here is not in the two fixes. It is that a question shaped as *"is

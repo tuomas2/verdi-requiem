@@ -112,20 +112,61 @@ puolellaan — nämä ovat aitoja kysymyksiä:
      Riippumaton piano tekisi siitä mittauksen — ja samalla se ratkaisisi
      saman luokan kysymyksiä jatkossa ilman kirjaa.
 
-  Mitä pitää selvittää ennen kuin tähän koskee:
+  **Tahtikartoitus on nyt mitattu, ja se oli helpompi kuin luultiin.**
+  Kohdistus tehtiin tahdeittain eikä nuottivirtana: tahdin tunniste on
+  kaikkien neljän kuoroäänen sisältö puolisävelaskeleina, joten kaksi tahtia
+  vastaavat toisiaan vain jos kaikki neljä ääntä ovat samaa mieltä — kartoitus
+  tarkistaa itsensä eikä tuota "noin siinä kohtaa" -numeroita. Tyhjät tahdit
+  jätetään kohdistuksen ulkopuolelle, koska tyhjä tunniste osuu mihin tahansa
+  toiseen tyhjään (ilman tätä osan 10b loppu kohdistui Lacrymosan puolelle).
 
-  - **Tahtikartoitus per osa.** Tiedostot ovat kuoron oma tiivistetty,
-    kuoro-only leikkaus: `01_requiem` on 127 tahtia meidän 140:tä vastaan, ja
-    tahdit lakkaavat vastaamaan noin tahdista 94. Ilman kartoitusta kopiointi
-    siirtäisi pianon väärille tahdeille — sama ansa kuin sävelvertailussa, ja
-    sääntö on sama: **älä koskaan lainaa tahtinumeroa `difflib`-kohdistuksesta.**
+  | Osa | Kartoitus | Kattavuus | Kunto |
+  |---|---|---|---|
+  | **01** | meidän t.1–78 ↔ kuoron t.1–78 (siirtymä 0), meidän t.90–138 ↔ kuoron t.79–127 (siirtymä **+11**) | 127/140 tahtia | **Valmis.** Kaksi vakiosiirtymää, todistettu 59 + 23 täsmälleen samalla tahdilla; rajat naulattu tahdin tarkkuudella. Puuttuu t.79–89 (solistijakso, jonka kuoro leikkasi pois) ja t.139–140 |
+  | **10b** | meidän t.1–39 ↔ kuoron t.1–39 (siirtymä 0) | 39/51 tahtia | **Valmis.** Yksi siirtymä. Loput t.41–51 ovat kuorolle taukoa, ja kuoron tiedosto jatkaa siitä Lacrymosaan |
+  | **14** | kolme lohkoa: t.14–26 ↔ 4–16 (+10), t.41–43 ↔ 22–24 (+19), t.59–71 ↔ 31–43 (+28) | ~33/74 tahtia | **Kesken.** Keskimmäinen lohko nojaa vain kahteen osuvaan tahtiin, joten sen rajat pitää naulata käsin |
+
+  Muut mitatut asiat:
+
+  - **Osan I piano ei olekaan puuttuva vaan hylätty.** `yhdista.py`:n
+    `MAPPING`-kommentti kertoo miksi: konelukema tuotti sinne 1912 nuottia,
+    mutta MuseScoren moottori kaatuu niihin (`Spanner::setTick2`,
+    `ChordLayout::placeDots`) ja soitto pysähtyi tahtiin 81, joten `P17`
+    jätettiin pois. Kuoron piano siis **korvaisi tunnetusti rikkinäisen
+    osaston** eikä täyttäisi tyhjiötä — ja kiertäisi sen kaatumisen kokonaan.
+    Tiheys on samaa luokkaa (kuorolla 1620 nuottia 127 tahdissa, meidän
+    hylätyssä 1912 nuottia 140:ssä), eli kyse on aidosta pianoriisusta eikä
+    luurangosta.
+  - **Divisions**: kuoron tiedostossa 12, meidän osassa 01 sekä 4 että 12.
+    Kestot pitää siis skaalata, mutta kertoimella 3 — pieni kokonaisluku.
+  - **Tahtien pituudet täsmäävät** joka kartoitetussa tahdissa kahta lukuun
+    ottamatta, ja kumpikin on meidän tiedostomme oma vanha vika eikä
+    kartoituksen ongelma (t.119 on 9/8 mittainen, mutta `yhdista.py` korjaa sen
+    itse; t.40 ei, ks. alla).
+
+  Jäljelle jäävät kysymykset:
+
   - **Kattavuus.** Vain neljä kansiota kahdeksasta on käyty läpi ääni ääneltä,
-    eivätkä tiedostot kata kaikkia osia (Agnus Deistä vain 44 tahtia 74:stä).
+    eivätkä tiedostot kata kaikkia osia. Osassa 01 aukko t.79–89 on juuri se
+    solistijakso, jossa piano soittaa ja jossa laulaja laskee taukoja — eli
+    kaikkein huonoin paikka aukolle.
   - **Alkuperä.** `.local/musescore/` on tarkoituksella versionhallinnan
     ulkopuolella, koska tiedostojen tekijää ei tiedetä ja tiedostonimissä on
     laulajien nimiä. Sävelten *vertaaminen* niihin ei vie mitään repoon;
     pianon *kopioiminen* vie. Se on kysymys, joka pitää kysyä ennen kuin
     yhtään tahtia siirretään julkiseen partituuriin.
+
+- **Osan I t.40 on puolen tahdin mittainen — vika omassa stemmassasi.**
+  Löytyi 2026-09-10 pianokartoituksen sivutuotteena. Kuorobasson tahdissa 40
+  on vain puolinuotti B♭3 tavulla "ex", eli 2/4 neljästä neljäsosasta, ja
+  **alusta puuttuu puolitauko**: kuoron tiedostossa tahti on puolitauko + B♭3.
+  Sisääntulo "ex-au-di" kuuluu siis kolmannelle iskulle, ei ensimmäiselle.
+  Painetussa stemmassa haitta on pieni (MuseScore asettelee nuotin suunnilleen
+  oikeaan kohtaan, mutta taukoa ei piirry), mutta harjoitustiedostossa nuotti
+  **soi kaksi iskua liian aikaisin**. Tämä ei löytynyt aiemmasta t.1–78:n
+  tarkistuksesta, koska se vertaili säveliä eikä rytmiä. Korjaus tarvitsee
+  `korjaa_kasin.py`:yn uuden toimenpiteen (tauon lisäys); sellaista ei vielä
+  ole.
 
 - **Osan I Kyrie, t.79–140.** Suurin yhtenäinen tarkistamaton pätkä osassa I.
   Kuoron tiedosto ei kelpaa siihen sellaisenaan, koska sen tahdit lakkaavat
