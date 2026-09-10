@@ -92,7 +92,11 @@ _POIKKEUKSET = {
         "vertailtu kuoron omaan tiedostoon tahdeissa 1–78: kaksi eroa, "
         "kumpikin ratkesi lähdesivun hyväksi (t.35 palautusmerkki, t.52 "
         "nouseva kromatiikka). Kyrie tahdista 79 eteenpäin on vertailematta, "
-        "koska kuorotiedoston tahdit eivät siellä osu meidän tahteihin."),
+        "koska kuorotiedoston tahdit eivät siellä osu meidän tahteihin. "
+        "Laulaja luki 2026-09-10 nuottikirjasta kaksi näistä: t.35:n "
+        "palautusmerkki on kirjassa, ja t.51–52:n tavu \"nis\" on tahdin 51 "
+        "toisella nuotilla jatkoviivan kanssa — molemmat nyt kolmen lähteen "
+        "varassa."),
     ("I", ("Kuoro S", "Kuoro A")): _osittain(
         "Sanat korjattu koneellisesti lähde-PDF:ää vasten, peitto 83–91 %, "
         "mutta ei tarkistettu tavu tavulta; \"et lux per-pe-tu-a\" korjattu "
@@ -150,10 +154,13 @@ _POIKKEUKSET = {
         "korjattiin — tenori ja basso laulavat siinä unisonossa. Sanoja ei "
         "ole tarkistettu."),
 
-    ("II·9b", ("Kuoro B",)): _osittain(
-        "Sanat tarkistettu lähde-PDF:ää vasten nuotti nuotilta. Nuotit ovat "
-        "konelukemisen tulosta ja tarkistamatta yhtä rakenteellista "
-        "pistokoetta lukuun ottamatta."),
+    ("II·9b", ("Kuoro B",)): _varmistettu(
+        "Sanat tarkistettu lähde-PDF:ää vasten nuotti nuotilta. Nuotit "
+        "vertailtu kuoron omaan tiedostoon koko 51 tahdin matkalta: ainoa ero "
+        "oli tahti 607, jonka \"di-es\" oli konelukemassa puhtaana G:nä, ja "
+        "laulaja luki 2026-09-10 nuottikirjasta G♭:n — korjattu kuoron "
+        "tiedoston mukaiseksi. Tahtiin 607 on lisätty myös dynamiikkamerkintä "
+        "p, jota lähteessä ei ollut."),
     ("II·9b", SAT): _tarkistamatta(
         "Konelukemisen tulosta. Nuotteja ilman tavua on selvästi enemmän kuin "
         "bassossa; osa on aitoja melismoja, mutta sitä ei ole tarkistettu "

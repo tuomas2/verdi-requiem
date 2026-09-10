@@ -278,7 +278,16 @@ too low. See *2026-09-03 (c): Lacrymosa's three-bar shift*.
 
 1. Soprano/Alto/Tenor lyrics for II·9b — same close-verification pass the
    bass already got (see above).
-2. Notes for all four voices are OMR output, unproofread against the source
-   PDF beyond the one structural spot-check (the tied G3). Same category as
-   *What is left* for movements 01/14 below.
-3. ~~The measure-numbering disagreement~~ — settled, see above.
+2. ~~Notes for all four voices are OMR output, unproofread~~ — **the bass is
+   done** (2026-09-10, then *2026-09-10 (c)*): compared against the choir file
+   over all 51 bars, one difference, and the printed rehearsal book settled it
+   as a **G♭** at bar 607 in the choir file's favour. S/A/T still carry seven
+   candidate differences, three of them a dropped flat that our own piano staff
+   contradicts on the same beat; `TODO.md` lists all seven.
+3. **This movement's accidentals cannot be read off its source PDF at all.**
+   Its subset font uses private-use codepoints (`\ue0a3` and such), so none of
+   the glyph codes measured on movement 01's pages apply, and identifying them
+   would take the same one-off counting pass movement 01's needed. Until
+   someone does that, or photographs the book's spread, a G-versus-G♭
+   disagreement here has no arbiter but the harmony.
+4. ~~The measure-numbering disagreement~~ — settled, see above.

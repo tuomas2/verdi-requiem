@@ -112,13 +112,15 @@ OSA_I = Osa(
         # roikkumaan seuraavan tavun perään.
         ("49", 0, "aseta", "am", "end", "am"),
 
-        # Sivu 3: "ad te om-nis ca-ro ve-ni-et." Laulaja pyysi melisman
-        # tavulle "om", jolloin "nis" tulee vasta tahdin 52 viimeiselle
-        # nuotille. HUOM: lähde-PDF merkitsee sen toisin päin — "nis" tahdin
-        # 51 kolmannelle iskulle ja melisma sen jälkeen. Jos kuoron
-        # nuottikirja on PDF:n kannalla, nämä kaksi riviä vaihdetaan päittäin.
-        ("51", 1, "poista", "nis"),
-        ("52", 3, "lisaa", "end", "nis"),
+        # Sivu 3: "ad te om-nis ca-ro ve-ni-et." Laulaja pyysi 2026-09-02
+        # melisman tavulle "om", jolloin "nis" siirtyi tahdin 52 viimeiselle
+        # nuotille — mutta lähde-PDF merkitsi sen toisin päin, ja se kirjattiin
+        # kommenttiin yhtenä rivinä peruttavaksi. 2026-09-10 laulaja luki
+        # kuoron nuottikirjaa: "nis" on tahdin 51 toisella nuotilla ja
+        # jatkoviiva sen perässä ulottuu tahdin 52 viimeiseen nuottiin asti.
+        # Kirja on siis PDF:n kannalla. Lähde merkitsee tavun jo oikein, joten
+        # siirtorivit ovat poissa ja jäljelle jää melisman jatkoviiva.
+        ("51", 1, "jatka"),
 
         # Konelukema jätti tahtiin 54 ylimääräisen 16-osatauon, jolloin tahti
         # on 17/16 pitkä. Nuotit itse ovat oikein (12 + 4 = 16).
@@ -499,6 +501,15 @@ OSA_II9B = Osa(
     yksi_sanarivi=False,
     korjaukset=(
         ("35", None, "dynamiikka", "p"),               # t.607
+
+        # t.607, tavut "di-es". Konelukema antoi molemmille nuotille puhtaan
+        # G:n; kuoron oma MuseScore-tiedosto laulaa G♭:n. Sävellaji on -2
+        # (B♭, E♭), joten G♭ vaatii painetun b-merkin, eikä tämän osan
+        # lähde-PDF:n etumerkkejä pysty lukemaan koordinaateista (osajoukko-
+        # fontti, private-use-koodipisteet). 2026-09-10 laulaja luki kohdan
+        # kuoron nuottikirjasta: siellä on G♭. Kuoron tiedosto oli oikeassa.
+        ("35", 0, "korkeus", "G3", "Ges3"),
+        ("35", 1, "korkeus", "G3", "Ges3"),
     ) + SYBILLA,
 )
 

@@ -28,6 +28,7 @@ sellainen on aina merkitty molempiin päihin.
 | *2026-09-09 (d)* | [`2026-09-09-rex-tremendaen-sakeet-ja-taukohannat.md`](2026-09-09-rex-tremendaen-sakeet-ja-taukohannat.md) | Rex tremendae toisti säkeistön yhtä säettä ja pudotti seuraavan (t.340-341, 362-363); divisin sanarivit t.367-369; p tahteihin 607 ja 677; osan 10b oma korjaustaulukko, ja mitattuna sen käsikerros ei koskaan ollut vaarassa; taukohännät liitetään seuraavan osan riviin, 3-5 riviä per stemma |
 | *2026-09-10* | [`2026-09-10-kuorotiedostot-ja-osan-i-savelet.md`](2026-09-10-kuorotiedostot-ja-osan-i-savelet.md) | Kuoron omat tiedostot takaisin koneelle `.local/musescore/`:een; osan I sopraanon ja alton sävellajivahinko korjattu, ja nuottipään korkeus luetaan nyt lähdesivun fontista säveleksi — yksitoista säveltä, neljätoista tavua, kaksi Rex tremendaen sävelvirhettä ja "Sy-bil-la" |
 | *2026-09-10 (b)* | [`2026-09-10-stemman-paivays.md`](2026-09-10-stemman-paivays.md) | Jokainen stemma kertoo nyt itse, milloin sen sisältö viimeksi muuttui: päivä PDF:n ensimmäisen sivun ylälaidassa ja sivustolla latauslinkin alla, eikä rakennuspäivänä vaan gitin versioon verraten — ja `<credit>`in kaksi mitattua yllätystä matkan varrelta |
+| *2026-09-10 (c)* | [`2026-09-10-nuottikirjan-nelja-tarppia.md`](2026-09-10-nuottikirjan-nelja-tarppia.md) | Neljä nimettyä kysymystä vietiin painettuun nuottikirjaan ja kaikki neljä vastattiin: II·9b:n t.607 "di-es" on G♭ (kuoron tiedosto oli oikeassa), osan I t.51–52:n "nis" palautettiin lähdesivun mukaiseksi jatkoviivalla, ja kaksi vahvistusta — t.35:n palautusmerkki sekä se, että Sanctuksen kuorobasso todella on Bass I. II·9b:n kuorobasso on nyt ✔ |
 
 ## Where things stand
 
@@ -180,3 +181,19 @@ the top left of the PDF's first page, and under the download link on the
 site, both from one stamp in the `.mxl`. The date is not the build date but
 the part compared against its committed self, so an unchanged voice keeps its
 old date however often it is rebuilt. See *2026-09-10 (b)*.
+
+And the same day, later still: the previous session's open questions had been
+written up as **named questions for the printed rehearsal book** — "is there a
+flat in front of these two notes?" rather than "check bar 607" — and the singer
+answered four of them in one evening. Two were defects: II·9b bar 607's "di-es"
+is a G♭ and not a G, which is the **first pitch in the score decided by the
+book** and the one place where neither the source PDF (a subset font whose
+accidentals cannot be read) nor the harmony could arbitrate; and movement I's
+"om-nis" went back to the way the source page prints it, "nis" on bar 51's
+second note with an extension line through bar 52, reverting a 2026-09-02
+change in the single line that entry had promised. Two were confirmations, and
+one of them closes an assumption from the merge itself: **the Sanctus's chorus
+bass really is Bass I**, so the reader has been on the right staff of the
+double chorus all along. With bar 607 fixed, II·9b's chorus bass agrees with
+the choir file at every note and is the third voice to reach ✔. See
+*2026-09-10 (c)*.

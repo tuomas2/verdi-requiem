@@ -178,7 +178,11 @@ wrong note stops the run instead of silently corrupting a bar. Then:
 If the singer's reading disagrees with the source PDF, **do it their way and
 say so in the comment** — they are the one in the room with the conductor —
 but record what the PDF says so it is one line to revert. Bar 51's `om-nis` is
-the standing example.
+the worked example, both halves of it: the syllable moved on 2026-09-02 on the
+singer's word against the page, the comment named the one line to change, and
+on 2026-09-10 the singer read the rehearsal book, the page turned out to be
+right, and reverting it cost exactly that one line. Write the comment as though
+someone will have to undo it, because they may.
 
 ## 7. Rebuild, then read the result back as an image
 

@@ -100,6 +100,15 @@ page* — where the movement has a source PDF at all. Movements 02, 03, 05, 07,
 11, 13 and 16 do not, so there a disagreement can only be settled by what the
 other staves and the piano are doing on that beat.
 
+And where neither works, there is the book. II·9b bar 607 was the first note
+decided that way (*2026-09-10 (c)*): its source PDF's accidentals are
+unreadable, the harmony was ambiguous, and the singer read the printed page in
+one glance — **G♭, the choir file's reading, not ours**. That is the first time
+the choir file has been shown right at a named note that could not be settled
+any other way, and it is worth remembering when weighing the eight times it was
+shown wrong in movement I: these files are a real second source, not a
+tiebreaker to be overruled by default.
+
 ## What the matching actually found
 
 - **Movement 1: 95 % pitch match**, project's `01` `Kuoro B` (P16, 287 notes)

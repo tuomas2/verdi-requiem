@@ -395,12 +395,16 @@ niihin **lisätään 3**.
 
 | Kohta | Oletus | Muutos |
 |---|---|---|
-| Sanctuksen kuorobasso | Basso I | `MAPPING`-taulukossa vaihda `"Kuoro B": ["P4"]` -> `["P8"]` |
 | Osan 05 solisti | Mezzo (tiedostossa "Soprano solo", mutta Liber scriptus on mezzon aaria) | `"Solisti M-S"` -> `"Solisti S"` |
 | Osien 12 ja 15 nimeämättömät solistit | Järjestys partituurin tavan mukaan | vaihda osastojen `P`-tunnukset |
 
-Basso I ja Basso II erottuvat sisääntulosta: Basso I aloittaa tahdissa 2,
-Basso II tahdissa 4, molemmat sävelellä C3 sanalla "San-ctus".
+**Sanctuksen kuorobasso ei ole enää oletus.** Basso I ja Basso II erottuvat
+sisääntulosta: Basso I aloittaa tahdissa 2, Basso II tahdissa 4, molemmat
+sävelellä C3 sanalla "San-ctus". Laulaja tarkisti nuottikirjasta 2026-09-10,
+että hän aloittaa tahdista 2, ja `stemma-basso-1` lukee juuri sen viivaston
+(`"Kuoro B": ["P4"]`), joten kartoitus on oikein. Jos tämä joskus pitää
+kääntää päinvastoin, `MAPPING`-taulukossa vaihdetaan `"Kuoro B": ["P4"]` ->
+`["P8"]`.
 
 ## Osien pituudet
 
