@@ -9,6 +9,14 @@
   MuseScore has no built-in OMR — "Import PDF" opens musescore.com in a browser.
 - `mutool` (mupdf-tools) installed via Homebrew. Used for rasterising and for
   reading text out of PDFs. `poppler` is *not* installed.
+- **Nothing on this machine can crop an image.** No PIL/Pillow, no ImageMagick
+  (`convert`/`magick`), no `pdftoppm`, no `pymupdf` — and `mutool draw`
+  rasterises but has no crop (`mutool trim` clips the content and leaves the
+  page size alone, so the result is a mostly-white full page). The recipe's
+  "450 dpi cropped to one staff" step therefore goes through **`rajaa.py`**,
+  which does it with `subprocess`, `struct` and `zlib` only: `mutool draw -F ppm`
+  for the raw bitmap, then the PNG written by hand. Do not spend time looking
+  for a tool; there isn't one.
 - **The MuseScore CLI aborts at teardown, nondeterministically.** Roughly two
   runs in three exit 134 (SIGABRT) with `mutex lock failed` *after* writing a
   complete PDF. It predates this work — the same file converts with exit 0 on

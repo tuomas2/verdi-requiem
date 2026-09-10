@@ -37,6 +37,7 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `korjaa_sanat.py` | Fixes OMR lyric errors against the source PDFs |
 | `korjaa_kasin.py` | The hand-verified fixes on top of that, as a table; writes the `*-kasin.mxl` files |
 | `kuoropiano.py` | Movement I's piano staff, taken from the choir's own MuseScore file by a proven bar mapping; writes `01-Verdi_Requiem-piano.mxl`. Runs **after** `korjaa_kasin.py` and **before** `yhdista.py`. `--pura` extracts the source from an `mscore` export (needs `.local/musescore/`) |
+| `rajaa.py` | Rajaa PDF-sivun palan PNG:ksi ilman ulkoisia kirjastoja — se on ainoa tapa tehdä tarkistuksen viimeinen vaihe, sivun lukeminen kuvana yhteen viivastoon rajattuna. Ks. [`docs/ymparisto.md`](ymparisto.md) |
 | `suomennos.py` | The Finnish glossary, the gloss placement, and the syllabic repair. `--teksti` prints a part's whole text as running prose |
 | `nayta.py` | Prints a staff's notes, voices and **lyric rows** per bar — the first tool for any reported error |
 | `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |

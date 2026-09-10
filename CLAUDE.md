@@ -46,7 +46,7 @@ the single most expensive mistake available here.
 | [`docs/hakemistot.md`](docs/hakemistot.md) | Every filename and script, what each is for, the four data directories, the CPDL provenance of the sources |
 | [`docs/ymparisto.md`](docs/ymparisto.md) | MuseScore 4.7.4 and its CLI's nondeterministic abort, `mutool`, Audiveris, Tesseract data |
 | [`docs/menetelmat/omr.md`](docs/menetelmat/omr.md) | OMR of movements 01/14/II·9b, and the whole PDF-driven lyric-fixing method (`korjaa_sanat.py`) with its measurements |
-| [`docs/menetelmat/yhdistaminen.md`](docs/menetelmat/yhdistaminen.md) | The eight parts, what the merge had to learn, the "corrupted file" warning, why movement I has no piano, the open assumptions |
+| [`docs/menetelmat/yhdistaminen.md`](docs/menetelmat/yhdistaminen.md) | The eight parts, what the merge had to learn, the "corrupted file" warning, where movement I's piano comes from and why the OMR one could not be used, the `divisions` trap, the open assumptions |
 | [`docs/menetelmat/kuorotiedostot.md`](docs/menetelmat/kuorotiedostot.md) | The choir's own MuseScore files: correct notes, no lyrics, condensed cut. The second source, how to compare against it without lying to yourself, **and how to measure a bar mapping** — plus where their piano was taken from and where it was not |
 | [`docs/menetelmat/harjoitus.md`](docs/menetelmat/harjoitus.md) | The practice `.mscz`: one visible staff, everything still sounding, and what MuseScore's file format demanded |
 | [`docs/suunnitelmat/`](docs/suunnitelmat/) | Design and implementation plans |
