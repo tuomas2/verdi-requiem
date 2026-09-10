@@ -17,9 +17,10 @@ komennot toimivat sekä nimellä että täydellä polulla.
 | Tiedosto | Sisältö |
 |---|---|
 | `Verdi-Requiem-koko.mxl` | Koko teos, 15 viivastoa, 1807 tahtia |
-| `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, kaikki ajan tasalla (II·9b mukana, tahtinumerointi juoksee Dies iraen läpi, osan nimi joka sivun ylälaidassa, latinan sanojen suomennos tavujen alla) |
+| `stemma-*.mxl` / `stemma-*.pdf` | Kahdeksan kuorostemmaa, kaikki ajan tasalla (II·9b mukana, tahtinumerointi juoksee Dies iraen läpi, osan nimi joka sivun ylälaidassa, latinan sanojen suomennos tavujen alla, klikattava sisällysluettelo sivulla 1) |
 | `stemmat-sisallys.txt` | Osien alkusivut kaikissa kahdeksassa, ajan tasalla |
-| `sisallys.py` | Rakentaa tuon luettelon uudelleen valmiista stemma-PDF:istä |
+| `sisallys.py` | Rakentaa tuon luettelon uudelleen valmiista stemma-PDF:istä ja kirjoittaa sen myös stemman ensimmäiselle sivulle klikattavana |
+| `linkit.py` | Sisällysluettelo stemmaan: `--varaa` tekee sille tilan ennen renderöintiä, ja loppu on `sisallys.py`:n ajamaa linkkien ja kirjanmerkkien lisäystä |
 | `tiivistys.mss` | Tyylitiedosto: taukotahtien tiivistys, tahtinumero joka tahtiin, väljyys rivien välissä |
 | `harjoitus-*.mscz` | Harjoittelutiedosto: oma ääni trumpettina, muut piilossa |
 | `yhdista.py` | Yhdistämisskripti, kartoitustaulukko tiedoston alussa |
@@ -87,32 +88,37 @@ Jos lähdeaineisto muuttuu, aja koko ketju **tässä järjestyksessä** —
     python3 kuoropiano.py                         # 3. osan I piano
     python3 yhdista.py Verdi-Requiem-koko.mxl     # 4. partituuri
     python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"   # 5. stemmat
-    python3 sivuotsikot.py stemma-basso-1.mxl     # 6. sivujen osaotsikot
-    python3 paivays.py stemma-basso-1.mxl         # 7. päiväys ensimmäiselle sivulle
+    python3 linkit.py --varaa stemma-basso-1.mxl  # 6. tila sisällysluettelolle
+    python3 sivuotsikot.py stemma-basso-1.mxl     # 7. sivujen osaotsikot
+    python3 paivays.py stemma-basso-1.mxl         # 8. päiväys ensimmäiselle sivulle
     "/Applications/MuseScore 4.app/Contents/MacOS/mscore" \
         -S tiivistys.mss -o stemma-basso-1.pdf stemma-basso-1.mxl
-    python3 harjoitus.py --stemma "Basso I"       # 8. harjoittelutiedosto
-    python3 sisallys.py                           # 9. sisällysluettelo
-    python3 suomennos.py --teksti stemma-basso-1.mxl   # 10. lue teksti läpi
+    python3 harjoitus.py --stemma "Basso I"       # 9. harjoittelutiedosto
+    python3 sisallys.py                           # 10. sisällysluettelo
+    python3 suomennos.py --teksti stemma-basso-1.mxl   # 11. lue teksti läpi
 
 Vaihe 3 on uusi 2026-09-10: se kirjoittaa osan I pianoviivaston kuoron omasta
 MuseScore-tiedostosta ja tuottaa `01-Verdi_Requiem-piano.mxl`:n, jota
 `yhdista.py` lukee `-kasin.mxl`:n sijasta. Jos sen jättää ajamatta, osan I
 piano jää edelliseen ajoon eikä mikään huomauta siitä.
 
-Vaihe 7 on viimeinen ennen PDF:ää: se merkitsee stemmaan päivän, jona sen
+Vaihe 6 varaa sisällysluettelolle tilan sivun 1 yläosasta. Se on ajettava
+**ennen vaihetta 7**, koska varaus siirtää sivunvaihtoja ja sivuotsikot
+lasketaan niistä. Jos sen jättää ajamatta, vaihe 10 kaatuu ja kertoo syyn.
+
+Vaihe 8 on viimeinen ennen PDF:ää: se merkitsee stemmaan päivän, jona sen
 sisältö viimeksi muuttui, ja lataa sen pienellä ensimmäisen sivun vasempaan
 ylälaitaan. Päivä ei ole rakennuspäivä vaan verrataan gitissä olevaan
 versioon, joten muuttumaton stemma pitää vanhan päivänsä. Sivusto lukee
 saman merkinnän `.mxl`-tiedostosta latauslinkin alle.
 
-Vaihe 9 on tarkistus eikä tuota mitään: se tulostaa stemman tekstin
+Vaihe 11 on tarkistus eikä tuota mitään: se tulostaa stemman tekstin
 juoksevana proosana, ja väärä suomennos tai rikkinäinen tavutus näkyy siinä
 heti. Ks. *Latinan sanojen suomennos*.
 
-Vaiheet 4-7 toistetaan kullekin tarvittavalle äänelle; `sivuotsikot.py` ja
-`paivays.py` ottavat monta tiedostoa kerralla (`python3 sivuotsikot.py
-stemma-*.mxl`). Yksittäiset
+Vaiheet 4-8 toistetaan kullekin tarvittavalle äänelle; `linkit.py`,
+`sivuotsikot.py` ja `paivays.py` ottavat monta tiedostoa kerralla (`python3
+sivuotsikot.py stemma-*.mxl`). Yksittäiset
 komennot ovat alla.
 
     # koko partituuri, 15 viivastoa
@@ -187,8 +193,13 @@ tilanhukkaa; nimi on otsikossa.
 `--vain "Kuoro B,Piano"` jos haluat bassostemman pianosäestyksen kanssa.
 
 Sisällysluettelon sivunumerot poimitaan valmiista PDF:istä, joten aja
-`python3 sisallys.py` aina kun stemmat on renderöity uudelleen — se kirjoittaa
-`stemmat-sisallys.txt`:n uudestaan.
+`python3 sisallys.py` aina kun stemmat on renderöity uudelleen. Se kirjoittaa
+`stemmat-sisallys.txt`:n uudestaan **ja** latoo saman luettelon jokaisen
+stemman ensimmäiselle sivulle kahtena palstana: osan nimi, sivunumero ja koko
+rivin levyinen linkki siihen sivuun, sekä samat osat PDF:n kirjanmerkkeinä.
+Luettelo mahtuu sille tilalle, jonka `linkit.py --varaa` varasi ennen
+renderöintiä (vaihe 6) — noin 170 pt sivun 1 yläosasta, eikä yhdenkään
+stemman sivumäärä kasvanut siitä.
 
 ## Latinan sanojen suomennos
 

@@ -203,11 +203,12 @@ someone will have to undo it, because they may.
     python3 kuoropiano.py              # osan I piano; yhdista lukee sen tuloksen
     python3 yhdista.py Verdi-Requiem-koko.mxl
     python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"
+    python3 linkit.py --varaa stemma-basso-1.mxl # tila sisällysluettelolle
     python3 sivuotsikot.py stemma-basso-1.mxl    # sivujen osaotsikot
     python3 paivays.py stemma-basso-1.mxl        # päiväys ensimmäiselle sivulle
     mscore -S tiivistys.mss -o stemmat/stemma-basso-1.pdf stemmat/stemma-basso-1.mxl
     python3 harjoitus.py --stemma "Basso I"
-    python3 sisallys.py                # jos sivumäärät muuttuivat
+    python3 sisallys.py                # sisällysluettelo ja sen linkit
     python3 luotettavuus.py            # jos luotettavuustaulukko muuttui
     python3 sivusto.py                 # jos sivustolle näkyvä tieto muuttui
 
@@ -220,9 +221,22 @@ and it is the one thing in this pipeline that no test can derive from the data.
 Run `python3 luotettavuus.py` after editing it — `LUOTETTAVUUS.md` is generated
 but committed, and a test fails if it is stale.
 
+`linkit.py --varaa` must run **after** `yhdista.py` and **before**
+`sivuotsikot.py`: it reserves the room the first page's clickable contents
+needs, which moves page breaks, and the running heads are computed from those
+breaks. Skip it and `sisallys.py` stops at the end with "onko `--varaa`
+ajamatta" — it lays the list out only into room it can measure.
+
 `sivuotsikot.py` must run **after** `yhdista.py` (which rewrites the file from
 scratch) and **before** rendering. It runs `mscore` itself, twice per part, to
 read the computed page layout back.
+
+`sisallys.py` runs **after** rendering. It rewrites `stemmat-sisallys.txt` and
+lays the same listing onto each part's first page with a link per row and PDF
+bookmarks; `python3 linkit.py --lue stemma-basso-1.pdf` reads back what a
+reader will see. It strips its own earlier work before reading the pages,
+because the listing names every movement on page 1 and the page search goes
+by name.
 
 `paivays.py` runs **last, right before rendering**: it stamps the part with
 the date its content last changed, and the site reads that same stamp. The
