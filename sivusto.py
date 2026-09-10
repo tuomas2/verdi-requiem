@@ -275,8 +275,7 @@ asti kun korjaus on tehty ja stemma rakennettu uudelleen.</p>
 <dl class="ominaisuudet">{osat}</dl>
 <p class="tausta">Mieluiten yksi virhe per tiketti: ne korjataan ja
 suljetaan yksitellen. Jos GitHub-tunnusta ei ole, kelpaa yhtä hyvin
-WhatsApp-viesti tekijälle — kuorolaiset tietävät kuka ja mistä, ja samat
-tiedot tarvitaan siinäkin.</p>
+WhatsApp-viesti tekijälle — samat tiedot tarvitaan siinäkin.</p>
 </section>
 """
 
