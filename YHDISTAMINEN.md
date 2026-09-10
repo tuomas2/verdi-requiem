@@ -86,18 +86,26 @@ Jos lähdeaineisto muuttuu, aja koko ketju **tässä järjestyksessä** —
     python3 yhdista.py Verdi-Requiem-koko.mxl     # 3. partituuri
     python3 yhdista.py stemma-basso-1.mxl --stemma "Basso I"   # 4. stemmat
     python3 sivuotsikot.py stemma-basso-1.mxl     # 5. sivujen osaotsikot
+    python3 paivays.py stemma-basso-1.mxl         # 6. päiväys ensimmäiselle sivulle
     "/Applications/MuseScore 4.app/Contents/MacOS/mscore" \
         -S tiivistys.mss -o stemma-basso-1.pdf stemma-basso-1.mxl
-    python3 harjoitus.py --stemma "Basso I"       # 6. harjoittelutiedosto
-    python3 sisallys.py                           # 7. sisällysluettelo
-    python3 suomennos.py --teksti stemma-basso-1.mxl   # 8. lue teksti läpi
+    python3 harjoitus.py --stemma "Basso I"       # 7. harjoittelutiedosto
+    python3 sisallys.py                           # 8. sisällysluettelo
+    python3 suomennos.py --teksti stemma-basso-1.mxl   # 9. lue teksti läpi
 
-Vaihe 8 on tarkistus eikä tuota mitään: se tulostaa stemman tekstin
+Vaihe 6 on viimeinen ennen PDF:ää: se merkitsee stemmaan päivän, jona sen
+sisältö viimeksi muuttui, ja lataa sen pienellä ensimmäisen sivun vasempaan
+ylälaitaan. Päivä ei ole rakennuspäivä vaan verrataan gitissä olevaan
+versioon, joten muuttumaton stemma pitää vanhan päivänsä. Sivusto lukee
+saman merkinnän `.mxl`-tiedostosta latauslinkin alle.
+
+Vaihe 9 on tarkistus eikä tuota mitään: se tulostaa stemman tekstin
 juoksevana proosana, ja väärä suomennos tai rikkinäinen tavutus näkyy siinä
 heti. Ks. *Latinan sanojen suomennos*.
 
-Vaiheet 4-6 toistetaan kullekin tarvittavalle äänelle; `sivuotsikot.py` ottaa
-monta tiedostoa kerralla (`python3 sivuotsikot.py stemma-*.mxl`). Yksittäiset
+Vaiheet 4-7 toistetaan kullekin tarvittavalle äänelle; `sivuotsikot.py` ja
+`paivays.py` ottavat monta tiedostoa kerralla (`python3 sivuotsikot.py
+stemma-*.mxl`). Yksittäiset
 komennot ovat alla.
 
     # koko partituuri, 15 viivastoa

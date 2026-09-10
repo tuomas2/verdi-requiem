@@ -17,6 +17,7 @@ import shutil
 import sys
 
 import luotettavuus
+import paivays
 import suomennos
 import polut
 import yhdista
@@ -365,6 +366,24 @@ def ominaisuudet():
             f'<dl class="ominaisuudet">{rivit}</dl>')
 
 
+def paivamaara(pdf):
+    """Milloin tämän stemman sisältö viimeksi muuttui.
+
+    Luetaan `.mxl`:stä, johon `paivays.py` merkitsi sen — samasta
+    merkinnästä kuin PDF:n ensimmäisen sivun päiväys, joten sivu ja tiedosto
+    eivät voi kertoa eri päivää. Merkitsemätön stemma jää ilman päiväystä:
+    arvattu päivä olisi huonompi kuin ei mitään.
+    """
+    mxl = pdf[:-4] + ".mxl"
+    if not os.path.exists(polut.polku(mxl)):
+        return ""
+    iso = paivays.lue(mxl)
+    if not iso:
+        return ""
+    return ('<span class="paivays"><time datetime="%s">päivitetty %s</time>'
+            "</span>" % (e(iso), e(paivays.suomeksi(iso))))
+
+
 def stemmasivu():
     """Stemmat ja lataukset — sivuston pääsivu."""
     pikkukuvat = os.path.isdir(os.path.join(POHJA, "pikkukuvat"))
@@ -374,8 +393,9 @@ def stemmasivu():
                 'loading="lazy">' % pdf[:-4]) if pikkukuvat else ""
         return ('<li><a class="stemma" href="stemmat/%s">%s<span>%s</span></a>'
                 '<span class="muodot"><a href="stemmat/%s">PDF</a> · '
-                '<a href="stemmat/%s">MusicXML</a></span></li>'
-                % (pdf, kuva, e(nimi), pdf, pdf[:-4] + ".mxl"))
+                '<a href="stemmat/%s">MusicXML</a></span>%s</li>'
+                % (pdf, kuva, e(nimi), pdf, pdf[:-4] + ".mxl",
+                   paivamaara(pdf)))
 
     linkit = "".join(lataus(nimi, pdf) for nimi, pdf in STEMMAT)
 

@@ -31,13 +31,14 @@ the data flows; the scripts and their tables still speak bare filenames, and
 | `sisallys.py` | Rebuilds that listing from the eight PDFs; run it after any re-render |
 | `yhdista.py` | The merge tool; mapping table at the top |
 | `sivuotsikot.py` | Writes the running movement name over each page's first bar; run after `yhdista.py`, before rendering |
+| `paivays.py` | Stamps the part with the date its content last changed — small, top left of page 1, and the same date read back by the site. Runs **last** before rendering |
 | `korjaa_sanat.py` | Fixes OMR lyric errors against the source PDFs |
 | `korjaa_kasin.py` | The hand-verified fixes on top of that, as a table; writes the `*-kasin.mxl` files |
 | `suomennos.py` | The Finnish glossary, the gloss placement, and the syllabic repair. `--teksti` prints a part's whole text as running prose |
 | `nayta.py` | Prints a staff's notes, voices and **lyric rows** per bar — the first tool for any reported error |
 | `harjoitus.py` | Builds a practice .mscz: own voice as trumpet, rest hidden |
 | `harjoitus/*.mscz` | The result, one per singer. Gitignored |
-| `testit/test_*.py` | Tests; all of them: `python3 -m unittest discover -s testit -t .` (188). Run from the repo root — the tests and the scripts both use relative paths |
+| `testit/test_*.py` | Tests; all of them: `python3 -m unittest discover -s testit -t .` (366). Run from the repo root — the tests and the scripts both use relative paths |
 | `fix-mxl.py` | Repairs missing measures in Audiveris exports |
 | `tiivistys.mss` | MuseScore style for the reading parts: multimeasure rests, a bar number on every bar, extra air between systems |
 | `.local/musescore/NN_name/` | The choir's own MuseScore practice files — correct notes and piano, no lyrics at all; see *The choir's own MuseScore practice files*. **Not in the repo**: authorship is unknown and the filenames carried singers' names, so they were kept out of the public history. They exist only on the user's own machine, and `.local/` is listed in `.git/info/exclude`. (Earlier notes call this directory plain `musescore/`; it moved under `.local/` on 2026-09-10.) |
